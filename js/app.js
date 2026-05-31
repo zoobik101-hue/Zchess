@@ -455,10 +455,10 @@ const App = {
     document.querySelectorAll('.game-mode-card').forEach(card => {
       card.addEventListener('click', () => {
         const mode = card.dataset.mode;
-        // Quick match → immediately start searching (no intermediate choice screen)
+        // Quick match → open lobby with 3 options (quick, create, join)
         if (mode === 'quick') {
           if (!ZChess.Auth.isLoggedIn()) { this.showAuthModal('login'); return; }
-          this._startQuickMatch();
+          ZChess.Multiplayer?.showLobby('lobby-choose');
           return;
         }
         this.gameSetupOptions.mode = mode;
@@ -766,22 +766,30 @@ const App = {
   // QUICK MATCH - immediate search, no extra click
   // =========================================
 
+  _searchTimerInterval: null,
+
   _startQuickMatch() {
     const MP = ZChess.Multiplayer;
     if (!MP) return;
     if (MP.status !== 'idle') return; // already searching
 
-    // Open lobby in "searching" state immediately
+    // Clear any old timer first (fixes doubling bug)
+    if (this._searchTimerInterval) {
+      clearInterval(this._searchTimerInterval);
+      this._searchTimerInterval = null;
+    }
+
     MP.showLobby('lobby-searching');
 
-    // Start elapsed timer
+    // Elapsed search timer
     const timerEl = document.getElementById('lobby-search-timer');
     const startMs = Date.now();
     if (timerEl) timerEl.textContent = '0:00';
-    const timerInterval = setInterval(() => {
-      // Stop when overlay closes or status changes
+
+    this._searchTimerInterval = setInterval(() => {
       if (MP.status !== 'waiting' && MP.status !== 'idle') {
-        clearInterval(timerInterval);
+        clearInterval(this._searchTimerInterval);
+        this._searchTimerInterval = null;
         return;
       }
       const s = Math.floor((Date.now() - startMs) / 1000);
@@ -792,13 +800,12 @@ const App = {
 
     MP.findQuickMatch().then(res => {
       if (res.found) {
-        // Joined existing room → handleRoomUpdate → _beginGame → game starts
-        clearInterval(timerInterval);
+        clearInterval(this._searchTimerInterval);
+        this._searchTimerInterval = null;
       }
-      // If not found: created public room, stay on "searching" screen,
-      // wait for another player to click Quick Match
     }).catch(e => {
-      clearInterval(timerInterval);
+      clearInterval(this._searchTimerInterval);
+      this._searchTimerInterval = null;
       console.error('[QuickMatch]', e);
       MP.leave();
       ZChess.Notifications.error('Не удалось начать поиск. Попробуй ещё раз.');

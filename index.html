@@ -1062,9 +1062,19 @@
   </div>
 </div>
 
-<!-- In-game opponent status bar (shown during multiplayer) -->
+<!-- In-game multiplayer HUD (shown during multiplayer) -->
 <div class="mp-status-bar" id="mp-status-bar" style="display:none">
-  <span id="mp-opp-status" class="mp-status-ok">● Онлайн</span>
+  <div class="mp-hud-row">
+    <span id="mp-opp-status" class="mp-status-ok">● Онлайн</span>
+    <span id="mp-turn-label" class="mp-turn-label">⚡ Ваш ход</span>
+    <div class="mp-move-timer" id="mp-move-timer">
+      <span>⏱</span>
+      <span id="mp-move-timer-val">2:00</span>
+    </div>
+  </div>
+  <div class="mp-timer-bar-wrap">
+    <div class="mp-timer-bar-fill" id="mp-timer-bar-fill"></div>
+  </div>
 </div>
 
 <!-- Firebase SDK (optional - comment out if not using Firebase) -->

@@ -357,6 +357,13 @@ const ChessBoard = {
     // Show multiplayer status bar
     const bar = document.getElementById('mp-status-bar');
     if (bar) bar.style.display = '';
+
+    // Start move timer - white always goes first
+    if (ZChess.Multiplayer) {
+      setTimeout(() => {
+        ZChess.Multiplayer.startMoveTimer(this.playerColor === 'w');
+      }, 300);
+    }
   },
 
   // =========================================
@@ -408,10 +415,14 @@ const ChessBoard = {
 
     if (status.status !== 'playing' && status.status !== 'check') {
       // Opponent's move ended the game — report to Firestore
+      ZChess.Multiplayer.stopMoveTimer();
       const winner = status.status === 'checkmate' ? status.winner : 'draw';
       const reason = status.status === 'checkmate' ? 'checkmate' : (status.reason || status.status);
       await ZChess.Multiplayer.reportResult({ winner, reason });
       this.handleGameEnd(status, move);
+    } else {
+      // Game continues — now it's our turn, start our move timer
+      ZChess.Multiplayer.startMoveTimer(true);
     }
   },
 
@@ -551,24 +562,27 @@ const ChessBoard = {
 
     if (status.status !== 'playing' && status.status !== 'check') {
       // In multiplayer: report result to Firestore before showing modal
-      if (this.multiplayerMode && ZChess.Multiplayer) {
-        const winner = status.status === 'checkmate' ? status.winner : 'draw';
-        const reason = status.status === 'checkmate' ? 'checkmate' : (status.reason || status.status);
-        await ZChess.Multiplayer.reportResult({ winner, reason });
-      }
-      this.handleGameEnd(status, move);
-      return;
-    }
-
-    // Trigger AI only in AI game mode
-    if (this.isAIGame && this.gameState.turn !== this.playerColor) {
-      await this.triggerAIMove();
-    }
-    // In multiplayer: just wait for opponent's move via Firestore subscription
-
-    // Push move to Firestore in multiplayer
     if (this.multiplayerMode && ZChess.Multiplayer) {
+      ZChess.Multiplayer.stopMoveTimer();
+      const winner = status.status === 'checkmate' ? status.winner : 'draw';
+      const reason = status.status === 'checkmate' ? 'checkmate' : (status.reason || status.status);
+      await ZChess.Multiplayer.reportResult({ winner, reason });
+    }
+    this.handleGameEnd(status, move);
+    return;
+  }
+
+  // Trigger AI only in AI game mode
+  if (this.isAIGame && this.gameState.turn !== this.playerColor) {
+    await this.triggerAIMove();
+  }
+  // In multiplayer: just wait for opponent's move via Firestore subscription
+
+  // Push move to Firestore in multiplayer + switch timer to opponent
+    if (this.multiplayerMode && ZChess.Multiplayer) {
+      ZChess.Multiplayer.stopMoveTimer(); // stop our timer
       await ZChess.Multiplayer.sendMove(move);
+      ZChess.Multiplayer.startMoveTimer(false); // show opponent's "turn" state (dimmed)
     }
   },
 

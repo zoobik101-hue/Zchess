@@ -326,24 +326,109 @@
   50%       { transform: scale(1.1); }
 }
 
-/* ---- In-game opponent status bar ---- */
+/* ---- In-game multiplayer HUD ---- */
 .mp-status-bar {
   position: fixed;
   bottom: 16px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(16,10,32,0.92);
+  background: rgba(14,8,28,0.95);
   border: 1px solid rgba(124,58,237,0.25);
-  border-radius: 20px;
-  padding: 6px 18px;
+  border-radius: 16px;
+  padding: 8px 20px 6px;
   font-size: 12px;
   font-weight: 600;
   z-index: 200;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
+  min-width: 280px;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+}
+
+.mp-hud-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 5px;
 }
 
 .mp-status-ok   { color: #4ade80; }
 .mp-status-warn { color: #fbbf24; }
+
+.mp-turn-label {
+  color: rgba(167,139,250,0.7);
+  font-size: 11px;
+}
+
+.mp-move-timer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 800;
+  color: #a855f7;
+  transition: opacity 0.3s;
+}
+
+/* ---- Move timer progress bar ---- */
+.mp-timer-bar-wrap {
+  width: 100%;
+  height: 3px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.mp-timer-bar-fill {
+  height: 100%;
+  width: 100%;
+  background: #4ade80;
+  border-radius: 2px;
+  transition: width 0.9s linear, background 0.5s;
+}
+
+/* ---- Disconnect overlay ---- */
+.mp-disconnect-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 900;
+  backdrop-filter: blur(4px);
+}
+
+.mp-disconnect-card {
+  background: linear-gradient(160deg, rgba(16,10,32,0.99), rgba(8,5,18,0.99));
+  border: 1px solid rgba(124,58,237,0.3);
+  border-radius: 20px;
+  padding: 40px 48px;
+  text-align: center;
+  box-shadow: 0 0 60px rgba(0,0,0,0.8);
+  animation: lobbyIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+.mp-dc-icon { font-size: 56px; margin-bottom: 12px; }
+
+.mp-disconnect-card h3 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #e2d9f3;
+  margin: 0 0 8px;
+}
+
+.mp-disconnect-card p {
+  color: rgba(167,139,250,0.6);
+  margin: 0 0 20px;
+}
+
+.mp-disconnect-card .lobby-btn-primary {
+  max-width: none;
+  width: auto;
+  padding: 12px 32px;
+}
 
 /* ---- Waiting animation ---- */
 .lobby-waiting-anim {
