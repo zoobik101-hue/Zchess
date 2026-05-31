@@ -90,6 +90,11 @@ const App = {
       link.classList.toggle('active', link.dataset.page === page);
     });
 
+    // Stop particles when leaving home page to free CPU
+    if (page !== 'home' && ZChess.Particles) {
+      ZChess.Particles.stop();
+    }
+
     // Page-specific initialization
     this.onPageEnter(page, params);
 
