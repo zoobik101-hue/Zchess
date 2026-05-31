@@ -112,6 +112,15 @@ if errorlevel 1 (
 )
 call :log_ok ".gitignore blocks github-token.txt"
 
+rem ---- [7.5] Generate version.json (triggers auto-reload on site) ----
+call :next_step "Generate version.json"
+set "VER_DATE=%date%"
+set "VER_TIME=%time%"
+set "VER_BUILD=%VER_DATE: =_%_%VER_TIME::=-%"
+set "VER_BUILD=%VER_BUILD:/=-%"
+echo {"version":"%VER_DATE% %VER_TIME%","build":"%RANDOM%%RANDOM%"} > version.json
+call :log_ok "version.json updated - build timestamp written"
+
 rem ---- [8] Stage all files ----
 call :next_step "Stage all files (git add)"
 git add -A

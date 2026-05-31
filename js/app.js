@@ -652,15 +652,80 @@ const App = {
   // --- Service Worker ---
 
   registerSW() {
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').then(() => {
-          console.log('[ZChess] Service Worker registered');
-        }).catch(err => {
-          console.warn('[ZChess] SW registration failed:', err);
+    if (!('serviceWorker' in navigator)) return;
+
+    const swPath = '/Zchess/sw.js';
+
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register(swPath).then(reg => {
+        console.log('[ZChess] Service Worker registered');
+
+        // When a new SW is waiting, activate it immediately
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          if (!newWorker) return;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              newWorker.postMessage({ type: 'SKIP_WAITING' });
+            }
+          });
         });
+
+      }).catch(err => {
+        console.warn('[ZChess] SW registration failed:', err);
       });
-    }
+
+      // When SW sends SW_UPDATED - reload the page
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data?.type === 'SW_UPDATED') {
+          console.log('[ZChess] New version detected - reloading...');
+          window.location.reload();
+        }
+      });
+    });
+
+    // Auto-check version.json every 30 seconds
+    this.startVersionCheck();
+  },
+
+  startVersionCheck() {
+    const VERSION_KEY = 'zchess_version';
+    const CHECK_INTERVAL = 30000;
+
+    const checkVersion = () => {
+      fetch('/Zchess/version.json?t=' + Date.now(), { cache: 'no-store' })
+        .then(r => r.json())
+        .then(data => {
+          const newVer = data.build || data.version || '';
+          if (!newVer) return;
+
+          const savedVer = localStorage.getItem(VERSION_KEY);
+
+          if (savedVer && savedVer !== newVer) {
+            console.log('[ZChess] New version detected:', newVer, '(was:', savedVer, ')');
+            localStorage.setItem(VERSION_KEY, newVer);
+
+            // Clear all SW caches before reload
+            if ('caches' in window) {
+              caches.keys().then(keys => {
+                Promise.all(keys.map(k => caches.delete(k))).then(() => {
+                  window.location.reload();
+                });
+              });
+            } else {
+              window.location.reload();
+            }
+          } else {
+            localStorage.setItem(VERSION_KEY, newVer);
+          }
+        })
+        .catch(() => {});
+    };
+
+    // First check after 5 seconds (let page load first)
+    setTimeout(checkVersion, 5000);
+    // Then every 30 seconds
+    setInterval(checkVersion, CHECK_INTERVAL);
   }
 };
 
