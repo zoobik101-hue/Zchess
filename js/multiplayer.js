@@ -384,6 +384,7 @@ const Multiplayer = {
       reason  = result.reason === 'resign'     ? t('board.resigned_reason') :
                 result.reason === 'disconnect' ? 'Соперник отключился' :
                 result.reason === 'timeout'    ? 'Время вышло у соперника' :
+                result.reason === 'abandoned'  ? 'Соперник покинул игру' :
                 t('board.checkmate');
     } else {
       outcome = 'loss';
@@ -391,6 +392,7 @@ const Multiplayer = {
       reason  = result.reason === 'resign'     ? t('board.resigned_reason') :
                 result.reason === 'disconnect' ? 'Соперник отключился' :
                 result.reason === 'timeout'    ? 'Время вышло' :
+                result.reason === 'abandoned'  ? 'Вы покинули игру' :
                 t('board.checkmate');
     }
 

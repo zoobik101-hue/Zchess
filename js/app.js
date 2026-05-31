@@ -81,6 +81,18 @@ const App = {
   },
 
   navigate(page, params = []) {
+    // Guard: leaving active multiplayer game = auto resign opponent gets win
+    if (this.currentPage === 'play' && page !== 'play') {
+      const MP = ZChess.Multiplayer;
+      if (MP && MP.status === 'playing' && !ZChess.ChessBoard?.gameOver) {
+        // reportResult captures roomId/db synchronously before the first await,
+        // so calling leave() right after is safe - Firestore write will still go through.
+        MP.reportResult({ winner: MP.localColor === 'w' ? 'b' : 'w', reason: 'abandoned' });
+        MP.leave();
+        ZChess.Notifications?.info('Матч завершён - вы покинули игру');
+      }
+    }
+
     // Hide all pages
     document.querySelectorAll('.page').forEach(p => {
       p.classList.remove('active');
@@ -492,9 +504,21 @@ const App = {
     document.getElementById('btn-flip-board')?.addEventListener('click', () => ZChess.ChessBoard.flipBoard());
     document.getElementById('btn-undo-move')?.addEventListener('click', () => ZChess.ChessBoard.undoMove());
     document.getElementById('btn-resign')?.addEventListener('click', () => {
-      if (confirm('Are you sure you want to resign?')) ZChess.ChessBoard.resign();
+      const MP = ZChess.Multiplayer;
+      const isMP = MP && MP.status === 'playing' && !ZChess.ChessBoard?.gameOver;
+      const msg  = isMP
+        ? 'Сдаться? Это будет засчитано как поражение для вас, а соперник получит победу.'
+        : 'Вы уверены что хотите сдаться?';
+      if (confirm(msg)) ZChess.ChessBoard.resign();
     });
     document.getElementById('btn-new-game')?.addEventListener('click', () => {
+      const MP = ZChess.Multiplayer;
+      const isMP = MP && MP.status === 'playing' && !ZChess.ChessBoard?.gameOver;
+      if (isMP) {
+        const ok = confirm('Покинуть игру? Это будет засчитано как поражение.');
+        if (!ok) return;
+        // resign will be triggered by navigate() guard automatically
+      }
       this.navigate('game');
     });
 
