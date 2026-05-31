@@ -1,0 +1,309 @@
+/* ZChess - Training mode */
+
+.game-modes-grid {
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 960px;
+}
+
+.training-section {
+  max-width: 960px;
+  margin: 0 auto 32px;
+}
+
+.training-section-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.training-section-sub {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+.training-cat-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.training-cat-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.training-cat-tab:hover,
+.training-cat-tab.active {
+  border-color: var(--accent-primary);
+  color: var(--text-primary);
+  background: rgba(124, 58, 237, 0.12);
+}
+
+.training-lessons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.training-lesson-card {
+  padding: 18px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.training-lesson-card:hover {
+  border-color: rgba(124, 58, 237, 0.5);
+  transform: translateY(-2px);
+}
+
+.training-lesson-card.completed {
+  border-color: rgba(34, 197, 94, 0.4);
+}
+
+.training-lesson-card h4 {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 8px 0 6px;
+  color: var(--text-primary);
+}
+
+.training-lesson-card p {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  line-height: 1.45;
+  min-height: 36px;
+}
+
+.tlc-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tlc-diff {
+  color: #fbbf24;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+.tlc-done {
+  color: #22c55e;
+  font-weight: 700;
+}
+
+.training-coach-block {
+  margin-top: 8px;
+}
+
+.training-coach-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  padding: 22px;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(59, 130, 246, 0.08));
+  border: 1.5px solid rgba(124, 58, 237, 0.35);
+  border-radius: var(--radius-lg);
+}
+
+.training-coach-icon {
+  font-size: 40px;
+}
+
+.training-coach-card h4 {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.training-coach-card p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  max-width: 420px;
+}
+
+/* In-game training panel */
+.training-panel {
+  padding: 16px;
+  background: var(--bg-card);
+  border: 1.5px solid rgba(124, 58, 237, 0.35);
+  border-radius: var(--radius-lg);
+  margin-bottom: 16px;
+}
+
+.training-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.training-badge {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #a78bfa;
+  background: rgba(124, 58, 237, 0.2);
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.training-exit-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.training-exit-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.training-panel h4 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.training-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.training-step {
+  font-size: 12px;
+  font-weight: 600;
+  color: #a78bfa;
+  margin-bottom: 12px;
+}
+
+.training-quality-wrap {
+  margin-bottom: 12px;
+}
+
+.training-quality-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.training-pct {
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.training-quality-track {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.training-quality-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.training-quality-fill.quality-excellent { background: linear-gradient(90deg, #22c55e, #4ade80); }
+.training-quality-fill.quality-good { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+.training-quality-fill.quality-inaccuracy { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.training-quality-fill.quality-blunder { background: linear-gradient(90deg, #ef4444, #f87171); }
+.training-quality-fill.quality-hint { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+
+.training-quality-label {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.training-feedback {
+  padding: 12px;
+  border-radius: var(--radius-md);
+  margin-bottom: 12px;
+  min-height: 48px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glass-border);
+}
+
+.training-feedback p {
+  font-size: 13px;
+  line-height: 1.45;
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.training-feedback.quality-excellent {
+  border-color: rgba(34, 197, 94, 0.5);
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.training-feedback.quality-excellent p { color: #86efac; }
+
+.training-feedback.quality-good {
+  border-color: rgba(59, 130, 246, 0.5);
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.training-feedback.quality-inaccuracy {
+  border-color: rgba(245, 158, 11, 0.5);
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.training-feedback.quality-blunder {
+  border-color: rgba(239, 68, 68, 0.5);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.training-feedback.quality-blunder p { color: #fca5a5; }
+
+.training-feedback.quality-hint {
+  border-color: rgba(139, 92, 246, 0.5);
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.training-actions {
+  display: flex;
+  gap: 8px;
+}
+
+@media (max-width: 900px) {
+  .game-modes-grid {
+    grid-template-columns: 1fr;
+    max-width: 700px;
+  }
+}
+
+@media (max-width: 600px) {
+  .training-coach-card {
+    flex-direction: column;
+    text-align: center;
+  }
+}

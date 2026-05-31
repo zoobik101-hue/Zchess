@@ -588,6 +588,57 @@ const ChessEngine = {
     return notation;
   },
 
+  /** Load position from FEN (pieces + turn + castling + en passant) */
+  parseFEN(fen) {
+    const parts = (fen || '').trim().split(/\s+/);
+    if (!parts[0]) return this.createInitialState();
+
+    const rows = parts[0].split('/');
+    const board = Array.from({ length: 8 }, () => Array(8).fill(null));
+
+    for (let fenRank = 0; fenRank < 8; fenRank++) {
+      const row = 7 - fenRank;
+      let col = 0;
+      for (const ch of rows[fenRank] || '') {
+        if (ch >= '1' && ch <= '8') {
+          col += parseInt(ch, 10);
+        } else {
+          const color = ch === ch.toUpperCase() ? 'w' : 'b';
+          board[row][col] = { type: ch.toUpperCase(), color };
+          col++;
+        }
+      }
+    }
+
+    const turn = parts[1] === 'b' ? 'b' : 'w';
+    const castStr = parts[2] || 'KQkq';
+    const castling = {
+      wK: castStr.includes('K'),
+      wQ: castStr.includes('Q'),
+      bK: castStr.includes('k'),
+      bQ: castStr.includes('q')
+    };
+
+    let enPassant = null;
+    if (parts[3] && parts[3] !== '-') {
+      const file = parts[3].charCodeAt(0) - 97;
+      const epRank = parts[3][1] === '3' ? 2 : 5;
+      if (file >= 0 && file < 8) enPassant = { row: epRank, col: file };
+    }
+
+    return {
+      board,
+      turn,
+      castling,
+      enPassant,
+      halfMoveClock: parseInt(parts[4], 10) || 0,
+      fullMoveNumber: parseInt(parts[5], 10) || 1,
+      history: [],
+      capturedPieces: { w: [], b: [] },
+      positionHistory: []
+    };
+  },
+
   // Get FEN string (for debugging/display)
   getFEN(state) {
     const ranks = [];

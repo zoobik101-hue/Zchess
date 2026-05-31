@@ -31,6 +31,7 @@
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/chess.css">
   <link rel="stylesheet" href="css/multiplayer.css">
+  <link rel="stylesheet" href="css/training.css">
 </head>
 <body>
 
@@ -291,6 +292,18 @@
           <div class="game-mode-title" data-i18n="game.quick_game">Quick Match</div>
           <div class="game-mode-desc" data-i18n="game.quick_game_desc">Get matched instantly with an opponent</div>
         </div>
+        <div class="game-mode-card" data-mode="training">
+          <div class="game-mode-icon">🎓</div>
+          <div class="game-mode-title" data-i18n="game.training">Training</div>
+          <div class="game-mode-desc" data-i18n="game.training_desc">Lessons, tactics, coach mode with move analysis</div>
+        </div>
+      </div>
+
+      <!-- Training catalog -->
+      <div id="training-section" class="training-section" style="display:none">
+        <h3 class="training-section-title" data-i18n="training.catalog_title">Training Academy</h3>
+        <p class="training-section-sub" data-i18n="training.catalog_sub">Puzzles, techniques, and live coaching with move quality feedback</p>
+        <div id="training-catalog"></div>
       </div>
 
       <!-- Difficulty (AI only) -->
@@ -440,6 +453,34 @@
             <span class="icon">🏳️</span>
             <span data-i18n="board.resign">Resign</span>
           </button>
+        </div>
+
+        <!-- Training coach panel -->
+        <div class="training-panel" id="training-panel" style="display:none">
+          <div class="training-panel-head">
+            <span class="training-badge" data-i18n="training.mode_label">Training</span>
+            <button type="button" class="training-exit-btn" id="btn-training-exit" title="Exit">✕</button>
+          </div>
+          <h4 id="training-lesson-title">Lesson</h4>
+          <p id="training-lesson-desc" class="training-desc"></p>
+          <p id="training-step" class="training-step"></p>
+          <div class="training-quality-wrap">
+            <div class="training-quality-header">
+              <span data-i18n="training.move_quality">Move quality</span>
+              <span id="training-move-pct" class="training-pct">—</span>
+            </div>
+            <div class="training-quality-track">
+              <div id="training-quality-bar" class="training-quality-fill"></div>
+            </div>
+            <span id="training-quality-label" class="training-quality-label">—</span>
+          </div>
+          <div id="training-feedback" class="training-feedback">
+            <p id="training-feedback-msg"></p>
+          </div>
+          <div class="training-actions">
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-training-hint" data-i18n="training.hint_btn">Hint</button>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-training-reset" data-i18n="training.reset_btn">Reset</button>
+          </div>
         </div>
 
         <!-- Move History -->
@@ -1099,6 +1140,7 @@
 <script src="js/profile.js"></script>
 <script src="js/leaderboard.js"></script>
 <script src="js/multiplayer.js"></script>
+<script src="js/training.js"></script>
 <script src="js/app.js"></script>
 
 </body>

@@ -31,6 +31,7 @@ const App = {
 
     // Init multiplayer module
     if (ZChess.Multiplayer) ZChess.Multiplayer.init();
+    if (ZChess.Training) ZChess.Training.init();
 
     // Bind global events
     this.bindEvents();
@@ -81,6 +82,10 @@ const App = {
   },
 
   navigate(page, params = []) {
+    if (this.currentPage === 'play' && page !== 'play' && ZChess.ChessBoard?.trainingMode && ZChess.Training?.active) {
+      ZChess.Training.cleanup();
+    }
+
     // Guard: leaving active multiplayer game = auto resign opponent gets win
     if (this.currentPage === 'play' && page !== 'play') {
       const MP = ZChess.Multiplayer;
@@ -216,15 +221,28 @@ const App = {
   },
 
   renderGameSetup() {
-    // Mode selection
+    const mode = this.gameSetupOptions.mode;
+    const isAi = mode === 'ai';
+    const isTraining = mode === 'training';
+
     document.querySelectorAll('.game-mode-card').forEach(card => {
-      card.classList.toggle('selected', card.dataset.mode === this.gameSetupOptions.mode);
+      card.classList.toggle('selected', card.dataset.mode === mode);
     });
 
-    // Difficulty selector - show/hide based on mode
     const diffEl = document.getElementById('difficulty-section');
-    if (diffEl) {
-      diffEl.style.display = this.gameSetupOptions.mode === 'ai' ? 'block' : 'none';
+    if (diffEl) diffEl.style.display = isAi ? 'block' : 'none';
+
+    const trainEl = document.getElementById('training-section');
+    if (trainEl) trainEl.style.display = isTraining ? 'block' : 'none';
+
+    const playAsWrap = document.querySelector('#page-game .play-as-selector')?.parentElement;
+    if (playAsWrap) playAsWrap.style.display = (isAi || isTraining) ? 'block' : 'none';
+
+    const startBtn = document.getElementById('btn-start-game');
+    if (startBtn) startBtn.style.display = isTraining ? 'none' : '';
+
+    if (isTraining && ZChess.Training) {
+      ZChess.Training.renderCatalog('basics');
     }
 
     // Highlight selected difficulty
@@ -240,6 +258,7 @@ const App = {
 
   startGame() {
     const opts = this.gameSetupOptions;
+    if (opts.mode === 'training') return;
 
     // Determine player color
     let playerColor = opts.playerColor;
@@ -475,6 +494,11 @@ const App = {
         if (mode === 'quick') {
           if (!ZChess.Auth.isLoggedIn()) { this.showAuthModal('login'); return; }
           ZChess.Multiplayer?.showLobby('lobby-choose');
+          return;
+        }
+        if (mode === 'training') {
+          this.gameSetupOptions.mode = mode;
+          this.renderGameSetup();
           return;
         }
         this.gameSetupOptions.mode = mode;

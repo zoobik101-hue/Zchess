@@ -15,6 +15,8 @@ const ChessBoard = {
   legalMovesForSelected: [],
   flipped: false,
   isAIGame: false,
+  trainingMode: false,
+  trainingPuzzle: false,
   aiDifficulty: 'medium',
   playerColor: 'w',
   isThinking: false,
@@ -209,9 +211,8 @@ const ChessBoard = {
       const { board, turn } = this.gameState;
       const p = board[row][col];
       // Block dragging opponent's pieces in AI or multiplayer
-      const notOurPiece = (this.isAIGame || this.multiplayerMode) && p?.color !== this.playerColor;
-      // Block dragging when not our turn in multiplayer
-      const notOurTurn  = this.multiplayerMode && turn !== this.playerColor;
+      const notOurPiece = (this.isAIGame || this.multiplayerMode || this.trainingPuzzle) && p?.color !== this.playerColor;
+      const notOurTurn  = (this.multiplayerMode || this.trainingPuzzle) && turn !== this.playerColor;
       if (!p || notOurPiece || notOurTurn) {
         e.preventDefault();
         return;
@@ -258,7 +259,10 @@ const ChessBoard = {
   // =========================================
 
   startGame(options = {}) {
-    this.isAIGame = options.mode === 'ai';
+    const isCoach = options.mode === 'training' && options.trainingMode === 'coach';
+    this.trainingMode = isCoach;
+    this.trainingPuzzle = false;
+    this.isAIGame = options.mode === 'ai' || isCoach;
     this.aiDifficulty = options.difficulty || 'medium';
     this.playerColor = options.playerColor || 'w';
     this.flipped = this.playerColor === 'b';
@@ -305,6 +309,45 @@ const ChessBoard = {
     if (this.isAIGame && this.playerColor === 'b') {
       this.triggerAIMove();
     }
+
+    if (isCoach && ZChess.Training) {
+      ZChess.Training.active = true;
+      ZChess.Training.mode = 'coach';
+      ZChess.Training._showPanel(true);
+      ZChess.Training._setCoachUI();
+    }
+  },
+
+  startTrainingLesson(lesson) {
+    this.trainingMode = true;
+    this.trainingPuzzle = true;
+    this.isAIGame = false;
+    this.multiplayerMode = false;
+    this.playerColor = lesson.color || 'w';
+    this.flipped = this.playerColor === 'b';
+    this.gameOver = false;
+    this.isThinking = false;
+    this.undoHistory = [];
+    this.selectedSquare = null;
+    this.legalMovesForSelected = [];
+    this._gameStats = null;
+    this._aiGen++;
+
+    this.gameState = ZChess.Engine.parseFEN(lesson.fen);
+    this._prevPieces = Array.from({ length: 8 }, () => new Array(8).fill(null));
+
+    this.initBoard();
+    if (this.flipped) this._reorderSquares();
+    this.render();
+    this.updateTurnIndicator();
+    this.updatePlayerBars();
+    this.updateCoordinates();
+
+    if (ZChess.Training) {
+      ZChess.Training.active = true;
+      ZChess.Training.mode = 'puzzle';
+      ZChess.Training.lesson = lesson;
+    }
   },
 
   // =========================================
@@ -313,6 +356,8 @@ const ChessBoard = {
 
   startMultiplayerGame(options = {}) {
     this.isAIGame        = false;
+    this.trainingMode    = false;
+    this.trainingPuzzle  = false;
     this.multiplayerMode = true;
     this.playerColor     = options.playerColor || 'w';
     this.flipped         = this.playerColor === 'b';
@@ -469,8 +514,7 @@ const ChessBoard = {
     const { board, turn } = this.gameState;
     const piece = board[row][col];
 
-    // In AI or multiplayer: block input when it's not local player's turn
-    if ((this.isAIGame || this.multiplayerMode) && turn !== this.playerColor) return;
+    if ((this.isAIGame || this.multiplayerMode || this.trainingPuzzle) && turn !== this.playerColor) return;
 
     if (this.selectedSquare) {
       const move = this.legalMovesForSelected.find(m => m.to.row === row && m.to.col === col);
@@ -523,6 +567,19 @@ const ChessBoard = {
   async makeMove(move) {
     const engine = ZChess.Engine;
 
+    const isPlayerMove = move.piece.color === this.playerColor;
+
+    if (this.trainingMode && isPlayerMove && ZChess.Training?.active) {
+      ZChess.Training.onBeforePlayerMove(engine.cloneState(this.gameState));
+      if (this.trainingPuzzle && !ZChess.Training.isPuzzleMoveCorrect(move)) {
+        await ZChess.Training.onPuzzleWrongMove(move);
+        this.selectedSquare = null;
+        this.legalMovesForSelected = [];
+        this.render();
+        return;
+      }
+    }
+
     if (this.isAIGame) {
       this.undoHistory.push(engine.cloneState(this.gameState));
     }
@@ -565,6 +622,10 @@ const ChessBoard = {
     // Track check given by player
     if (this._gameStats && status.status === 'check' && (this.isAIGame || this.multiplayerMode)) {
       this._gameStats.playerChecks++;
+    }
+
+    if (this.trainingMode && isPlayerMove && ZChess.Training?.active) {
+      await ZChess.Training.onPlayerMove(move, this.gameState);
     }
 
     if (status.status !== 'playing' && status.status !== 'check') {
