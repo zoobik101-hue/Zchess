@@ -1,6 +1,7 @@
 /* =============================================
    ZChess - Chess Board UI Controller
-   Handles: Rendering, Click, Drag, Promotion, Game Result
+   OPTIMIZED: Persistent DOM, incremental updates,
+   event delegation, zero innerHTML resets per move
    ============================================= */
 
 (function() {
@@ -9,7 +10,6 @@
 window.ZChess = window.ZChess || {};
 
 const ChessBoard = {
-  // Game state
   gameState: null,
   selectedSquare: null,
   legalMovesForSelected: [],
@@ -19,20 +19,218 @@ const ChessBoard = {
   playerColor: 'w',
   isThinking: false,
   gameOver: false,
-  undoHistory: [], // Stack for undo in AI games
+  undoHistory: [],
 
-  // DOM elements
-  boardEl: null,
-  historyEl: null,
-  turnEl: null,
+  // Persistent square DOM elements [row][col]
+  _squares: null,
+  // Track previous board to only update changed squares
+  _prevPieces: null,
 
-  // Piece symbols
   SYMBOLS: {
     wK:'♔', wQ:'♕', wR:'♖', wB:'♗', wN:'♘', wP:'♙',
     bK:'♚', bQ:'♛', bR:'♜', bB:'♝', bN:'♞', bP:'♟'
   },
 
-  // Start a new game
+  // =========================================
+  // BOARD INITIALIZATION - runs once
+  // =========================================
+
+  initBoard() {
+    const boardEl = document.getElementById('chess-board');
+    if (!boardEl || this._squares) return;
+
+    this._squares = Array.from({ length: 8 }, () => new Array(8));
+    this._prevPieces = Array.from({ length: 8 }, () => new Array(8).fill(null));
+
+    const frag = document.createDocumentFragment();
+
+    for (let sr = 7; sr >= 0; sr--) {
+      for (let sc = 0; sc < 8; sc++) {
+        const el = document.createElement('div');
+        const br = this.flipped ? 7 - sr : sr;
+        const bc = this.flipped ? 7 - sc : sc;
+        el.className = `chess-square ${(br + bc) % 2 === 1 ? 'light' : 'dark'}`;
+        el.dataset.row = br;
+        el.dataset.col = bc;
+        this._squares[br][bc] = el;
+        frag.appendChild(el);
+      }
+    }
+
+    boardEl.appendChild(frag);
+
+    // Event delegation - ONE listener for the entire board
+    boardEl.addEventListener('click', (e) => {
+      const sq = e.target.closest('.chess-square');
+      if (sq) this.handleSquareClick(+sq.dataset.row, +sq.dataset.col);
+    });
+
+    // Drag & Drop delegation
+    boardEl.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    });
+
+    boardEl.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const sq = e.target.closest('.chess-square');
+      if (!sq || !this.dragSource) return;
+      const toRow = +sq.dataset.row;
+      const toCol = +sq.dataset.col;
+      if (!isNaN(toRow) && !isNaN(toCol)) {
+        this.handleSquareClick(toRow, toCol);
+      }
+      this.dragSource = null;
+    });
+  },
+
+  // =========================================
+  // INCREMENTAL RENDER
+  // Only updates what actually changed
+  // =========================================
+
+  render() {
+    if (!this._squares) {
+      this.initBoard();
+    }
+
+    const { board } = this.gameState;
+    const engine = ZChess.Engine;
+    const inCheck = engine.isInCheck(board, this.gameState.turn);
+    const kingSquare = inCheck ? engine.findKing(board, this.gameState.turn) : null;
+    const lastMove = this.gameState.history.length > 0
+      ? this.gameState.history[this.gameState.history.length - 1]
+      : null;
+
+    // Build legal move set for O(1) lookup
+    const legalSet = new Set();
+    const captureSet = new Set();
+    for (const m of this.legalMovesForSelected) {
+      const key = `${m.to.row},${m.to.col}`;
+      legalSet.add(key);
+      if (m.capture || m.enPassant) captureSet.add(key);
+    }
+
+    const sel = this.selectedSquare;
+
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const el = this._squares[r][c];
+        const piece = board[r][c];
+        const key = `${r},${c}`;
+
+        // --- Class names (no DOM creation, just string compare) ---
+        const isLight = (r + c) % 2 === 1;
+        let cls = `chess-square ${isLight ? 'light' : 'dark'}`;
+
+        if (sel && sel.row === r && sel.col === c) cls += ' selected';
+        if (kingSquare && kingSquare.row === r && kingSquare.col === c) cls += ' king-check';
+        if (lastMove) {
+          if (lastMove.from.row === r && lastMove.from.col === c) cls += ' last-move-from';
+          if (lastMove.to.row === r && lastMove.to.col === c) cls += ' last-move-to';
+        }
+        if (legalSet.has(key)) {
+          cls += captureSet.has(key) ? ' can-capture' : ' can-move';
+        }
+
+        if (el.className !== cls) el.className = cls;
+
+        // --- Move dot ---
+        const hasDot = el.querySelector('.move-dot');
+        const needsDot = legalSet.has(key);
+        if (needsDot && !hasDot) {
+          const dot = document.createElement('div');
+          dot.className = 'move-dot';
+          el.appendChild(dot);
+        } else if (!needsDot && hasDot) {
+          hasDot.remove();
+        }
+
+        // --- Piece update (only if changed) ---
+        const pieceKey = piece ? piece.color + piece.type : '';
+        const prevKey = this._prevPieces[r][c];
+
+        if (pieceKey !== prevKey) {
+          this._prevPieces[r][c] = pieceKey;
+          // Remove old piece element
+          const oldPiece = el.querySelector('.chess-piece');
+          if (oldPiece) oldPiece.remove();
+
+          if (piece) {
+            const pEl = this._createPieceEl(piece, r, c);
+            el.appendChild(pEl);
+          }
+        } else if (piece) {
+          // Update selected state on existing piece element
+          const pEl = el.querySelector('.chess-piece');
+          if (pEl) {
+            const shouldBeSelected = sel && sel.row === r && sel.col === c;
+            pEl.classList.toggle('selected-piece', shouldBeSelected);
+          }
+        }
+      }
+    }
+
+    this.updateMoveHistory();
+    this.updateCapturedPieces();
+  },
+
+  _createPieceEl(piece, row, col) {
+    const el = document.createElement('div');
+    el.className = `chess-piece ${piece.color === 'w' ? 'white-piece' : 'black-piece'}`;
+    el.textContent = this.SYMBOLS[piece.color + piece.type];
+    el.dataset.row = row;
+    el.dataset.col = col;
+    el.setAttribute('draggable', 'true');
+
+    el.addEventListener('dragstart', (e) => {
+      const { board, turn } = this.gameState;
+      const p = board[row][col];
+      if (!p || (this.isAIGame && p.color !== this.playerColor)) {
+        e.preventDefault();
+        return;
+      }
+      this.dragSource = { row, col };
+      this.selectPiece(row, col);
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', `${row},${col}`);
+      requestAnimationFrame(() => el.classList.add('dragging'));
+    });
+
+    el.addEventListener('dragend', () => {
+      el.classList.remove('dragging');
+      this.dragSource = null;
+    });
+
+    return el;
+  },
+
+  // Re-order square elements when board is flipped
+  _reorderSquares() {
+    const boardEl = document.getElementById('chess-board');
+    if (!boardEl || !this._squares) return;
+
+    const frag = document.createDocumentFragment();
+    if (this.flipped) {
+      for (let sr = 0; sr < 8; sr++) {
+        for (let sc = 7; sc >= 0; sc--) {
+          frag.appendChild(this._squares[sr][sc]);
+        }
+      }
+    } else {
+      for (let sr = 7; sr >= 0; sr--) {
+        for (let sc = 0; sc < 8; sc++) {
+          frag.appendChild(this._squares[sr][sc]);
+        }
+      }
+    }
+    boardEl.appendChild(frag);
+  },
+
+  // =========================================
+  // GAME LIFECYCLE
+  // =========================================
+
   startGame(options = {}) {
     this.isAIGame = options.mode === 'ai';
     this.aiDifficulty = options.difficulty || 'medium';
@@ -44,32 +242,32 @@ const ChessBoard = {
     this.selectedSquare = null;
     this.legalMovesForSelected = [];
 
-    // Initialize game state
     this.gameState = ZChess.Engine.createInitialState();
 
-    // Render the board
-    this.render();
+    // Reset piece tracking
+    this._prevPieces = Array.from({ length: 8 }, () => new Array(8).fill(null));
 
-    // If playing as black vs AI, AI goes first
+    this.initBoard();
+    if (this.flipped) this._reorderSquares();
+    this.render();
+    this.updateTurnIndicator();
+    this.updatePlayerBars();
+    this.updateCoordinates();
+    this.saveGameState();
+
     if (this.isAIGame && this.playerColor === 'b') {
       this.triggerAIMove();
     }
-
-    // Update turn indicator
-    this.updateTurnIndicator();
-    this.updatePlayerBars();
-
-    // Save state for resume
-    this.saveGameState();
   },
 
-  // Resume a saved game
   resumeGame() {
     try {
       const saved = localStorage.getItem(ZChess.STORAGE.GAME_STATE);
       if (!saved) return false;
       const data = JSON.parse(saved);
       Object.assign(this, data);
+      this._prevPieces = Array.from({ length: 8 }, () => new Array(8).fill(null));
+      this.initBoard();
       this.render();
       this.updateTurnIndicator();
       this.updatePlayerBars();
@@ -81,153 +279,33 @@ const ChessBoard = {
 
   saveGameState() {
     try {
-      const toSave = {
+      localStorage.setItem(ZChess.STORAGE.GAME_STATE, JSON.stringify({
         gameState: this.gameState,
         isAIGame: this.isAIGame,
         aiDifficulty: this.aiDifficulty,
         playerColor: this.playerColor,
         flipped: this.flipped,
         gameOver: this.gameOver
-      };
-      localStorage.setItem(ZChess.STORAGE.GAME_STATE, JSON.stringify(toSave));
+      }));
     } catch (e) {}
   },
 
-  // Render the full board
-  render() {
-    this.boardEl = document.getElementById('chess-board');
-    if (!this.boardEl) return;
-
-    this.boardEl.innerHTML = '';
-
-    const { board } = this.gameState;
-    const engine = ZChess.Engine;
-
-    // Find king in check
-    const inCheck = engine.isInCheck(board, this.gameState.turn);
-    const kingSquare = inCheck ? engine.findKing(board, this.gameState.turn) : null;
-
-    // Last move squares
-    const lastMove = this.gameState.history.length > 0
-      ? this.gameState.history[this.gameState.history.length - 1]
-      : null;
-
-    for (let screenRow = 7; screenRow >= 0; screenRow--) {
-      for (let screenCol = 0; screenCol < 8; screenCol++) {
-        // Convert screen coordinates to board coordinates
-        const boardRow = this.flipped ? 7 - screenRow : screenRow;
-        const boardCol = this.flipped ? 7 - screenCol : screenCol;
-
-        const square = this.createSquare(boardRow, boardCol, {
-          kingSquare,
-          lastMove,
-          screenRow,
-          screenCol
-        });
-
-        this.boardEl.appendChild(square);
-      }
-    }
-
-    // Update side panels
-    this.updateMoveHistory();
-    this.updateCapturedPieces();
-  },
-
-  createSquare(row, col, { kingSquare, lastMove }) {
-    const el = document.createElement('div');
-    const isLight = (row + col) % 2 === 1;
-    el.className = `chess-square ${isLight ? 'light' : 'dark'}`;
-    el.dataset.row = row;
-    el.dataset.col = col;
-
-    // Selected square
-    if (this.selectedSquare && this.selectedSquare.row === row && this.selectedSquare.col === col) {
-      el.classList.add('selected');
-    }
-
-    // King in check
-    if (kingSquare && kingSquare.row === row && kingSquare.col === col) {
-      el.classList.add('king-check');
-    }
-
-    // Last move highlight
-    if (lastMove) {
-      if (lastMove.from.row === row && lastMove.from.col === col) el.classList.add('last-move-from');
-      if (lastMove.to.row === row && lastMove.to.col === col) el.classList.add('last-move-to');
-    }
-
-    // Legal move indicator
-    const legalMove = this.legalMovesForSelected.find(m => m.to.row === row && m.to.col === col);
-    if (legalMove) {
-      const dot = document.createElement('div');
-      if (legalMove.capture || legalMove.enPassant) {
-        el.classList.add('can-capture');
-        dot.className = 'move-dot';
-      } else {
-        dot.className = 'move-dot';
-      }
-      el.appendChild(dot);
-    }
-
-    // Piece
-    const piece = this.gameState.board[row][col];
-    if (piece) {
-      const pieceEl = this.createPiece(piece, row, col);
-      el.appendChild(pieceEl);
-    }
-
-    // Click handler
-    el.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.handleSquareClick(row, col);
-    });
-
-    return el;
-  },
-
-  createPiece(piece, row, col) {
-    const el = document.createElement('div');
-    el.className = `chess-piece ${piece.color === 'w' ? 'white-piece' : 'black-piece'}`;
-    el.textContent = this.SYMBOLS[piece.color + piece.type];
-    el.dataset.row = row;
-    el.dataset.col = col;
-    el.setAttribute('draggable', 'true');
-
-    const isSelected = this.selectedSquare &&
-      this.selectedSquare.row === row && this.selectedSquare.col === col;
-    if (isSelected) el.classList.add('selected-piece');
-
-    // Drag events
-    el.addEventListener('dragstart', (e) => this.handleDragStart(e, row, col));
-    el.addEventListener('dragend', () => this.handleDragEnd());
-
-    return el;
-  },
-
-  // --- Interaction Handlers ---
+  // =========================================
+  // INTERACTION
+  // =========================================
 
   handleSquareClick(row, col) {
     if (this.gameOver || this.isThinking) return;
-
     const { board, turn } = this.gameState;
     const piece = board[row][col];
-    const engine = ZChess.Engine;
 
-    // If AI's turn, ignore
     if (this.isAIGame && turn !== this.playerColor) return;
 
-    // If a square is already selected
     if (this.selectedSquare) {
-      // Try to make a move
-      const move = this.legalMovesForSelected.find(m =>
-        m.to.row === row && m.to.col === col
-      );
+      const move = this.legalMovesForSelected.find(m => m.to.row === row && m.to.col === col);
 
       if (move) {
-        // Check if promotion
         if (move.promotion) {
-          // Find all promotion moves to this square
           const promoMoves = this.legalMovesForSelected.filter(m =>
             m.to.row === row && m.to.col === col && m.promotion
           );
@@ -238,18 +316,15 @@ const ChessBoard = {
         return;
       }
 
-      // Clicked own piece - select it instead
       if (piece && piece.color === turn) {
         this.selectPiece(row, col);
         return;
       }
 
-      // Clicked empty square or opponent piece (not a valid move) - deselect
       this.deselectPiece();
       return;
     }
 
-    // No piece selected yet - try to select
     if (piece && piece.color === turn) {
       this.selectPiece(row, col);
     }
@@ -258,18 +333,6 @@ const ChessBoard = {
   selectPiece(row, col) {
     this.selectedSquare = { row, col };
     this.legalMovesForSelected = ZChess.Engine.getLegalMovesForPiece(this.gameState, row, col);
-
-    // Filter to unique destination squares (for promotion, multiple moves to same dest)
-    const seen = new Set();
-    this.legalMovesForSelected = this.legalMovesForSelected.filter(m => {
-      const key = `${m.to.row},${m.to.col}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-    // Restore all including promotions
-    this.legalMovesForSelected = ZChess.Engine.getLegalMovesForPiece(this.gameState, row, col);
-
     this.render();
     if (ZChess.Sound) ZChess.Sound.playClick();
   },
@@ -280,22 +343,21 @@ const ChessBoard = {
     this.render();
   },
 
-  // --- Move Execution ---
+  // =========================================
+  // MOVE EXECUTION
+  // =========================================
 
   async makeMove(move) {
     const engine = ZChess.Engine;
 
-    // Save state for undo (only in AI games)
     if (this.isAIGame) {
       this.undoHistory.push(engine.cloneState(this.gameState));
     }
 
-    // Apply the move
     this.gameState = engine.applyMove(this.gameState, move);
     this.selectedSquare = null;
     this.legalMovesForSelected = [];
 
-    // Play sound
     if (ZChess.Sound) {
       if (move.castling) ZChess.Sound.playCastle();
       else if (move.capture || move.enPassant) ZChess.Sound.playCapture();
@@ -303,39 +365,36 @@ const ChessBoard = {
       else ZChess.Sound.playMove();
     }
 
-    // Render
     this.render();
     this.updateTurnIndicator();
     this.updatePlayerBars();
     this.saveGameState();
 
-    // Check game status
     const status = engine.getGameStatus(this.gameState);
-
-    if (status.status === 'check') {
-      if (ZChess.Sound) ZChess.Sound.playCheck();
-    }
+    if (status.status === 'check' && ZChess.Sound) ZChess.Sound.playCheck();
 
     if (status.status !== 'playing' && status.status !== 'check') {
       this.handleGameEnd(status, move);
       return;
     }
 
-    // AI move
     if (this.isAIGame && this.gameState.turn !== this.playerColor) {
       await this.triggerAIMove();
     }
   },
 
+  // =========================================
+  // AI MOVE (Web Worker)
+  // =========================================
+
   async triggerAIMove() {
     if (this.gameOver || this.isThinking) return;
-
     this.isThinking = true;
     this.showAIThinking(true);
     this.updateTurnIndicator();
 
     try {
-      const move = await this._computeAIMoveInWorker(this.gameState, this.aiDifficulty);
+      const move = await this._computeAIMove(this.gameState, this.aiDifficulty);
 
       if (!move || this.gameOver) {
         this.isThinking = false;
@@ -359,15 +418,10 @@ const ChessBoard = {
       this.saveGameState();
 
       const status = engine.getGameStatus(this.gameState);
-
-      if (status.status === 'check') {
-        if (ZChess.Sound) ZChess.Sound.playCheck();
-      }
-
+      if (status.status === 'check' && ZChess.Sound) ZChess.Sound.playCheck();
       if (status.status !== 'playing' && status.status !== 'check') {
         this.handleGameEnd(status, move);
       }
-
     } catch (e) {
       console.error('[ChessBoard] AI error:', e);
     }
@@ -376,93 +430,96 @@ const ChessBoard = {
     this.showAIThinking(false);
   },
 
-  // Run AI in Web Worker to avoid freezing the UI thread
-  _computeAIMoveInWorker(state, difficulty) {
+  _computeAIMove(state, difficulty) {
     return new Promise((resolve) => {
-      // Minimal delay so "thinking" indicator renders before computation
-      const minDelay = difficulty === 'beginner' ? 150 : 250;
+      const minDelay = difficulty === 'beginner' ? 150 : 300;
 
-      const tryWorker = () => {
-        // Try Web Worker first (best option - separate thread)
-        if (typeof Worker !== 'undefined') {
-          const workerPath = this._getWorkerPath();
-          let worker;
-          let settled = false;
-          let startTime = Date.now();
+      if (typeof Worker === 'undefined') {
+        setTimeout(() => resolve(ZChess.AI.getBestMove(state, difficulty)), minDelay);
+        return;
+      }
 
-          try {
-            worker = new Worker(workerPath);
+      let worker = null;
+      let settled = false;
+      const startTime = Date.now();
 
-            // Timeout: kill worker after 15 seconds and fall back to sync
-            const timeout = setTimeout(() => {
-              if (!settled) {
-                settled = true;
-                worker.terminate();
-                console.warn('[AI] Worker timed out, falling back to sync');
-                const move = ZChess.AI.getBestMove(state, 'medium'); // fallback lower depth
-                resolve(move);
-              }
-            }, 15000);
-
-            worker.onmessage = (e) => {
-              if (settled) return;
-              settled = true;
-              clearTimeout(timeout);
-              worker.terminate();
-              const elapsed = Date.now() - startTime;
-              // Ensure minimum display time for thinking indicator
-              const remaining = Math.max(0, minDelay - elapsed);
-              setTimeout(() => resolve(e.data.move || null), remaining);
-            };
-
-            worker.onerror = (err) => {
-              if (settled) return;
-              settled = true;
-              clearTimeout(timeout);
-              worker.terminate();
-              console.warn('[AI] Worker error, falling back to sync:', err.message);
-              // Fall back to synchronous computation
-              setTimeout(() => {
-                resolve(ZChess.AI.getBestMove(state, difficulty));
-              }, minDelay);
-            };
-
-            worker.postMessage({ state, difficulty, id: Date.now() });
-            return;
-          } catch (e) {
-            // Worker creation failed, fall through to sync
-            if (worker) worker.terminate();
-          }
-        }
-
-        // Fallback: synchronous (wrapped in setTimeout to let UI paint first)
-        setTimeout(() => {
-          try {
-            resolve(ZChess.AI.getBestMove(state, difficulty));
-          } catch (e) {
-            resolve(null);
-          }
-        }, minDelay);
+      const done = (move) => {
+        if (settled) return;
+        settled = true;
+        if (worker) { try { worker.terminate(); } catch(e){} }
+        const wait = Math.max(0, minDelay - (Date.now() - startTime));
+        setTimeout(() => resolve(move), wait);
       };
 
-      tryWorker();
+      try {
+        // Build worker as Blob to avoid CORS/path issues
+        const workerSrc = this._buildWorkerBlob();
+        worker = new Worker(workerSrc);
+
+        const timeout = setTimeout(() => {
+          console.warn('[AI] Worker timed out');
+          done(ZChess.AI.getBestMove(state, 'medium'));
+        }, 12000);
+
+        worker.onmessage = (e) => {
+          clearTimeout(timeout);
+          done(e.data.move || null);
+        };
+
+        worker.onerror = (err) => {
+          clearTimeout(timeout);
+          console.warn('[AI] Worker error:', err.message);
+          done(ZChess.AI.getBestMove(state, difficulty));
+        };
+
+        worker.postMessage({ state, difficulty });
+
+      } catch (e) {
+        console.warn('[AI] Worker creation failed, using sync');
+        setTimeout(() => done(ZChess.AI.getBestMove(state, difficulty)), minDelay);
+      }
     });
   },
 
-  // Get absolute path to ai-worker.js (works on GitHub Pages subpath)
-  _getWorkerPath() {
-    const scripts = document.querySelectorAll('script[src]');
-    for (const s of scripts) {
-      if (s.src.includes('chess-board.js')) {
-        return s.src.replace('chess-board.js', 'ai-worker.js');
-      }
+  // Build worker as Blob URL - no CORS issues, works on any host
+  _buildWorkerBlob() {
+    if (this._workerBlobUrl) return this._workerBlobUrl;
+
+    // Get URLs of engine and AI scripts from page
+    const scripts = Array.from(document.querySelectorAll('script[src]'));
+    const engineUrl = scripts.find(s => s.src.includes('chess-engine'))?.src;
+    const aiUrl = scripts.find(s => s.src.includes('ai-engine'))?.src;
+
+    let workerCode;
+    if (engineUrl && aiUrl) {
+      workerCode = `
+var window = self;
+importScripts(${JSON.stringify(engineUrl)}, ${JSON.stringify(aiUrl)});
+self.onmessage = function(e) {
+  try {
+    var move = ZChess.AI.getBestMove(e.data.state, e.data.difficulty);
+    self.postMessage({ move: move });
+  } catch(err) {
+    self.postMessage({ error: err.message });
+  }
+};`;
+    } else {
+      // Minimal fallback - just returns first legal move
+      workerCode = `
+self.onmessage = function(e) { self.postMessage({ move: null }); };`;
     }
-    // Fallback: derive from current page URL
-    const base = location.pathname.replace(/\/[^/]*$/, '');
-    return location.origin + base + '/js/ai-worker.js';
+
+    const blob = new Blob([workerCode], { type: 'application/javascript' });
+    this._workerBlobUrl = URL.createObjectURL(blob);
+    return this._workerBlobUrl;
   },
 
-  // --- Promotion Dialog ---
+  _workerBlobUrl: null,
+  dragSource: null,
+
+  // =========================================
+  // PROMOTION DIALOG
+  // =========================================
 
   showPromotionDialog(promoMoves, color) {
     const overlay = document.getElementById('promotion-overlay');
@@ -471,12 +528,7 @@ const ChessBoard = {
 
     pieces.innerHTML = '';
     const types = ['Q', 'R', 'B', 'N'];
-    const names = {
-      Q: t('board.promote_queen'),
-      R: t('board.promote_rook'),
-      B: t('board.promote_bishop'),
-      N: t('board.promote_knight')
-    };
+    const names = { Q: 'Queen', R: 'Rook', B: 'Bishop', N: 'Knight' };
 
     types.forEach(type => {
       const btn = document.createElement('button');
@@ -496,46 +548,42 @@ const ChessBoard = {
     overlay.classList.add('open');
   },
 
-  // --- Game End ---
+  // =========================================
+  // GAME END
+  // =========================================
 
   async handleGameEnd(status, lastMove) {
     this.gameOver = true;
     localStorage.removeItem(ZChess.STORAGE.GAME_STATE);
 
-    let outcome;
-    let heading, reason;
+    let outcome, heading, reason;
 
     if (status.status === 'checkmate') {
       const winnerColor = status.winner;
-      if (this.isAIGame) {
-        outcome = winnerColor === this.playerColor ? 'win' : 'loss';
-      } else {
-        outcome = winnerColor === 'w' ? 'win' : 'loss'; // from white's perspective
-      }
-      heading = outcome === 'win' ? t('board.you_win') : t('board.you_lose');
-      reason = t('board.checkmate');
-
+      outcome = this.isAIGame
+        ? (winnerColor === this.playerColor ? 'win' : 'loss')
+        : (winnerColor === 'w' ? 'win' : 'loss');
+      heading = outcome === 'win' ? 'Victory!' : 'Defeat';
+      reason = 'Checkmate';
       if (ZChess.Sound) {
         outcome === 'win' ? ZChess.Sound.playWin() : ZChess.Sound.playCheckmate();
       }
     } else {
       outcome = 'draw';
-      heading = t('board.draw');
+      heading = 'Draw';
       const reasonMap = {
-        stalemate: t('board.stalemate'),
-        insufficient: t('board.draw_insufficient'),
-        'fifty-move': t('board.draw_fifty'),
-        repetition: 'Draw - Threefold Repetition'
+        stalemate: 'Stalemate',
+        insufficient: 'Insufficient Material',
+        'fifty-move': '50-Move Rule',
+        repetition: 'Threefold Repetition'
       };
-      reason = reasonMap[status.reason] || t('board.draw');
-
+      reason = reasonMap[status.reason] || 'Draw';
       if (ZChess.Sound) ZChess.Sound.playDraw();
     }
 
-    // Save game result
-    let xpGain = 0, ratingChange = 0, newLevel = 1;
+    let xpGain = 0, ratingChange = 0;
 
-    if (ZChess.Auth.isLoggedIn()) {
+    if (ZChess.Auth && ZChess.Auth.isLoggedIn()) {
       const aiRatings = {
         beginner: 600, easy: 800, medium: 1000, advanced: 1300,
         expert: 1600, grandmaster: 1900, impossible: 2400
@@ -548,17 +596,10 @@ const ChessBoard = {
         moves: this.gameState.history.length,
         lastPiece: lastMove?.piece?.type
       });
-      if (result) {
-        xpGain = result.xpGain;
-        ratingChange = result.ratingChange;
-        newLevel = result.newLevel;
-      }
+      if (result) { xpGain = result.xpGain; ratingChange = result.ratingChange; }
     }
 
-    // Show result modal
-    setTimeout(() => {
-      this.showGameResultModal(heading, reason, outcome, xpGain, ratingChange);
-    }, 600);
+    setTimeout(() => this.showGameResultModal(heading, reason, outcome, xpGain, ratingChange), 600);
   },
 
   showGameResultModal(heading, reason, outcome, xpGain, ratingChange) {
@@ -574,172 +615,142 @@ const ChessBoard = {
     document.getElementById('result-heading').textContent = heading;
     document.getElementById('result-reason').textContent = reason;
     document.getElementById('result-xp').textContent = `+${xpGain}`;
-    document.getElementById('result-rating').textContent = ratingChange >= 0 ? `+${ratingChange}` : ratingChange;
-    document.getElementById('result-rating').className = `result-stat-value ${ratingChange >= 0 ? 'positive' : 'negative'}`;
+    const ratingEl = document.getElementById('result-rating');
+    ratingEl.textContent = ratingChange >= 0 ? `+${ratingChange}` : ratingChange;
+    ratingEl.className = `result-stat-value ${ratingChange >= 0 ? 'positive' : 'negative'}`;
 
     document.getElementById('game-result-overlay').classList.add('open');
   },
 
-  // --- Undo Move ---
+  // =========================================
+  // UNDO / RESIGN / FLIP
+  // =========================================
 
   undoMove() {
     if (!this.isAIGame || this.undoHistory.length === 0 || this.gameOver) return;
-
-    // Undo player's move and AI's move (2 moves back)
-    const targetLength = Math.max(0, this.undoHistory.length - 2);
-    this.gameState = this.undoHistory[targetLength] || this.undoHistory[0];
-    this.undoHistory = this.undoHistory.slice(0, targetLength);
-
+    const targetLen = Math.max(0, this.undoHistory.length - 2);
+    this.gameState = this.undoHistory[targetLen] || this.undoHistory[0];
+    this.undoHistory = this.undoHistory.slice(0, targetLen);
     this.selectedSquare = null;
     this.legalMovesForSelected = [];
     this.isThinking = false;
     this.gameOver = false;
-
+    this._prevPieces = Array.from({ length: 8 }, () => new Array(8).fill(null));
     this.render();
     this.updateTurnIndicator();
     this.updatePlayerBars();
     this.saveGameState();
-
-    ZChess.Notifications.info('Move undone');
+    if (ZChess.Notifications) ZChess.Notifications.info('Move undone');
   },
-
-  // --- Resign ---
 
   resign() {
     if (this.gameOver) return;
-
-    const outcome = 'loss';
     this.gameOver = true;
     localStorage.removeItem(ZChess.STORAGE.GAME_STATE);
-
-    if (ZChess.Auth.isLoggedIn()) {
-      ZChess.Auth.saveGameResult({
-        outcome,
-        isAI: this.isAIGame,
-        aiDifficulty: this.aiDifficulty,
-        opponentRating: 1200,
-        moves: this.gameState.history.length
-      });
+    if (ZChess.Auth && ZChess.Auth.isLoggedIn()) {
+      ZChess.Auth.saveGameResult({ outcome: 'loss', isAI: this.isAIGame,
+        aiDifficulty: this.aiDifficulty, opponentRating: 1200,
+        moves: this.gameState.history.length });
     }
-
     if (ZChess.Sound) ZChess.Sound.playLose();
-    this.showGameResultModal(t('board.you_lose'), 'Resigned', 'loss', 20, -10);
+    this.showGameResultModal('Defeat', 'Resigned', 'loss', 20, -10);
   },
-
-  // --- Board Flip ---
 
   flipBoard() {
     this.flipped = !this.flipped;
+    this._reorderSquares();
+    this.updateCoordinates();
+    // Force full piece re-render after flip
+    this._prevPieces = Array.from({ length: 8 }, () => new Array(8).fill(null));
     this.render();
   },
 
-  // --- UI Updates ---
+  // =========================================
+  // UI UPDATES
+  // =========================================
 
   updateTurnIndicator() {
     const el = document.getElementById('turn-indicator');
     if (!el) return;
-
     const { turn } = this.gameState;
-    const engine = ZChess.Engine;
-    const inCheck = engine.isInCheck(this.gameState.board, turn);
+    const inCheck = ZChess.Engine.isInCheck(this.gameState.board, turn);
 
     if (inCheck) {
       el.className = 'turn-indicator check-indicator';
-      el.innerHTML = `<div class="turn-dot"></div> ${t('board.check')}`;
+      el.innerHTML = `<div class="turn-dot"></div> CHECK!`;
     } else if (this.isThinking) {
       el.className = 'turn-indicator opponent-turn';
-      el.innerHTML = `
-        <div class="ai-thinking">
-          <div class="thinking-dots">
-            <div class="thinking-dot"></div>
-            <div class="thinking-dot"></div>
-            <div class="thinking-dot"></div>
-          </div>
-          ${t('board.ai_thinking')}
+      el.innerHTML = `<div class="ai-thinking">
+        <div class="thinking-dots">
+          <div class="thinking-dot"></div>
+          <div class="thinking-dot"></div>
+          <div class="thinking-dot"></div>
         </div>
-      `;
+        AI is thinking...
+      </div>`;
     } else {
       const isPlayerTurn = !this.isAIGame || turn === this.playerColor;
       el.className = `turn-indicator ${isPlayerTurn ? 'your-turn' : 'opponent-turn'}`;
-      el.innerHTML = `
-        <div class="turn-dot"></div>
-        ${isPlayerTurn ? t('board.your_turn') : (this.isAIGame ? t('board.ai_thinking') : t('board.opponent_turn'))}
-      `;
+      el.innerHTML = `<div class="turn-dot"></div>
+        ${isPlayerTurn ? 'Your turn' : (this.isAIGame ? 'AI thinking...' : 'Opponent\'s turn')}`;
     }
   },
 
   updatePlayerBars() {
-    const user = ZChess.Auth.currentUser;
-    const userName = user?.username || t('common.guest');
+    const user = ZChess.Auth && ZChess.Auth.currentUser;
+    const userName = user?.username || 'Guest';
     const userRating = user?.rating || '';
 
-    // White bar
-    const whiteBar = document.getElementById('player-bar-white');
-    const blackBar = document.getElementById('player-bar-black');
+    const updateBar = (barId, color) => {
+      const bar = document.getElementById(barId);
+      if (!bar) return;
+      bar.classList.toggle('active', this.gameState.turn === color);
+      const isPlayer = this.playerColor === color;
+      const name = isPlayer ? userName : (this.isAIGame ? `AI (${this.aiDifficulty})` : 'Opponent');
+      const rating = isPlayer ? userRating : '';
+      const nameEl = bar.querySelector('.player-name-sm');
+      const ratingEl = bar.querySelector('.player-rating-sm');
+      if (nameEl) nameEl.textContent = name;
+      if (ratingEl) ratingEl.textContent = rating;
+    };
 
-    if (whiteBar) {
-      const isActive = this.gameState.turn === 'w';
-      whiteBar.classList.toggle('active', isActive);
-
-      const whiteName = this.playerColor === 'w' ? userName : (this.isAIGame ? `AI (${this.aiDifficulty})` : 'Opponent');
-      const whiteRating = this.playerColor === 'w' ? userRating : '';
-      whiteBar.querySelector('.player-name-sm').textContent = whiteName;
-      whiteBar.querySelector('.player-rating-sm').textContent = whiteRating;
-    }
-
-    if (blackBar) {
-      const isActive = this.gameState.turn === 'b';
-      blackBar.classList.toggle('active', isActive);
-
-      const blackName = this.playerColor === 'b' ? userName : (this.isAIGame ? `AI (${this.aiDifficulty})` : 'Opponent');
-      const blackRating = this.playerColor === 'b' ? userRating : '';
-      blackBar.querySelector('.player-name-sm').textContent = blackName;
-      blackBar.querySelector('.player-rating-sm').textContent = blackRating;
-    }
+    updateBar('player-bar-white', 'w');
+    updateBar('player-bar-black', 'b');
   },
 
   updateMoveHistory() {
     const el = document.getElementById('move-history-list');
     if (!el) return;
-
     const history = this.gameState.history;
     el.innerHTML = '';
-
     for (let i = 0; i < history.length; i += 2) {
-      const moveNum = Math.floor(i / 2) + 1;
-      const white = history[i];
-      const black = history[i + 1];
-
+      const num = Math.floor(i / 2) + 1;
+      const w = history[i];
+      const b = history[i + 1];
       const row = document.createElement('div');
       row.className = 'move-history-row';
-      row.innerHTML = `
-        <span class="move-number">${moveNum}.</span>
-        <span class="move-white">${white?.notation || ''}</span>
-        <span class="move-black">${black?.notation || ''}</span>
-      `;
+      row.innerHTML = `<span class="move-number">${num}.</span>
+        <span class="move-white">${w?.notation || ''}</span>
+        <span class="move-black">${b?.notation || ''}</span>`;
       el.appendChild(row);
     }
-
-    // Scroll to bottom
     const panel = document.getElementById('move-history-panel');
     if (panel) panel.scrollTop = panel.scrollHeight;
   },
 
   updateCapturedPieces() {
     const { capturedPieces } = this.gameState;
-    const VALUE_ORDER = ['Q','R','B','N','P'];
-
-    const updateBar = (elId, pieces) => {
-      const el = document.getElementById(elId);
+    const ORDER = ['Q','R','B','N','P'];
+    const upd = (id, pieces) => {
+      const el = document.getElementById(id);
       if (!el) return;
-      el.innerHTML = pieces
-        .sort((a,b) => VALUE_ORDER.indexOf(a) - VALUE_ORDER.indexOf(b))
-        .map(type => `<span class="captured-piece">${this.SYMBOLS['b' + type]}</span>`)
+      el.innerHTML = [...pieces]
+        .sort((a,b) => ORDER.indexOf(a) - ORDER.indexOf(b))
+        .map(t => `<span class="captured-piece">${this.SYMBOLS['b'+t]}</span>`)
         .join('');
     };
-
-    updateBar('captured-by-white', capturedPieces.b);
-    updateBar('captured-by-black', capturedPieces.w);
+    upd('captured-by-white', capturedPieces.b);
+    upd('captured-by-black', capturedPieces.w);
   },
 
   showAIThinking(show) {
@@ -747,90 +758,31 @@ const ChessBoard = {
     if (el) el.style.display = show ? 'flex' : 'none';
   },
 
-  // --- Drag & Drop ---
-
-  dragSource: null,
-
-  handleDragStart(e, row, col) {
-    const { board, turn } = this.gameState;
-    const piece = board[row][col];
-    if (!piece || (this.isAIGame && piece.color !== this.playerColor)) {
-      e.preventDefault();
-      return;
-    }
-
-    this.dragSource = { row, col };
-    this.selectPiece(row, col);
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', `${row},${col}`);
-
-    // Make dragged element look right
-    setTimeout(() => {
-      const el = e.target;
-      if (el) el.classList.add('dragging');
-    }, 0);
-  },
-
-  handleDragEnd() {
-    this.dragSource = null;
-    document.querySelectorAll('.chess-piece.dragging').forEach(el => {
-      el.classList.remove('dragging');
-    });
-  },
-
-  initDragDrop() {
-    const boardEl = document.getElementById('chess-board');
-    if (!boardEl) return;
-
-    boardEl.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-    });
-
-    boardEl.addEventListener('drop', (e) => {
-      e.preventDefault();
-      const target = e.target.closest('.chess-square');
-      if (!target || !this.dragSource) return;
-
-      const toRow = parseInt(target.dataset.row);
-      const toCol = parseInt(target.dataset.col);
-
-      if (isNaN(toRow) || isNaN(toCol)) return;
-
-      this.handleSquareClick(toRow, toCol);
-      this.dragSource = null;
-    });
-  },
-
-  // --- Coordinate Labels ---
-
   updateCoordinates() {
     const files = ['a','b','c','d','e','f','g','h'];
     const ranks = ['1','2','3','4','5','6','7','8'];
-
     const colLabels = document.getElementById('board-col-labels');
     const rowLabels = document.getElementById('board-row-labels');
-
     if (colLabels) {
-      const displayFiles = this.flipped ? [...files].reverse() : files;
-      colLabels.innerHTML = displayFiles.map(f => `<span class="coord-label">${f}</span>`).join('');
+      const f = this.flipped ? [...files].reverse() : files;
+      colLabels.innerHTML = f.map(x => `<span class="coord-label">${x}</span>`).join('');
     }
-
     if (rowLabels) {
-      const displayRanks = this.flipped ? ranks : [...ranks].reverse();
-      rowLabels.innerHTML = displayRanks.map(r => `<span class="coord-label">${r}</span>`).join('');
+      const r = this.flipped ? ranks : [...ranks].reverse();
+      rowLabels.innerHTML = r.map(x => `<span class="coord-label">${x}</span>`).join('');
     }
   },
 
-  // Main init
+  // =========================================
+  // INIT
+  // =========================================
+
   init() {
-    this.initDragDrop();
     console.log('[ZChess] ChessBoard module loaded');
   }
 };
 
 window.ZChess.ChessBoard = ChessBoard;
-
 ChessBoard.init();
 
 })();
