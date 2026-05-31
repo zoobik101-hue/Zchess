@@ -1,0 +1,450 @@
+/* =============================================
+   ZChess - Firebase Authentication Manager
+   Handles: Login, Register, Google Auth, Logout
+   ============================================= */
+
+(function() {
+'use strict';
+
+window.ZChess = window.ZChess || {};
+
+const Auth = {
+  currentUser: null,
+  firebase: null,
+  auth: null,
+  db: null,
+  listeners: [],
+
+  async init() {
+    // Initialize Firebase if config is provided
+    try {
+      if (typeof firebase === 'undefined') {
+        console.warn('[Auth] Firebase SDK not loaded. Running in offline mode.');
+        this.initOfflineMode();
+        return;
+      }
+
+      if (!firebase.apps.length) {
+        firebase.initializeApp(ZChess.firebaseConfig);
+      }
+
+      this.firebase = firebase;
+      this.auth = firebase.auth();
+      this.db = firebase.firestore();
+
+      // Listen for auth state changes
+      this.auth.onAuthStateChanged(user => this.handleAuthChange(user));
+
+      console.log('[Auth] Firebase initialized');
+    } catch (err) {
+      console.error('[Auth] Firebase init failed:', err);
+      this.initOfflineMode();
+    }
+  },
+
+  initOfflineMode() {
+    // Load cached user for offline display
+    try {
+      const cached = localStorage.getItem(ZChess.STORAGE.USER_CACHE);
+      if (cached) {
+        const user = JSON.parse(cached);
+        this.currentUser = user;
+        this.handleAuthChange(user);
+      } else {
+        this.handleAuthChange(null);
+      }
+    } catch (e) {
+      this.handleAuthChange(null);
+    }
+  },
+
+  async handleAuthChange(firebaseUser) {
+    if (firebaseUser) {
+      // Load user profile from Firestore
+      try {
+        if (this.db) {
+          const doc = await this.db.collection('users').doc(firebaseUser.uid).get();
+          if (doc.exists) {
+            this.currentUser = { uid: firebaseUser.uid, email: firebaseUser.email, ...doc.data() };
+          } else {
+            // Create profile for new user
+            this.currentUser = await this.createUserProfile(firebaseUser);
+          }
+        } else {
+          this.currentUser = {
+            uid: firebaseUser.uid || 'local',
+            username: firebaseUser.username || firebaseUser.email?.split('@')[0] || 'Player',
+            email: firebaseUser.email || '',
+            rating: firebaseUser.rating || ZChess.ELO.INITIAL_RATING,
+            xp: firebaseUser.xp || 0,
+            wins: firebaseUser.wins || 0,
+            losses: firebaseUser.losses || 0,
+            draws: firebaseUser.draws || 0,
+            gamesPlayed: firebaseUser.gamesPlayed || 0,
+            createdAt: firebaseUser.createdAt || new Date().toISOString(),
+            avatar: firebaseUser.avatar || null,
+            achievements: firebaseUser.achievements || []
+          };
+        }
+
+        // Cache user data
+        localStorage.setItem(ZChess.STORAGE.USER_CACHE, JSON.stringify(this.currentUser));
+
+        // Check daily login
+        this.checkDailyLogin();
+
+      } catch (err) {
+        console.error('[Auth] Failed to load user profile:', err);
+        this.currentUser = {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          username: firebaseUser.email?.split('@')[0] || 'Player',
+          rating: ZChess.ELO.INITIAL_RATING,
+          xp: 0, wins: 0, losses: 0, draws: 0, gamesPlayed: 0,
+          createdAt: new Date().toISOString(),
+          achievements: []
+        };
+      }
+    } else {
+      this.currentUser = null;
+      localStorage.removeItem(ZChess.STORAGE.USER_CACHE);
+    }
+
+    // Notify listeners
+    this.notifyListeners();
+
+    // Update UI
+    this.updateNavUI();
+  },
+
+  async createUserProfile(firebaseUser) {
+    const profile = {
+      uid: firebaseUser.uid,
+      username: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Player',
+      email: firebaseUser.email || '',
+      rating: ZChess.ELO.INITIAL_RATING,
+      xp: 0,
+      level: 1,
+      wins: 0,
+      losses: 0,
+      draws: 0,
+      gamesPlayed: 0,
+      winStreak: 0,
+      maxWinStreak: 0,
+      createdAt: new Date().toISOString(),
+      lastLogin: new Date().toISOString(),
+      avatar: null,
+      achievements: [],
+      recentGames: [],
+      loginStreak: 1
+    };
+
+    if (this.db) {
+      await this.db.collection('users').doc(firebaseUser.uid).set(profile);
+    }
+
+    return profile;
+  },
+
+  async register(email, password, username) {
+    if (!this.auth) {
+      // Offline mode - create local user
+      return this.registerOffline(email, password, username);
+    }
+
+    try {
+      // Check username uniqueness
+      const usernameCheck = await this.db.collection('users')
+        .where('username', '==', username).limit(1).get();
+
+      if (!usernameCheck.empty) {
+        throw { code: 'username-taken' };
+      }
+
+      const credential = await this.auth.createUserWithEmailAndPassword(email, password);
+      await credential.user.updateProfile({ displayName: username });
+
+      // Create Firestore profile
+      const profile = await this.createUserProfile({
+        uid: credential.user.uid,
+        email,
+        displayName: username
+      });
+
+      ZChess.Notifications.success(t('notifications.register_success', { name: username }));
+      return { success: true, user: profile };
+
+    } catch (err) {
+      let msg = t('notifications.error_generic');
+      if (err.code === 'auth/email-already-in-use') msg = t('notifications.error_email_taken');
+      if (err.code === 'username-taken') msg = t('notifications.error_username_taken');
+      if (err.code === 'auth/weak-password') msg = 'Password must be at least 6 characters.';
+      ZChess.Notifications.error(msg);
+      return { success: false, error: err };
+    }
+  },
+
+  registerOffline(email, password, username) {
+    // Create offline user
+    const user = {
+      uid: 'local_' + Date.now(),
+      username,
+      email,
+      rating: ZChess.ELO.INITIAL_RATING,
+      xp: 0, level: 1, wins: 0, losses: 0, draws: 0, gamesPlayed: 0,
+      winStreak: 0, maxWinStreak: 0,
+      createdAt: new Date().toISOString(),
+      lastLogin: new Date().toISOString(),
+      achievements: [], recentGames: [], loginStreak: 1
+    };
+
+    this.currentUser = user;
+    localStorage.setItem(ZChess.STORAGE.USER_CACHE, JSON.stringify(user));
+    this.notifyListeners();
+    this.updateNavUI();
+
+    ZChess.Notifications.success(t('notifications.register_success', { name: username }));
+    return { success: true, user };
+  },
+
+  async login(email, password) {
+    if (!this.auth) {
+      return this.loginOffline(email, password);
+    }
+
+    try {
+      await this.auth.signInWithEmailAndPassword(email, password);
+      ZChess.Notifications.success(t('notifications.login_success', { name: this.currentUser?.username || '' }));
+      return { success: true };
+    } catch (err) {
+      let msg = t('notifications.error_auth');
+      ZChess.Notifications.error(msg);
+      return { success: false, error: err };
+    }
+  },
+
+  loginOffline(email, password) {
+    // Try to find cached user
+    try {
+      const cached = localStorage.getItem(ZChess.STORAGE.USER_CACHE);
+      if (cached) {
+        const user = JSON.parse(cached);
+        if (user.email === email) {
+          this.currentUser = user;
+          this.notifyListeners();
+          this.updateNavUI();
+          ZChess.Notifications.success(t('notifications.login_success', { name: user.username }));
+          return { success: true };
+        }
+      }
+    } catch (e) {}
+
+    ZChess.Notifications.error(t('notifications.error_auth'));
+    return { success: false };
+  },
+
+  async loginWithGoogle() {
+    if (!this.auth) {
+      ZChess.Notifications.error('Google sign-in requires Firebase configuration.');
+      return { success: false };
+    }
+
+    try {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      await this.auth.signInWithPopup(provider);
+      return { success: true };
+    } catch (err) {
+      ZChess.Notifications.error(t('notifications.error_generic'));
+      return { success: false, error: err };
+    }
+  },
+
+  async logout() {
+    if (this.auth) {
+      await this.auth.signOut();
+    } else {
+      this.currentUser = null;
+      localStorage.removeItem(ZChess.STORAGE.USER_CACHE);
+      this.notifyListeners();
+      this.updateNavUI();
+    }
+    ZChess.Notifications.info(t('notifications.logout_success'));
+  },
+
+  // Update user profile data
+  async updateProfile(data) {
+    if (!this.currentUser) return;
+
+    this.currentUser = { ...this.currentUser, ...data };
+    localStorage.setItem(ZChess.STORAGE.USER_CACHE, JSON.stringify(this.currentUser));
+
+    if (this.db && this.currentUser.uid) {
+      try {
+        await this.db.collection('users').doc(this.currentUser.uid).update(data);
+      } catch (e) {
+        console.error('[Auth] Failed to update profile in Firestore:', e);
+      }
+    }
+
+    this.notifyListeners();
+  },
+
+  // Save game result and update stats
+  async saveGameResult(result) {
+    if (!this.currentUser) return;
+
+    const { outcome, opponentRating, isAI, aiDifficulty } = result;
+    const user = this.currentUser;
+
+    // Calculate rating change (only for rated games)
+    let ratingChange = 0;
+    if (!isAI || ['advanced', 'expert', 'grandmaster', 'impossible'].includes(aiDifficulty)) {
+      ratingChange = this.calculateEloChange(user.rating, opponentRating || 1200, outcome);
+    }
+
+    // Calculate XP
+    let xpGain = ZChess.XP[outcome.toUpperCase()] || ZChess.XP.LOSS;
+    if (isAI && aiDifficulty) {
+      const mult = ZChess.XP.WIN_VS_AI_MULTIPLIER[aiDifficulty] || 1;
+      xpGain = Math.round(xpGain * mult);
+    }
+
+    // Win streak bonus
+    let newStreak = outcome === 'win' ? (user.winStreak || 0) + 1 : 0;
+    if (outcome === 'win' && newStreak > 1) {
+      xpGain += ZChess.XP.WIN_STREAK_BONUS * Math.min(newStreak, 5);
+    }
+
+    const oldLevel = ZChess.getLevelFromXP(user.xp);
+    const newXP = user.xp + xpGain;
+    const newLevel = ZChess.getLevelFromXP(newXP);
+    const newRating = Math.max(ZChess.ELO.MIN_RATING, user.rating + ratingChange);
+
+    // Game record
+    const gameRecord = {
+      date: new Date().toISOString(),
+      outcome,
+      opponent: result.opponent || (isAI ? `AI (${aiDifficulty})` : 'Unknown'),
+      ratingChange,
+      aiDifficulty: isAI ? aiDifficulty : null,
+      moves: result.moves || 0
+    };
+
+    const updates = {
+      rating: newRating,
+      xp: newXP,
+      level: newLevel,
+      wins: (user.wins || 0) + (outcome === 'win' ? 1 : 0),
+      losses: (user.losses || 0) + (outcome === 'loss' ? 1 : 0),
+      draws: (user.draws || 0) + (outcome === 'draw' ? 1 : 0),
+      gamesPlayed: (user.gamesPlayed || 0) + 1,
+      winStreak: newStreak,
+      maxWinStreak: Math.max(user.maxWinStreak || 0, newStreak),
+      recentGames: [gameRecord, ...(user.recentGames || [])].slice(0, 20)
+    };
+
+    await this.updateProfile(updates);
+
+    // Level up notification
+    if (newLevel > oldLevel) {
+      ZChess.Notifications.levelUp(newLevel);
+      if (ZChess.Sound) ZChess.Sound.playLevelUp();
+
+      // Check level achievements
+      if (ZChess.Achievements) {
+        ZChess.Achievements.checkLevelAchievements(newLevel);
+      }
+    }
+
+    // Check game achievements
+    if (ZChess.Achievements) {
+      ZChess.Achievements.checkGameAchievements(outcome, updates, isAI, aiDifficulty);
+    }
+
+    // Update daily tasks
+    if (ZChess.DailyTasks) {
+      ZChess.DailyTasks.recordGame(outcome, isAI);
+    }
+
+    return { xpGain, ratingChange, newLevel, oldLevel };
+  },
+
+  calculateEloChange(myRating, opponentRating, outcome) {
+    const expectedScore = 1 / (1 + Math.pow(10, (opponentRating - myRating) / 400));
+    const actualScore = outcome === 'win' ? 1 : outcome === 'draw' ? 0.5 : 0;
+
+    const gamesPlayed = this.currentUser?.gamesPlayed || 0;
+    const K = gamesPlayed < 30 ? ZChess.ELO.K_FACTOR_NEW :
+              myRating >= 2400 ? ZChess.ELO.K_FACTOR_MASTER :
+              ZChess.ELO.K_FACTOR_NORMAL;
+
+    return Math.round(K * (actualScore - expectedScore));
+  },
+
+  checkDailyLogin() {
+    if (!this.currentUser) return;
+
+    const today = new Date().toDateString();
+    const lastLogin = this.currentUser.lastLoginDate;
+
+    if (lastLogin !== today) {
+      const yesterday = new Date(Date.now() - 86400000).toDateString();
+      const streak = lastLogin === yesterday ? (this.currentUser.loginStreak || 0) + 1 : 1;
+
+      this.updateProfile({
+        lastLoginDate: today,
+        loginStreak: streak,
+        xp: (this.currentUser.xp || 0) + ZChess.XP.DAILY_LOGIN
+      });
+
+      setTimeout(() => {
+        ZChess.Notifications.success(t('notifications.daily_reward', { xp: ZChess.XP.DAILY_LOGIN }));
+      }, 2000);
+
+      if (ZChess.Achievements) {
+        ZChess.Achievements.checkLoginStreakAchievements(streak);
+      }
+    }
+  },
+
+  // Auth state listeners
+  onAuthChange(callback) {
+    this.listeners.push(callback);
+    // Call immediately with current state
+    callback(this.currentUser);
+    return () => {
+      this.listeners = this.listeners.filter(l => l !== callback);
+    };
+  },
+
+  notifyListeners() {
+    this.listeners.forEach(fn => fn(this.currentUser));
+  },
+
+  updateNavUI() {
+    const guestBtns = document.getElementById('nav-guest-btns');
+    const userMenu = document.getElementById('nav-user-menu');
+    const userNameNav = document.getElementById('user-name-nav');
+    const userAvatarNav = document.getElementById('user-avatar-nav');
+
+    if (this.currentUser) {
+      if (guestBtns) guestBtns.style.display = 'none';
+      if (userMenu) userMenu.style.display = 'flex';
+      if (userNameNav) userNameNav.textContent = this.currentUser.username || 'Player';
+      if (userAvatarNav) userAvatarNav.textContent = (this.currentUser.username || 'P')[0].toUpperCase();
+    } else {
+      if (guestBtns) guestBtns.style.display = 'flex';
+      if (userMenu) userMenu.style.display = 'none';
+    }
+  },
+
+  isLoggedIn() {
+    return !!this.currentUser;
+  }
+};
+
+window.ZChess.Auth = Auth;
+
+console.log('[ZChess] Auth module loaded');
+
+})();

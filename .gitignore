@@ -1,0 +1,28 @@
+# ==========================================
+# ZChess - Git Ignore
+# ==========================================
+
+# Token - NEVER commit
+github-token.txt
+*.token
+.env
+.env.*
+secrets.txt
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Node (if used locally)
+node_modules/

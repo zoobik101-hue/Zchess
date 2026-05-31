@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-board-theme="classic">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="description" content="ZChess - Modern chess platform. Play against AI, compete online, level up your game.">
+  <meta name="keywords" content="chess, online chess, chess AI, chess game, play chess">
+  <meta name="author" content="ZChess">
+  <meta name="theme-color" content="#7c3aed">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="ZChess - Modern Chess Platform">
+  <meta property="og:description" content="Play chess against AI or real players. Level up, earn achievements, climb the leaderboard.">
+  <meta property="og:image" content="assets/og-image.png">
+  <meta property="og:url" content="https://yourusername.github.io/zchess/">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ZChess - Modern Chess Platform">
+  <meta name="twitter:description" content="Play chess at a new level.">
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
+
+  <title>ZChess - Modern Chess Platform</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/chess.css">
+</head>
+<body>
+
+<!-- ========== NAVIGATION ========== -->
+<nav class="navbar" role="navigation">
+  <div class="navbar-inner">
+    <!-- Logo -->
+    <div class="navbar-logo" id="nav-logo" role="link" aria-label="ZChess Home">
+      <div class="logo-icon" aria-hidden="true">♛</div>
+      <span class="logo-text">ZChess</span>
+    </div>
+
+    <!-- Desktop Navigation -->
+    <nav class="navbar-nav" aria-label="Main navigation">
+      <a class="nav-link" data-page="home" href="#home" data-i18n="nav.home">Home</a>
+      <a class="nav-link" data-page="game" href="#game" data-i18n="nav.play">Play</a>
+      <a class="nav-link" data-page="leaderboard" href="#leaderboard" data-i18n="nav.leaderboard">Leaderboard</a>
+      <a class="nav-link" data-page="news" href="#news" data-i18n="nav.news">News</a>
+      <a class="nav-link" data-page="faq" href="#faq" data-i18n="nav.faq">FAQ</a>
+      <a class="nav-link" data-page="rules" href="#rules" data-i18n="nav.rules">Rules</a>
+    </nav>
+
+    <!-- Right section -->
+    <div class="navbar-right">
+      <!-- Language Switcher -->
+      <div class="lang-switcher" role="group" aria-label="Language selection">
+        <button class="lang-btn active" data-lang="en" aria-label="English">EN</button>
+        <button class="lang-btn" data-lang="ru" aria-label="Russian">RU</button>
+        <button class="lang-btn" data-lang="uk" aria-label="Ukrainian">UK</button>
+      </div>
+
+      <!-- Guest buttons -->
+      <div id="nav-guest-btns" style="display:flex;gap:8px">
+        <button class="btn btn-secondary btn-sm" id="btn-login" data-i18n="auth.login">Sign In</button>
+        <button class="btn btn-primary btn-sm" id="btn-register" data-i18n="auth.register">Sign Up</button>
+      </div>
+
+      <!-- User Menu (hidden when logged out) -->
+      <div class="user-menu" id="nav-user-menu" style="display:none">
+        <button class="user-avatar-btn" id="user-avatar-btn" aria-label="User menu">
+          <div class="user-avatar" id="user-avatar-nav">P</div>
+          <span class="user-name-nav" id="user-name-nav">Player</span>
+          <span style="color:var(--text-muted);font-size:12px">▾</span>
+        </button>
+        <div class="user-dropdown" id="user-dropdown">
+          <div class="dropdown-item" id="nav-profile-link">
+            <span>👤</span> <span data-i18n="nav.profile">Profile</span>
+          </div>
+          <div class="dropdown-item" data-nav="settings">
+            <span>⚙️</span> <span data-i18n="nav.settings">Settings</span>
+          </div>
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-item danger" id="btn-logout">
+            <span>🚪</span> <span data-i18n="nav.logout">Sign Out</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Menu Button -->
+      <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">
+        <div class="menu-bar"></div>
+        <div class="menu-bar"></div>
+        <div class="menu-bar"></div>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Main App Container -->
+<div id="app">
+
+  <!-- ======================================
+       PAGE: HOME
+  ====================================== -->
+  <div id="page-home" class="page" style="padding-top:0">
+
+    <!-- Hero Section -->
+    <section class="hero-section" aria-label="Hero">
+      <canvas id="hero-canvas" class="hero-canvas" aria-hidden="true"></canvas>
+
+      <!-- Background Orbs -->
+      <div class="hero-bg-orbs" aria-hidden="true">
+        <div class="hero-orb hero-orb-1"></div>
+        <div class="hero-orb hero-orb-2"></div>
+        <div class="hero-orb hero-orb-3"></div>
+      </div>
+
+      <!-- Floating Chess Pieces -->
+      <div class="hero-pieces" aria-hidden="true">
+        <div class="hero-piece">♔</div>
+        <div class="hero-piece">♛</div>
+        <div class="hero-piece">♜</div>
+        <div class="hero-piece">♝</div>
+        <div class="hero-piece">♞</div>
+        <div class="hero-piece">♟</div>
+      </div>
+
+      <!-- Hero Content -->
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="hero-badge-dot"></span>
+          <span>⚡ ZChess Platform v1.0 — Now Live</span>
+        </div>
+
+        <h1 class="hero-title" data-i18n="home.hero_title">
+          Chess at a<br><span class="gradient-text">New Level</span>
+        </h1>
+
+        <p class="hero-subtitle" data-i18n="home.hero_subtitle">
+          Join millions of players worldwide. Compete, improve, and dominate the board.
+        </p>
+
+        <div class="hero-actions">
+          <button class="btn btn-primary btn-lg" id="btn-hero-play" data-i18n="home.play_now">
+            ▶ Play Now
+          </button>
+          <button class="btn btn-secondary btn-lg" id="btn-hero-how" data-i18n="home.how_to_play">
+            How to Play
+          </button>
+        </div>
+
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="hero-stat-value" data-counter="2500000">2.5M+</div>
+            <div class="hero-stat-label" data-i18n="home.stats_label_players">Active Players</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value" data-counter="50000000">50M+</div>
+            <div class="hero-stat-label" data-i18n="home.stats_label_games">Games Played</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value" data-counter="150">150+</div>
+            <div class="hero-stat-label" data-i18n="home.stats_label_countries">Countries</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">Features</div>
+          <h2 class="section-title" data-i18n="home.features_title">Everything You Need</h2>
+          <p class="section-subtitle" data-i18n="home.features_subtitle">A complete chess ecosystem for modern players</p>
+        </div>
+
+        <div class="features-grid">
+          <div class="feature-card animate-fade-in-up delay-1">
+            <div class="feature-icon">🤖</div>
+            <div class="feature-title" data-i18n="home.feature_ai_title">Intelligent AI</div>
+            <div class="feature-desc" data-i18n="home.feature_ai_desc">7 difficulty levels from absolute beginner to grandmaster strength</div>
+          </div>
+          <div class="feature-card animate-fade-in-up delay-2">
+            <div class="feature-icon">🌐</div>
+            <div class="feature-title" data-i18n="home.feature_online_title">Online Multiplayer</div>
+            <div class="feature-desc" data-i18n="home.feature_online_desc">Real-time matches against players from 150+ countries</div>
+          </div>
+          <div class="feature-card animate-fade-in-up delay-3">
+            <div class="feature-icon">⬆️</div>
+            <div class="feature-title" data-i18n="home.feature_progress_title">RPG Progression</div>
+            <div class="feature-desc" data-i18n="home.feature_progress_desc">Level up, earn achievements, unlock exclusive titles and frames</div>
+          </div>
+          <div class="feature-card animate-fade-in-up delay-4">
+            <div class="feature-icon">📊</div>
+            <div class="feature-title" data-i18n="home.feature_stats_title">Deep Analytics</div>
+            <div class="feature-desc" data-i18n="home.feature_stats_desc">Track every game, analyze mistakes, improve your win rate</div>
+          </div>
+          <div class="feature-card animate-fade-in-up delay-5">
+            <div class="feature-icon">📅</div>
+            <div class="feature-title" data-i18n="home.feature_daily_title">Daily Quests</div>
+            <div class="feature-desc" data-i18n="home.feature_daily_desc">Complete challenges every day and earn bonus XP and rewards</div>
+          </div>
+          <div class="feature-card animate-fade-in-up delay-6">
+            <div class="feature-icon">👥</div>
+            <div class="feature-title" data-i18n="home.feature_community_title">Community</div>
+            <div class="feature-desc" data-i18n="home.feature_community_desc">Friends, private matches, game rooms, and in-game chat</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+      <div class="container container-sm">
+        <div class="cta-card">
+          <h2 class="cta-title" data-i18n="home.cta_title">Ready to Play?</h2>
+          <p class="cta-subtitle" data-i18n="home.cta_subtitle">Create your free account and start your journey to chess mastery.</p>
+          <div class="cta-actions">
+            <button class="btn btn-primary btn-lg" id="btn-cta-start" data-i18n="home.cta_button">Get Started Free</button>
+            <button class="btn btn-secondary btn-lg" data-nav="game">Play as Guest</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-inner">
+          <div>
+            <div class="navbar-logo" style="margin-bottom:12px">
+              <div class="logo-icon">♛</div>
+              <span class="logo-text">ZChess</span>
+            </div>
+            <p class="footer-brand-desc">The modern chess platform for players of all levels. Compete, improve, and enjoy the game.</p>
+          </div>
+          <div>
+            <div class="footer-heading">Platform</div>
+            <div class="footer-links">
+              <span class="footer-link" data-nav="game">Play</span>
+              <span class="footer-link" data-nav="leaderboard">Leaderboard</span>
+              <span class="footer-link" data-nav="news">News</span>
+            </div>
+          </div>
+          <div>
+            <div class="footer-heading">Help</div>
+            <div class="footer-links">
+              <span class="footer-link" data-nav="faq">FAQ</span>
+              <span class="footer-link" data-nav="rules">Rules</span>
+              <span class="footer-link" data-nav="settings">Settings</span>
+            </div>
+          </div>
+          <div>
+            <div class="footer-heading">Join Us</div>
+            <div class="footer-links">
+              <span class="footer-link" id="footer-login">Sign In</span>
+              <span class="footer-link" id="footer-register">Sign Up Free</span>
+            </div>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <span>© 2026 ZChess. All rights reserved.</span>
+          <span>Made with ♟️ and passion</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ======================================
+       PAGE: GAME SETUP
+  ====================================== -->
+  <div id="page-game" class="page">
+    <div class="container" style="padding-top:40px;padding-bottom:60px">
+      <div class="page-header" style="border:none;margin-bottom:32px;padding-bottom:0">
+        <h1 class="page-header-title" data-i18n="game.title">Choose Your Game</h1>
+      </div>
+
+      <!-- Mode Cards -->
+      <div class="game-modes-grid" style="margin-bottom:40px">
+        <div class="game-mode-card selected" data-mode="ai">
+          <div class="game-mode-icon">🤖</div>
+          <div class="game-mode-title" data-i18n="game.vs_ai">vs Computer</div>
+          <div class="game-mode-desc" data-i18n="game.vs_ai_desc">Challenge our AI at 7 difficulty levels</div>
+        </div>
+        <div class="game-mode-card" data-mode="quick">
+          <div class="game-mode-icon">⚡</div>
+          <div class="game-mode-title" data-i18n="game.quick_game">Quick Match</div>
+          <div class="game-mode-desc" data-i18n="game.quick_game_desc">Get matched instantly with an opponent</div>
+        </div>
+      </div>
+
+      <!-- Difficulty (AI only) -->
+      <div id="difficulty-section" style="max-width:700px;margin:0 auto 32px">
+        <h3 style="font-size:16px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:16px" data-i18n="game.difficulty">Difficulty</h3>
+        <div class="difficulty-selector">
+          <div class="diff-btn" data-diff="beginner">
+            <span class="diff-emoji">🌱</span>
+            <span class="diff-name" data-i18n="game.difficulty_beginner">Beginner</span>
+          </div>
+          <div class="diff-btn" data-diff="easy">
+            <span class="diff-emoji">😊</span>
+            <span class="diff-name" data-i18n="game.difficulty_easy">Easy</span>
+          </div>
+          <div class="diff-btn selected" data-diff="medium">
+            <span class="diff-emoji">🤔</span>
+            <span class="diff-name" data-i18n="game.difficulty_medium">Medium</span>
+          </div>
+          <div class="diff-btn" data-diff="advanced">
+            <span class="diff-emoji">💪</span>
+            <span class="diff-name" data-i18n="game.difficulty_advanced">Advanced</span>
+          </div>
+          <div class="diff-btn" data-diff="expert">
+            <span class="diff-emoji">🔥</span>
+            <span class="diff-name" data-i18n="game.difficulty_expert">Expert</span>
+          </div>
+          <div class="diff-btn" data-diff="grandmaster">
+            <span class="diff-emoji">🏆</span>
+            <span class="diff-name" data-i18n="game.difficulty_grandmaster">GM</span>
+          </div>
+          <div class="diff-btn" data-diff="impossible">
+            <span class="diff-emoji">👾</span>
+            <span class="diff-name" data-i18n="game.difficulty_impossible">Max</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Play As -->
+      <div style="max-width:700px;margin:0 auto 40px">
+        <h3 style="font-size:16px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:16px" data-i18n="game.play_as">Play As</h3>
+        <div class="play-as-selector">
+          <div class="play-as-btn selected" data-color="w" title="White">♔<br><span style="font-size:12px;color:var(--text-muted)" data-i18n="game.white">White</span></div>
+          <div class="play-as-btn" data-color="b" title="Black">♚<br><span style="font-size:12px;color:var(--text-muted)" data-i18n="game.black">Black</span></div>
+          <div class="play-as-btn" data-color="r" title="Random">🎲<br><span style="font-size:12px;color:var(--text-muted)" data-i18n="game.random">Random</span></div>
+        </div>
+      </div>
+
+      <!-- Start Button -->
+      <div style="text-align:center">
+        <button class="btn btn-primary btn-lg" id="btn-start-game" style="min-width:200px" data-i18n="game.start_game">
+          ▶ Start Game
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================
+       PAGE: PLAY (Chess Board)
+  ====================================== -->
+  <div id="page-play" class="page">
+    <div class="chess-game-wrapper">
+
+      <!-- Main Chess Panel -->
+      <div class="chess-main-panel">
+
+        <!-- Black player bar (top) -->
+        <div class="player-bar" id="player-bar-black">
+          <div class="player-avatar-sm" style="background:linear-gradient(135deg,#1a1a2e,#2d1b69)">♚</div>
+          <div class="player-info-text">
+            <div class="player-name-sm">Black</div>
+            <div class="player-rating-sm"></div>
+          </div>
+          <div class="player-captured" id="captured-by-black"></div>
+        </div>
+
+        <!-- Chess Board -->
+        <div class="chess-board-wrap">
+          <div class="board-coordinates" id="board-row-labels">
+            <span class="coord-label">8</span>
+            <span class="coord-label">7</span>
+            <span class="coord-label">6</span>
+            <span class="coord-label">5</span>
+            <span class="coord-label">4</span>
+            <span class="coord-label">3</span>
+            <span class="coord-label">2</span>
+            <span class="coord-label">1</span>
+          </div>
+          <div>
+            <div class="chess-board" id="chess-board" role="grid" aria-label="Chess Board"></div>
+            <div class="board-coordinates-bottom" id="board-col-labels">
+              <span class="coord-label">a</span>
+              <span class="coord-label">b</span>
+              <span class="coord-label">c</span>
+              <span class="coord-label">d</span>
+              <span class="coord-label">e</span>
+              <span class="coord-label">f</span>
+              <span class="coord-label">g</span>
+              <span class="coord-label">h</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- White player bar (bottom) -->
+        <div class="player-bar" id="player-bar-white" style="order:1">
+          <div class="player-avatar-sm" style="background:linear-gradient(135deg,#c8a97b,#f0d9b5);color:#333">♔</div>
+          <div class="player-info-text">
+            <div class="player-name-sm">White</div>
+            <div class="player-rating-sm"></div>
+          </div>
+          <div class="player-captured" id="captured-by-white"></div>
+        </div>
+
+        <!-- Turn Indicator -->
+        <div id="turn-indicator" class="turn-indicator your-turn" style="margin-top:4px;width:100%;max-width:520px">
+          <div class="turn-dot"></div> Your turn
+        </div>
+
+        <!-- AI thinking indicator -->
+        <div id="ai-thinking-indicator" class="ai-thinking" style="display:none">
+          <div class="thinking-dots">
+            <div class="thinking-dot"></div>
+            <div class="thinking-dot"></div>
+            <div class="thinking-dot"></div>
+          </div>
+          <span data-i18n="board.ai_thinking">AI is thinking...</span>
+        </div>
+      </div>
+
+      <!-- Side Panel -->
+      <div class="chess-side-panel">
+
+        <!-- Game Controls -->
+        <div class="game-controls-panel">
+          <button class="btn-game-control" id="btn-flip-board">
+            <span class="icon">🔄</span>
+            <span data-i18n="board.flip_board">Flip Board</span>
+          </button>
+          <button class="btn-game-control" id="btn-undo-move">
+            <span class="icon">↩️</span>
+            <span data-i18n="board.undo_move">Undo Move</span>
+          </button>
+          <button class="btn-game-control" id="btn-new-game">
+            <span class="icon">🔁</span>
+            <span data-i18n="board.new_game">New Game</span>
+          </button>
+          <button class="btn-game-control danger" id="btn-resign">
+            <span class="icon">🏳️</span>
+            <span data-i18n="board.resign">Resign</span>
+          </button>
+        </div>
+
+        <!-- Move History -->
+        <div class="move-history-panel" id="move-history-panel">
+          <h4 data-i18n="board.move_history">Move History</h4>
+          <div class="move-history-list" id="move-history-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================
+       PAGE: PROFILE
+  ====================================== -->
+  <div id="page-profile" class="page">
+
+    <!-- Profile Hero -->
+    <div class="profile-hero">
+      <div class="container">
+        <div class="profile-hero-content">
+          <div class="profile-avatar-large" title="Click to change avatar">
+            <span id="profile-avatar-text">P</span>
+            <div class="profile-level-badge" id="profile-level-text">Lvl 1</div>
+          </div>
+          <div class="profile-info">
+            <div class="profile-username" id="profile-username">Player</div>
+            <div class="profile-title-badge" id="profile-title">Newcomer</div>
+            <div class="profile-meta">
+              <span class="profile-meta-item" id="profile-member-since">-</span>
+            </div>
+            <div class="xp-bar-wrap" style="max-width:400px">
+              <div class="xp-bar-header">
+                <span id="profile-xp-current">0 XP</span>
+                <span id="profile-xp-next">/ 1000 XP</span>
+              </div>
+              <div class="xp-bar-track">
+                <div class="xp-bar-fill" id="profile-xp-fill" style="width:0%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container" style="padding-top:32px;padding-bottom:60px">
+
+      <!-- Stats Grid -->
+      <div class="profile-stats-grid">
+        <div class="stat-card highlight">
+          <div class="stat-value" id="profile-rating-val">1200</div>
+          <div class="stat-label" data-i18n="profile.rating">Rating</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="color:var(--color-success)" id="profile-wins-val">0</div>
+          <div class="stat-label" data-i18n="profile.wins">Wins</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="color:var(--color-error)" id="profile-losses-val">0</div>
+          <div class="stat-label" data-i18n="profile.losses">Losses</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="profile-winrate-val">0%</div>
+          <div class="stat-label" data-i18n="profile.win_rate">Win Rate</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="color:var(--text-muted)" id="profile-draws-val">0</div>
+          <div class="stat-label" data-i18n="profile.draws">Draws</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="profile-games-val">0</div>
+          <div class="stat-label" data-i18n="profile.games_played">Games</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:32px">
+
+        <!-- Daily Tasks -->
+        <div>
+          <h3 style="font-size:18px;font-weight:700;margin-bottom:16px" data-i18n="daily_tasks.title">Daily Quests</h3>
+          <div id="daily-tasks-list"></div>
+        </div>
+
+        <!-- Stats Chart -->
+        <div>
+          <h3 style="font-size:18px;font-weight:700;margin-bottom:16px" data-i18n="profile.statistics">Statistics</h3>
+          <div class="card card-body" id="profile-stats-chart" style="min-height:180px"></div>
+        </div>
+      </div>
+
+      <!-- Recent Games -->
+      <div style="margin-top:32px">
+        <h3 style="font-size:18px;font-weight:700;margin-bottom:16px" data-i18n="profile.recent_games">Recent Games</h3>
+        <div class="card card-body" id="profile-recent-games" style="min-height:120px"></div>
+      </div>
+
+      <!-- Achievements -->
+      <div style="margin-top:32px">
+        <h3 style="font-size:18px;font-weight:700;margin-bottom:16px" data-i18n="profile.achievements">Achievements</h3>
+        <div class="achievements-grid" id="profile-achievements-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================
+       PAGE: LEADERBOARD
+  ====================================== -->
+  <div id="page-leaderboard" class="page">
+    <div class="container" style="padding-top:40px;padding-bottom:60px">
+      <div class="page-header">
+        <h1 class="page-header-title" data-i18n="leaderboard.title">Leaderboard</h1>
+        <p class="page-header-sub" data-i18n="leaderboard.subtitle">Top players on ZChess</p>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+        <div class="tab-nav">
+          <button class="tab-btn leaderboard-tab active" data-tab="rating" data-i18n="leaderboard.tab_rating">By Rating</button>
+          <button class="tab-btn leaderboard-tab" data-tab="wins" data-i18n="leaderboard.tab_wins">Most Wins</button>
+          <button class="tab-btn leaderboard-tab" data-tab="month" data-i18n="leaderboard.tab_month">This Month</button>
+        </div>
+        <div id="user-rank-display" style="font-size:14px;color:var(--accent-secondary);font-weight:700"></div>
+      </div>
+
+      <div class="card">
+        <div style="overflow-x:auto">
+          <table class="leaderboard-table" role="table">
+            <thead>
+              <tr>
+                <th data-i18n="leaderboard.rank">#</th>
+                <th data-i18n="leaderboard.player">Player</th>
+                <th data-i18n="leaderboard.rating">Rating</th>
+                <th data-i18n="leaderboard.wins">Wins</th>
+                <th data-i18n="leaderboard.games">Games</th>
+                <th data-i18n="leaderboard.win_rate">Win %</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+              <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted)">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================
+       PAGE: NEWS
+  ====================================== -->
+  <div id="page-news" class="page">
+    <div class="container" style="padding-top:40px;padding-bottom:60px">
+      <div class="page-header">
+        <h1 class="page-header-title" data-i18n="news.title">News & Updates</h1>
+        <p class="page-header-sub" data-i18n="news.subtitle">Latest from the ZChess team</p>
+      </div>
+      <div class="news-grid" id="news-grid"></div>
+    </div>
+  </div>
+
+  <!-- ======================================
+       PAGE: SETTINGS
+  ====================================== -->
+  <div id="page-settings" class="page">
+    <div class="container" style="padding-top:40px;padding-bottom:60px">
+      <div class="page-header">
+        <h1 class="page-header-title" data-i18n="settings.title">Settings</h1>
+      </div>
+
+      <div class="settings-sections">
+
+        <!-- General -->
+        <div class="settings-section">
+          <div class="settings-section-header" data-i18n="settings.section_general">General</div>
+          <div class="settings-section-body">
+            <div class="form-group">
+              <label class="form-label" data-i18n="settings.language">Language</label>
+              <select class="form-select" id="setting-language">
+                <option value="en">English</option>
+                <option value="ru">Русский</option>
+                <option value="uk">Українська</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="settings.theme">Theme</label>
+              <select class="form-select" id="setting-theme">
+                <option value="dark" data-i18n="settings.theme_dark">Dark (Default)</option>
+                <option value="light" data-i18n="settings.theme_light">Light</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Game -->
+        <div class="settings-section">
+          <div class="settings-section-header" data-i18n="settings.section_game">Game</div>
+          <div class="settings-section-body">
+            <div class="form-group">
+              <label class="form-label" data-i18n="settings.board_theme">Board Theme</label>
+              <select class="form-select" id="setting-boardTheme">
+                <option value="classic" data-i18n="settings.board_classic">Classic</option>
+                <option value="purple" data-i18n="settings.board_purple">Purple Neon</option>
+                <option value="ocean" data-i18n="settings.board_ocean">Ocean</option>
+                <option value="forest" data-i18n="settings.board_forest">Forest</option>
+              </select>
+            </div>
+            <div class="toggle-wrap" onclick="ZChess.App.toggleSetting('setting-showLegalMoves')">
+              <div>
+                <div class="toggle-label" data-i18n="settings.show_legal_moves">Show Legal Moves</div>
+              </div>
+              <div class="toggle-switch on" id="setting-showLegalMoves"></div>
+            </div>
+            <div class="toggle-wrap" onclick="ZChess.App.toggleSetting('setting-showLastMove')">
+              <div>
+                <div class="toggle-label" data-i18n="settings.show_last_move">Highlight Last Move</div>
+              </div>
+              <div class="toggle-switch on" id="setting-showLastMove"></div>
+            </div>
+            <div class="toggle-wrap" onclick="ZChess.App.toggleSetting('setting-autoFlip')">
+              <div>
+                <div class="toggle-label" data-i18n="settings.auto_flip">Auto-flip Board</div>
+              </div>
+              <div class="toggle-switch" id="setting-autoFlip"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Audio -->
+        <div class="settings-section">
+          <div class="settings-section-header" data-i18n="settings.section_audio">Audio</div>
+          <div class="settings-section-body">
+            <div class="toggle-wrap" onclick="ZChess.App.toggleSetting('setting-sounds')">
+              <div>
+                <div class="toggle-label" data-i18n="settings.sounds">Sound Effects</div>
+              </div>
+              <div class="toggle-switch on" id="setting-sounds"></div>
+            </div>
+            <div class="toggle-wrap" onclick="ZChess.App.toggleSetting('setting-animations')">
+              <div>
+                <div class="toggle-label" data-i18n="settings.animations">Animations</div>
+              </div>
+              <div class="toggle-switch on" id="setting-animations"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Display -->
+        <div class="settings-section">
+          <div class="settings-section-header" data-i18n="settings.section_display">Display</div>
+          <div class="settings-section-body">
+            <div class="toggle-wrap" onclick="ZChess.App.toggleSetting('setting-notifications')">
+              <div>
+                <div class="toggle-label" data-i18n="settings.notifications">Notifications</div>
+              </div>
+              <div class="toggle-switch on" id="setting-notifications"></div>
+            </div>
+            <div class="toggle-wrap" onclick="ZChess.App.toggleSetting('setting-showRating')">
+              <div>
+                <div class="toggle-label" data-i18n="settings.show_rating">Show Rating in Profile</div>
+              </div>
+              <div class="toggle-switch on" id="setting-showRating"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div style="display:flex;gap:12px">
+          <button class="btn btn-primary" id="btn-save-settings" data-i18n="settings.save">Save Settings</button>
+          <button class="btn btn-secondary" id="btn-reset-settings" data-i18n="settings.reset">Reset to Default</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================
+       PAGE: FAQ
+  ====================================== -->
+  <div id="page-faq" class="page">
+    <div class="container" style="padding-top:40px;padding-bottom:60px">
+      <div class="page-header">
+        <h1 class="page-header-title" data-i18n="faq.title">FAQ</h1>
+        <p class="page-header-sub" data-i18n="faq.subtitle">Frequently Asked Questions</p>
+      </div>
+      <div class="faq-list" id="faq-list"></div>
+    </div>
+  </div>
+
+  <!-- ======================================
+       PAGE: RULES
+  ====================================== -->
+  <div id="page-rules" class="page">
+    <div class="container" style="padding-top:40px;padding-bottom:60px">
+      <div class="page-header">
+        <h1 class="page-header-title" data-i18n="rules.title">Chess Rules</h1>
+        <p class="page-header-sub" data-i18n="rules.subtitle">Learn how to play chess</p>
+      </div>
+      <div class="rules-sections" id="rules-sections"></div>
+    </div>
+  </div>
+
+</div><!-- /#app -->
+
+<!-- ======================================
+     MODALS
+====================================== -->
+
+<!-- Auth Modal -->
+<div class="modal-overlay" id="auth-modal-overlay" role="dialog" aria-label="Authentication">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <div class="modal-title">ZChess</div>
+      <button class="modal-close" data-close-modal="auth-modal-overlay" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Tab Switch -->
+      <div class="auth-tabs">
+        <div class="auth-tab active" data-mode="login" data-i18n="auth.login">Sign In</div>
+        <div class="auth-tab" data-mode="register" data-i18n="auth.register">Sign Up</div>
+      </div>
+
+      <!-- Login Form -->
+      <div id="login-form-wrap" style="display:flex;flex-direction:column;gap:14px">
+        <div style="text-align:center">
+          <h2 style="font-size:20px;font-weight:700;margin-bottom:4px" data-i18n="auth.login_title">Welcome Back</h2>
+          <p style="font-size:13px" data-i18n="auth.login_subtitle">Sign in to your ZChess account</p>
+        </div>
+
+        <form id="login-form" style="display:flex;flex-direction:column;gap:14px">
+          <div class="form-group">
+            <input type="email" class="form-input" id="login-email" data-i18n-placeholder="auth.email" placeholder="Email address" autocomplete="email" required>
+          </div>
+          <div class="form-group">
+            <input type="password" class="form-input" id="login-password" data-i18n-placeholder="auth.password" placeholder="Password" autocomplete="current-password" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full" id="login-submit-btn" data-i18n="auth.login">Sign In</button>
+        </form>
+
+        <div class="auth-divider"><span data-i18n="auth.or_continue">or continue with</span></div>
+
+        <button class="btn-google" id="btn-google-login">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          <span data-i18n="auth.google">Continue with Google</span>
+        </button>
+      </div>
+
+      <!-- Register Form -->
+      <div id="register-form-wrap" style="display:none;flex-direction:column;gap:14px">
+        <div style="text-align:center">
+          <h2 style="font-size:20px;font-weight:700;margin-bottom:4px" data-i18n="auth.register_title">Join ZChess</h2>
+          <p style="font-size:13px" data-i18n="auth.register_subtitle">Create your account and start playing</p>
+        </div>
+
+        <form id="register-form" style="display:flex;flex-direction:column;gap:14px">
+          <div class="form-group">
+            <input type="text" class="form-input" id="register-username" data-i18n-placeholder="auth.username" placeholder="Username" autocomplete="username" required minlength="3" maxlength="20">
+          </div>
+          <div class="form-group">
+            <input type="email" class="form-input" id="register-email" data-i18n-placeholder="auth.email" placeholder="Email address" autocomplete="email" required>
+          </div>
+          <div class="form-group">
+            <input type="password" class="form-input" id="register-password" data-i18n-placeholder="auth.password" placeholder="Password (min 6 chars)" autocomplete="new-password" required minlength="6">
+          </div>
+          <button type="submit" class="btn btn-primary btn-full" id="register-submit-btn" data-i18n="auth.register">Sign Up</button>
+        </form>
+
+        <div class="auth-divider"><span data-i18n="auth.or_continue">or continue with</span></div>
+
+        <button class="btn-google" id="btn-google-register">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          <span data-i18n="auth.google">Continue with Google</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Promotion Modal -->
+<div class="modal-overlay promotion-modal-overlay" id="promotion-overlay" role="dialog" aria-label="Pawn Promotion">
+  <div class="promotion-modal">
+    <h3 data-i18n="board.promote_title">Promote Pawn</h3>
+    <div class="promotion-pieces" id="promotion-pieces"></div>
+  </div>
+</div>
+
+<!-- Game Result Modal -->
+<div class="modal-overlay" id="game-result-overlay" role="dialog" aria-label="Game Result">
+  <div class="modal game-result-modal">
+    <div class="modal-body" style="text-align:center">
+      <div class="result-icon win" id="result-icon">🏆</div>
+      <div class="result-title win" id="result-heading">Victory!</div>
+      <div class="result-reason" id="result-reason">Checkmate</div>
+
+      <div class="result-stats">
+        <div class="result-stat">
+          <div class="result-stat-value positive" id="result-xp">+0</div>
+          <div class="result-stat-label" data-i18n="board.xp_earned">XP Earned</div>
+        </div>
+        <div class="result-stat">
+          <div class="result-stat-value positive" id="result-rating">+0</div>
+          <div class="result-stat-label" data-i18n="board.rating_change">Rating</div>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn btn-primary" id="btn-result-new-game" data-i18n="board.new_game">New Game</button>
+        <button class="btn btn-secondary" id="btn-result-menu" data-i18n="board.back_to_menu">Main Menu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notifications Container -->
+<div id="toast-container" role="status" aria-live="polite"></div>
+
+<!-- Firebase SDK (optional - comment out if not using Firebase) -->
+<!-- Replace "compat" version if using Firebase modular API -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<!-- ZChess Scripts (order matters) -->
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/sound.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/particles.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/chess-engine.js"></script>
+<script src="js/ai-engine.js"></script>
+<script src="js/chess-board.js"></script>
+<script src="js/achievements.js"></script>
+<script src="js/daily-tasks.js"></script>
+<script src="js/profile.js"></script>
+<script src="js/leaderboard.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
