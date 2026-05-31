@@ -620,23 +620,98 @@ self.onmessage = function(e) {
   },
 
   showGameResultModal(heading, reason, outcome, xpGain, ratingChange) {
-    const modal = document.getElementById('game-result-modal');
-    if (!modal) return;
+    const overlay = document.getElementById('game-result-overlay');
+    const screen  = document.getElementById('game-result-modal');
+    if (!overlay || !screen) return;
 
     const typeClass = outcome === 'win' ? 'win' : outcome === 'loss' ? 'lose' : 'draw';
-    const emoji = outcome === 'win' ? '🏆' : outcome === 'loss' ? '💔' : '🤝';
 
-    document.getElementById('result-icon').className = `result-icon ${typeClass}`;
-    document.getElementById('result-icon').textContent = emoji;
-    document.getElementById('result-heading').className = `result-title ${typeClass}`;
+    const emojis = { win: '🏆', loss: '💀', draw: '🤝' };
+    const labels = {
+      win:  t('board.you_win')  || 'ПОБЕДА',
+      loss: t('board.you_lose') || 'ПОРАЖЕНИЕ',
+      draw: t('board.draw')     || 'НИЧЬЯ'
+    };
+
+    // Apply theme class
+    screen.className = `game-result-screen ${typeClass}`;
+
+    document.getElementById('result-icon').textContent = emojis[outcome] || '🏁';
+    document.getElementById('result-outcome-label').textContent = labels[outcome] || '';
     document.getElementById('result-heading').textContent = heading;
     document.getElementById('result-reason').textContent = reason;
-    document.getElementById('result-xp').textContent = `+${xpGain}`;
-    const ratingEl = document.getElementById('result-rating');
-    ratingEl.textContent = ratingChange >= 0 ? `+${ratingChange}` : ratingChange;
-    ratingEl.className = `result-stat-value ${ratingChange >= 0 ? 'positive' : 'negative'}`;
 
-    document.getElementById('game-result-overlay').classList.add('open');
+    // XP
+    document.getElementById('result-xp').textContent = xpGain > 0 ? `+${xpGain}` : `${xpGain}`;
+    document.getElementById('result-xp').className = `result-stat-val ${xpGain >= 0 ? 'positive' : 'neutral'}`;
+
+    // Rating
+    const ratingEl = document.getElementById('result-rating');
+    ratingEl.textContent = ratingChange >= 0 ? `+${ratingChange}` : `${ratingChange}`;
+    ratingEl.className = `result-stat-val ${ratingChange > 0 ? 'positive' : ratingChange < 0 ? 'negative' : 'neutral'}`;
+
+    overlay.classList.add('open');
+
+    // Launch confetti for win
+    if (outcome === 'win') {
+      this._launchConfetti();
+    }
+  },
+
+  _launchConfetti() {
+    const canvas = document.getElementById('result-particles');
+    if (!canvas) return;
+
+    const W = canvas.width  = canvas.offsetWidth  || window.innerWidth;
+    const H = canvas.height = canvas.offsetHeight || window.innerHeight;
+    const ctx = canvas.getContext('2d');
+
+    const colors = ['#fbbf24','#f59e0b','#a855f7','#7c3aed','#4ade80','#60a5fa','#f472b6'];
+    const pieces = Array.from({ length: 120 }, () => ({
+      x: Math.random() * W,
+      y: Math.random() * H * -1,
+      r: Math.random() * 8 + 4,
+      d: Math.random() * 3 + 1,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      tilt: Math.random() * 10 - 5,
+      tiltAngle: 0,
+      tiltAngleInc: (Math.random() * 0.07) + 0.05,
+      shape: Math.random() > 0.5 ? 'rect' : 'circle'
+    }));
+
+    let frame = 0;
+    const MAX_FRAMES = 180;
+
+    const draw = () => {
+      if (frame++ > MAX_FRAMES) { ctx.clearRect(0, 0, W, H); return; }
+      ctx.clearRect(0, 0, W, H);
+
+      pieces.forEach(p => {
+        p.tiltAngle += p.tiltAngleInc;
+        p.y += p.d + Math.sin(frame * 0.02) * 0.5;
+        p.tilt = Math.sin(p.tiltAngle) * 12;
+
+        if (p.y > H) { p.y = -20; p.x = Math.random() * W; }
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.tilt * Math.PI) / 180);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = Math.max(0, 1 - frame / MAX_FRAMES + 0.3);
+
+        if (p.shape === 'circle') {
+          ctx.beginPath();
+          ctx.arc(0, 0, p.r, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.fillRect(-p.r, -p.r / 2, p.r * 2, p.r);
+        }
+        ctx.restore();
+      });
+
+      requestAnimationFrame(draw);
+    };
+    draw();
   },
 
   // =========================================

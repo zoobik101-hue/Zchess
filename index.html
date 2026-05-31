@@ -823,28 +823,52 @@
 </div>
 
 <!-- Game Result Modal -->
-<div class="modal-overlay" id="game-result-overlay" role="dialog" aria-label="Game Result">
-  <div class="modal game-result-modal">
-    <div class="modal-body" style="text-align:center">
-      <div class="result-icon win" id="result-icon">🏆</div>
-      <div class="result-title win" id="result-heading">Victory!</div>
-      <div class="result-reason" id="result-reason">Checkmate</div>
+<div class="modal-overlay game-result-overlay" id="game-result-overlay" role="dialog" aria-label="Game Result">
+  <div class="game-result-screen" id="game-result-modal">
 
-      <div class="result-stats">
-        <div class="result-stat">
-          <div class="result-stat-value positive" id="result-xp">+0</div>
-          <div class="result-stat-label" data-i18n="board.xp_earned">XP Earned</div>
+    <!-- Particles canvas for win effect -->
+    <canvas class="result-particles" id="result-particles"></canvas>
+
+    <!-- Main content -->
+    <div class="result-content">
+
+      <!-- Big icon area -->
+      <div class="result-emblem" id="result-icon">🏆</div>
+
+      <!-- Outcome label -->
+      <div class="result-outcome-label" id="result-outcome-label">ПОБЕДА</div>
+
+      <!-- Title -->
+      <h1 class="result-heading" id="result-heading">Шах и мат!</h1>
+
+      <!-- Reason -->
+      <p class="result-reason" id="result-reason">Вы поставили мат сопернику</p>
+
+      <!-- Stats row -->
+      <div class="result-stats-row">
+        <div class="result-stat-card">
+          <span class="result-stat-icon">⚡</span>
+          <span class="result-stat-val positive" id="result-xp">+0</span>
+          <span class="result-stat-lbl" data-i18n="board.xp_earned">XP</span>
         </div>
-        <div class="result-stat">
-          <div class="result-stat-value positive" id="result-rating">+0</div>
-          <div class="result-stat-label" data-i18n="board.rating_change">Rating</div>
+        <div class="result-stat-divider"></div>
+        <div class="result-stat-card">
+          <span class="result-stat-icon">📈</span>
+          <span class="result-stat-val positive" id="result-rating">+0</span>
+          <span class="result-stat-lbl" data-i18n="board.rating_change">Рейтинг</span>
         </div>
       </div>
 
-      <div class="result-actions">
-        <button class="btn btn-primary" id="btn-result-new-game" data-i18n="board.new_game">New Game</button>
-        <button class="btn btn-secondary" id="btn-result-menu" data-i18n="board.back_to_menu">Main Menu</button>
+      <!-- Actions -->
+      <div class="result-btn-row">
+        <button class="result-btn result-btn-primary" id="btn-result-new-game" data-i18n="board.new_game">
+          ♟ Новая игра
+        </button>
+        <button class="result-btn result-btn-secondary" id="btn-result-menu" data-i18n="board.back_to_menu">
+          ← В меню
+        </button>
       </div>
+
     </div>
   </div>
 </div>
