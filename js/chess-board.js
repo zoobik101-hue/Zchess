@@ -540,7 +540,12 @@ self.onmessage = function(e) {
 
     pieces.innerHTML = '';
     const types = ['Q', 'R', 'B', 'N'];
-    const names = { Q: 'Queen', R: 'Rook', B: 'Bishop', N: 'Knight' };
+    const names = {
+      Q: t('board.promote_queen'),
+      R: t('board.promote_rook'),
+      B: t('board.promote_bishop'),
+      N: t('board.promote_knight')
+    };
 
     types.forEach(type => {
       const btn = document.createElement('button');
@@ -575,21 +580,21 @@ self.onmessage = function(e) {
       outcome = this.isAIGame
         ? (winnerColor === this.playerColor ? 'win' : 'loss')
         : (winnerColor === 'w' ? 'win' : 'loss');
-      heading = outcome === 'win' ? 'Victory!' : 'Defeat';
-      reason = 'Checkmate';
+      heading = outcome === 'win' ? t('board.you_win') : t('board.you_lose');
+      reason = t('board.checkmate');
       if (ZChess.Sound) {
         outcome === 'win' ? ZChess.Sound.playWin() : ZChess.Sound.playCheckmate();
       }
     } else {
       outcome = 'draw';
-      heading = 'Draw';
+      heading = t('board.draw');
       const reasonMap = {
-        stalemate: 'Stalemate',
-        insufficient: 'Insufficient Material',
-        'fifty-move': '50-Move Rule',
-        repetition: 'Threefold Repetition'
+        stalemate: t('board.stalemate_reason'),
+        insufficient: t('board.insufficient_reason'),
+        'fifty-move': t('board.fifty_reason'),
+        repetition: t('board.repetition_reason')
       };
-      reason = reasonMap[status.reason] || 'Draw';
+      reason = reasonMap[status.reason] || t('board.draw');
       if (ZChess.Sound) ZChess.Sound.playDraw();
     }
 
@@ -661,7 +666,7 @@ self.onmessage = function(e) {
     this.updatePlayerBars();
     this.saveGameState();
 
-    if (ZChess.Notifications) ZChess.Notifications.info('Move undone');
+    if (ZChess.Notifications) ZChess.Notifications.info(t('board.move_undone'));
   },
 
   resign() {
@@ -674,7 +679,7 @@ self.onmessage = function(e) {
         moves: this.gameState.history.length });
     }
     if (ZChess.Sound) ZChess.Sound.playLose();
-    this.showGameResultModal('Defeat', 'Resigned', 'loss', 20, -10);
+    this.showGameResultModal(t('board.you_lose'), t('board.resigned_reason'), 'loss', 20, -10);
   },
 
   flipBoard() {
@@ -698,7 +703,7 @@ self.onmessage = function(e) {
 
     if (inCheck) {
       el.className = 'turn-indicator check-indicator';
-      el.innerHTML = `<div class="turn-dot"></div> CHECK!`;
+      el.innerHTML = `<div class="turn-dot"></div> ${t('board.check')}`;
     } else if (this.isThinking) {
       el.className = 'turn-indicator opponent-turn';
       el.innerHTML = `<div class="ai-thinking">
@@ -707,27 +712,31 @@ self.onmessage = function(e) {
           <div class="thinking-dot"></div>
           <div class="thinking-dot"></div>
         </div>
-        AI is thinking...
+        ${t('board.ai_thinking')}
       </div>`;
     } else {
       const isPlayerTurn = !this.isAIGame || turn === this.playerColor;
       el.className = `turn-indicator ${isPlayerTurn ? 'your-turn' : 'opponent-turn'}`;
       el.innerHTML = `<div class="turn-dot"></div>
-        ${isPlayerTurn ? 'Your turn' : (this.isAIGame ? 'AI thinking...' : 'Opponent\'s turn')}`;
+        ${isPlayerTurn ? t('board.your_turn') : (this.isAIGame ? t('board.ai_thinking') : t('board.opponent_turn'))}`;
     }
   },
 
   updatePlayerBars() {
     const user = ZChess.Auth && ZChess.Auth.currentUser;
-    const userName = user?.username || 'Guest';
+    const userName = user?.username || t('common.guest');
     const userRating = user?.rating || '';
+
+    // Translate difficulty name for AI label
+    const diffKey = `game.difficulty_${this.aiDifficulty}`;
+    const diffName = t(diffKey) || this.aiDifficulty;
 
     const updateBar = (barId, color) => {
       const bar = document.getElementById(barId);
       if (!bar) return;
       bar.classList.toggle('active', this.gameState.turn === color);
       const isPlayer = this.playerColor === color;
-      const name = isPlayer ? userName : (this.isAIGame ? `AI (${this.aiDifficulty})` : 'Opponent');
+      const name = isPlayer ? userName : (this.isAIGame ? `${t('board.ai_opponent')} (${diffName})` : t('board.opponent'));
       const rating = isPlayer ? userRating : '';
       const nameEl = bar.querySelector('.player-name-sm');
       const ratingEl = bar.querySelector('.player-rating-sm');

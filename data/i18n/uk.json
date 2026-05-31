@@ -128,7 +128,15 @@
     "white_player": "Білі",
     "black_player": "Чорні",
     "rating_change": "Зміна рейтингу",
-    "xp_earned": "Отримано XP"
+    "xp_earned": "Отримано XP",
+    "stalemate_reason": "Пат",
+    "insufficient_reason": "Недостатньо матеріалу",
+    "fifty_reason": "Правило 50 ходів",
+    "repetition_reason": "Троєкратне повторення",
+    "resigned_reason": "Здався",
+    "move_undone": "Хід скасовано",
+    "ai_opponent": "ІІ",
+    "opponent": "Суперник"
   },
   "profile": {
     "title": "Профіль",
@@ -366,6 +374,20 @@
     "copied": "Код кімнати скопійовано!",
     "draw_offered": "Пропозицію нічиї відправлено",
     "draw_declined": "Суперник відхилив нічию"
+  },
+  "level_titles": {
+    "newcomer": "Новачок",
+    "pawn": "Пішак",
+    "knight": "Кінь",
+    "bishop": "Слон",
+    "rook": "Тура",
+    "queen": "Ферзь",
+    "king": "Король",
+    "champion": "Чемпіон",
+    "master": "Майстер",
+    "grandmaster": "Гросмейстер",
+    "legend": "Легенда",
+    "immortal": "Безсмертний"
   },
   "common": {
     "loading": "Завантаження...",

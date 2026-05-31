@@ -128,7 +128,15 @@
     "white_player": "Белые",
     "black_player": "Чёрные",
     "rating_change": "Изменение рейтинга",
-    "xp_earned": "Получено XP"
+    "xp_earned": "Получено XP",
+    "stalemate_reason": "Пат",
+    "insufficient_reason": "Недостаточно материала",
+    "fifty_reason": "Правило 50 ходов",
+    "repetition_reason": "Троекратное повторение",
+    "resigned_reason": "Сдался",
+    "move_undone": "Ход отменён",
+    "ai_opponent": "ИИ",
+    "opponent": "Соперник"
   },
   "profile": {
     "title": "Профиль",
@@ -366,6 +374,20 @@
     "copied": "Код комнаты скопирован!",
     "draw_offered": "Предложение ничьей отправлено",
     "draw_declined": "Соперник отклонил ничью"
+  },
+  "level_titles": {
+    "newcomer": "Новичок",
+    "pawn": "Пешка",
+    "knight": "Конь",
+    "bishop": "Слон",
+    "rook": "Ладья",
+    "queen": "Ферзь",
+    "king": "Король",
+    "champion": "Чемпион",
+    "master": "Мастер",
+    "grandmaster": "Гроссмейстер",
+    "legend": "Легенда",
+    "immortal": "Бессмертный"
   },
   "common": {
     "loading": "Загрузка...",

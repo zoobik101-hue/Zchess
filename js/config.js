@@ -85,19 +85,25 @@ window.ZChess.getXPForCurrentLevel = function(currentLevel) {
   return currentLevel <= 1 ? 0 : ZChess.LEVELS[currentLevel - 2];
 };
 
-// Level titles
+// Level title keys (translated at display time via t())
 window.ZChess.LEVEL_TITLES = {
-  1: 'Newcomer', 5: 'Pawn', 10: 'Knight', 15: 'Bishop',
-  20: 'Rook', 25: 'Queen', 30: 'King', 40: 'Champion',
-  50: 'Master', 60: 'Grandmaster', 75: 'Legend', 100: 'Immortal'
+  1: 'newcomer', 5: 'pawn', 10: 'knight', 15: 'bishop',
+  20: 'rook', 25: 'queen', 30: 'king', 40: 'champion',
+  50: 'master', 60: 'grandmaster', 75: 'legend', 100: 'immortal'
 };
 
-window.ZChess.getTitleForLevel = function(level) {
+window.ZChess.getTitleKey = function(level) {
   const thresholds = Object.keys(ZChess.LEVEL_TITLES).map(Number).sort((a,b) => b-a);
-  for (const t of thresholds) {
-    if (level >= t) return ZChess.LEVEL_TITLES[t];
+  for (const th of thresholds) {
+    if (level >= th) return 'level_titles.' + ZChess.LEVEL_TITLES[th];
   }
-  return 'Newcomer';
+  return 'level_titles.newcomer';
+};
+
+// Returns translated title - call this in UI code
+window.ZChess.getTitleForLevel = function(level) {
+  const key = ZChess.getTitleKey(level);
+  return (typeof t === 'function') ? t(key) : key.split('.')[1];
 };
 
 // AI difficulty settings

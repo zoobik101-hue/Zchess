@@ -128,7 +128,15 @@
     "white_player": "White",
     "black_player": "Black",
     "rating_change": "Rating Change",
-    "xp_earned": "XP Earned"
+    "xp_earned": "XP Earned",
+    "stalemate_reason": "Stalemate",
+    "insufficient_reason": "Insufficient Material",
+    "fifty_reason": "50-Move Rule",
+    "repetition_reason": "Threefold Repetition",
+    "resigned_reason": "Resigned",
+    "move_undone": "Move undone",
+    "ai_opponent": "AI",
+    "opponent": "Opponent"
   },
   "profile": {
     "title": "Profile",
@@ -366,6 +374,20 @@
     "copied": "Room code copied!",
     "draw_offered": "Draw offered to opponent",
     "draw_declined": "Opponent declined the draw"
+  },
+  "level_titles": {
+    "newcomer": "Newcomer",
+    "pawn": "Pawn",
+    "knight": "Knight",
+    "bishop": "Bishop",
+    "rook": "Rook",
+    "queen": "Queen",
+    "king": "King",
+    "champion": "Champion",
+    "master": "Master",
+    "grandmaster": "Grandmaster",
+    "legend": "Legend",
+    "immortal": "Immortal"
   },
   "common": {
     "loading": "Loading...",
