@@ -39,6 +39,9 @@ const ChessBoard = {
     bK:'♚', bQ:'♛', bR:'♜', bB:'♝', bN:'♞', bP:'♟'
   },
 
+  // Path to SVG pieces (cburnett set)
+  _piecesBase: 'assets/pieces/cburnett',
+
   // =========================================
   // BOARD INITIALIZATION - runs once
   // =========================================
@@ -186,10 +189,17 @@ const ChessBoard = {
   _createPieceEl(piece, row, col) {
     const el = document.createElement('div');
     el.className = `chess-piece ${piece.color === 'w' ? 'white-piece' : 'black-piece'}`;
-    el.textContent = this.SYMBOLS[piece.color + piece.type];
     el.dataset.row = row;
     el.dataset.col = col;
     el.setAttribute('draggable', 'true');
+
+    // SVG image piece
+    const img = document.createElement('img');
+    img.src = `${this._piecesBase}/${piece.color}${piece.type.toUpperCase()}.svg`;
+    img.alt = piece.color + piece.type;
+    img.className = 'piece-img';
+    img.draggable = false;
+    el.appendChild(img);
 
     el.addEventListener('dragstart', (e) => {
       const { board, turn } = this.gameState;
@@ -616,7 +626,7 @@ self.onmessage = function(e) {
       const btn = document.createElement('button');
       btn.className = 'promotion-piece-btn';
       btn.innerHTML = `
-        <span style="font-size:44px;line-height:1">${this.SYMBOLS[color + type]}</span>
+        <img src="${this._piecesBase}/${color}${type}.svg" alt="${color}${type}" class="promotion-piece-img" draggable="false">
         <span class="promotion-piece-label">${names[type]}</span>
       `;
       btn.addEventListener('click', () => {
@@ -988,9 +998,10 @@ self.onmessage = function(e) {
     const upd = (id, pieces) => {
       const el = document.getElementById(id);
       if (!el) return;
+      const base = this._piecesBase;
       el.innerHTML = [...pieces]
         .sort((a,b) => ORDER.indexOf(a) - ORDER.indexOf(b))
-        .map(t => `<span class="captured-piece">${this.SYMBOLS['b'+t]}</span>`)
+        .map(t => `<img src="${base}/b${t}.svg" alt="${t}" class="captured-piece-img" draggable="false">`)
         .join('');
     };
     upd('captured-by-white', capturedPieces.b);

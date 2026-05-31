@@ -115,6 +115,15 @@
   line-height: 1;
 }
 
+.captured-piece-img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  display: inline-block;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+  vertical-align: middle;
+}
+
 .player-timer {
   font-size: 17px;
   font-weight: 700;
@@ -349,51 +358,54 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: calc(var(--board-size, 512px) / 8 * 0.77);
-  line-height: 1;
   cursor: grab;
   z-index: 2;
-  /* Only transform - cheapest GPU op */
-  transition: transform 0.1s cubic-bezier(0.34,1.56,0.64,1);
+  transition: transform 0.12s cubic-bezier(0.34,1.56,0.64,1);
   pointer-events: auto;
 }
 
+/* SVG piece image */
+.piece-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  /* Subtle drop shadow for depth */
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.55));
+}
+
 .chess-piece:hover {
-  transform: scale(1.1) translateY(-2px);
+  transform: scale(1.12) translateY(-3px);
+}
+
+.chess-piece:hover .piece-img {
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.7)) brightness(1.08);
 }
 
 .chess-piece.selected-piece {
-  transform: scale(1.13) translateY(-4px);
+  transform: scale(1.15) translateY(-5px);
   z-index: 10;
+}
+
+.chess-piece.selected-piece .piece-img {
+  filter: drop-shadow(0 0 12px rgba(167,139,250,0.8)) drop-shadow(0 4px 10px rgba(0,0,0,0.7));
 }
 
 .chess-piece.dragging {
   cursor: grabbing;
-  transform: scale(1.2) translateY(-8px);
+  transform: scale(1.22) translateY(-10px);
   z-index: 100;
   transition: none;
 }
 
-/* White pieces - text-shadow instead of filter: drop-shadow (10x cheaper) */
-.chess-piece.white-piece {
-  color: #f0eaff;
-  text-shadow:
-    0 1px 0 rgba(0,0,0,0.6),
-    0 2px 4px rgba(0,0,0,0.5),
-    0 0 12px rgba(255,255,255,0.1);
-  -webkit-text-stroke: 1px rgba(40,20,80,0.5);
+.chess-piece.dragging .piece-img {
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8));
 }
 
-/* Black pieces */
-.chess-piece.black-piece {
-  color: #0e0820;
-  text-shadow:
-    0 1px 0 rgba(255,255,255,0.1),
-    0 2px 4px rgba(0,0,0,0.7);
-  -webkit-text-stroke: 0.5px rgba(80,40,150,0.4);
-}
-
-/* Piece move animation - position only, no repaint */
+/* Piece move animation */
 .chess-piece.moving {
   animation: pieceSlide 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
@@ -409,8 +421,8 @@
 }
 
 @keyframes pieceCapture {
-  0%   { transform: scale(1.2); filter: drop-shadow(0 0 16px rgba(239,68,68,0.9)); }
-  100% { transform: scale(1);   filter: none; }
+  0%   { transform: scale(1.2); opacity: 0.6; }
+  100% { transform: scale(1);   opacity: 0; }
 }
 
 /* =========================================
@@ -655,9 +667,18 @@
   justify-content: center;
 }
 
+.promotion-piece-img {
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 3px 8px rgba(0,0,0,0.5));
+  pointer-events: none;
+}
+
 .promotion-piece-btn {
-  width: 74px;
-  height: 78px;
+  width: 82px;
+  height: 88px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1190,7 +1211,7 @@
 
   .chess-game-wrapper { padding: 10px 8px; gap: 8px; }
   .player-bar { max-width: var(--board-size); }
-  .chess-piece { font-size: calc(var(--board-size) / 8 * 0.74); }
+  .piece-img { width: 100%; height: 100%; }
 
   .chess-board-container::before,
   .chess-board-container::after { display: none; }
