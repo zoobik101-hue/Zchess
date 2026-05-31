@@ -455,10 +455,10 @@ const App = {
     document.querySelectorAll('.game-mode-card').forEach(card => {
       card.addEventListener('click', () => {
         const mode = card.dataset.mode;
-        // Quick match → open multiplayer lobby (just show it, user picks from 3 options)
+        // Quick match → immediately start searching (no intermediate choice screen)
         if (mode === 'quick') {
           if (!ZChess.Auth.isLoggedIn()) { this.showAuthModal('login'); return; }
-          ZChess.Multiplayer?.showLobby('lobby-choose');
+          this._startQuickMatch();
           return;
         }
         this.gameSetupOptions.mode = mode;
@@ -537,6 +537,9 @@ const App = {
 
     // ---- Multiplayer lobby ----
     this.bindLobbyEvents();
+
+    // Quick match shortcut also from btn-lob-quick (lobby screen)
+    // Handled via _startQuickMatch below
 
     // Profile nav link
     document.getElementById('nav-profile-link')?.addEventListener('click', () => this.navigate('profile'));
@@ -760,6 +763,50 @@ const App = {
   },
 
   // =========================================
+  // QUICK MATCH - immediate search, no extra click
+  // =========================================
+
+  _startQuickMatch() {
+    const MP = ZChess.Multiplayer;
+    if (!MP) return;
+    if (MP.status !== 'idle') return; // already searching
+
+    // Open lobby in "searching" state immediately
+    MP.showLobby('lobby-searching');
+
+    // Start elapsed timer
+    const timerEl = document.getElementById('lobby-search-timer');
+    const startMs = Date.now();
+    if (timerEl) timerEl.textContent = '0:00';
+    const timerInterval = setInterval(() => {
+      // Stop when overlay closes or status changes
+      if (MP.status !== 'waiting' && MP.status !== 'idle') {
+        clearInterval(timerInterval);
+        return;
+      }
+      const s = Math.floor((Date.now() - startMs) / 1000);
+      const m = Math.floor(s / 60);
+      const ss = String(s % 60).padStart(2, '0');
+      if (timerEl) timerEl.textContent = `${m}:${ss}`;
+    }, 1000);
+
+    MP.findQuickMatch().then(res => {
+      if (res.found) {
+        // Joined existing room → handleRoomUpdate → _beginGame → game starts
+        clearInterval(timerInterval);
+      }
+      // If not found: created public room, stay on "searching" screen,
+      // wait for another player to click Quick Match
+    }).catch(e => {
+      clearInterval(timerInterval);
+      console.error('[QuickMatch]', e);
+      MP.leave();
+      ZChess.Notifications.error('Не удалось начать поиск. Попробуй ещё раз.');
+      document.getElementById('room-lobby-overlay')?.classList.remove('open');
+    });
+  },
+
+  // =========================================
   // MULTIPLAYER LOBBY
   // =========================================
 
@@ -782,32 +829,15 @@ const App = {
       this.closeModal('room-lobby-overlay');
     });
 
-    // ---- Quick match ----
-    document.getElementById('btn-lob-quick')?.addEventListener('click', async () => {
+    // ---- Quick match (from lobby) ----
+    document.getElementById('btn-lob-quick')?.addEventListener('click', () => {
       if (!requireLogin()) return;
-      if (MP.status !== 'idle') return; // prevent double-click
-      showState('lobby-searching');
-      try {
-        const res = await MP.findQuickMatch();
-        if (res.found) {
-          // Joined existing room → onSnapshot fires → countdown starts automatically
-        } else {
-          // Created public room, waiting for someone to join
-          // Show waiting state with invite code (so user can also share it)
-          const codeEl = document.getElementById('lobby-invite-code');
-          if (codeEl) codeEl.textContent = res.code || '------';
-          showState('lobby-waiting');
-        }
-      } catch (e) {
-        console.error('[Lobby] findQuickMatch error:', e);
-        ZChess.Notifications.error('Не удалось начать поиск. Попробуй ещё раз.');
-        showState('lobby-choose');
-      }
+      this._startQuickMatch();
     });
 
     document.getElementById('btn-cancel-search')?.addEventListener('click', async () => {
       await MP.leave();
-      showState('lobby-choose');
+      this.closeModal('room-lobby-overlay');
     });
 
     // ---- Create room ----
@@ -880,7 +910,8 @@ const App = {
     // Auto-reconnect to in-progress multiplayer game after login
     ZChess.Auth.onAuthChange(async (user) => {
       if (user && MP.status === 'idle') {
-        await MP.tryReconnect();
+        const reconnected = await MP.tryReconnect();
+        if (reconnected) this.navigate('play');
       }
     });
 

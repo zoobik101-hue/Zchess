@@ -351,6 +351,16 @@
   padding: 12px 0;
 }
 
+/* ---- Search timer ---- */
+.lobby-search-timer {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 20px;
+  color: rgba(167,139,250,0.4);
+  text-align: center;
+  margin: 4px 0 0;
+  letter-spacing: 2px;
+}
+
 /* ---- Mobile ---- */
 @media (max-width: 540px) {
   .lobby-modal { padding: 28px 18px 24px; }
