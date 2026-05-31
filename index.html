@@ -829,39 +829,19 @@
     <!-- Particles canvas for win effect -->
     <canvas class="result-particles" id="result-particles"></canvas>
 
-    <!-- Main content -->
+    <!-- Main content: 2-column grid -->
     <div class="result-content">
 
-      <!-- Big icon area -->
-      <div class="result-emblem" id="result-icon">🏆</div>
-
-      <!-- Outcome label -->
-      <div class="result-outcome-label" id="result-outcome-label">ПОБЕДА</div>
-
-      <!-- Title -->
-      <h1 class="result-heading" id="result-heading">Шах и мат!</h1>
-
-      <!-- Reason -->
-      <p class="result-reason" id="result-reason">Вы поставили мат сопернику</p>
-
-      <!-- XP / Rating row -->
-      <div class="result-stats-row">
-        <div class="result-stat-card">
-          <span class="result-stat-icon">⚡</span>
-          <span class="result-stat-val positive" id="result-xp">+0</span>
-          <span class="result-stat-lbl" data-i18n="board.xp_earned">XP</span>
-        </div>
-        <div class="result-stat-divider"></div>
-        <div class="result-stat-card">
-          <span class="result-stat-icon">📈</span>
-          <span class="result-stat-val positive" id="result-rating">+0</span>
-          <span class="result-stat-lbl" data-i18n="board.rating_change">Рейтинг</span>
-        </div>
+      <!-- LEFT COLUMN: hero -->
+      <div class="result-hero">
+        <div class="result-emblem" id="result-icon">🏆</div>
+        <div class="result-outcome-label" id="result-outcome-label">ПОБЕДА</div>
+        <h1 class="result-heading" id="result-heading">Шах и мат!</h1>
+        <p class="result-reason" id="result-reason">Вы поставили мат сопернику</p>
       </div>
 
-      <!-- Detailed stats block -->
+      <!-- RIGHT COLUMN top: stats grid -->
       <div class="rs-detail" id="rs-detail-block">
-
         <!-- Accuracy bar -->
         <div class="rs-accuracy-wrap">
           <div class="rs-accuracy-header">
@@ -872,8 +852,7 @@
             <div class="rs-accuracy-bar" id="rs-accuracy-bar" style="width:0%"></div>
           </div>
         </div>
-
-        <!-- Grid of stats -->
+        <!-- Grid 3x2 -->
         <div class="rs-grid">
           <div class="rs-item">
             <span class="rs-icon">⏱</span>
@@ -906,9 +885,27 @@
             <span class="rs-label">Шахов дали</span>
           </div>
         </div>
+      </div>
 
-        <!-- Move quality row -->
-        <div class="rs-quality-row">
+      <!-- XP / Rating row (left col bottom) -->
+      <div class="result-stats-row">
+        <div class="result-stat-card">
+          <span class="result-stat-icon">⚡</span>
+          <span class="result-stat-val positive" id="result-xp">+0</span>
+          <span class="result-stat-lbl" data-i18n="board.xp_earned">XP</span>
+        </div>
+        <div class="result-stat-divider"></div>
+        <div class="result-stat-card">
+          <span class="result-stat-icon">📈</span>
+          <span class="result-stat-val positive" id="result-rating">+0</span>
+          <span class="result-stat-lbl" data-i18n="board.rating_change">Рейтинг</span>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN bottom: move quality + extras -->
+      <div class="rs-quality-row">
+        <!-- Quality items 2x2 -->
+        <div class="rs-quality-items">
           <div class="rs-quality-item rs-q-excellent">
             <span class="rs-q-val" id="rs-excellent">0</span>
             <span class="rs-q-label">✨ Отличных</span>
@@ -926,20 +923,15 @@
             <span class="rs-q-label">💣 Зевков</span>
           </div>
         </div>
-
-        <!-- Extra row -->
+        <!-- Extra info -->
         <div class="rs-extra-row">
-          <span class="rs-extra-item">
-            🏰 <span id="rs-castled">-</span> рокировка
-          </span>
-          <span class="rs-extra-item">
-            🔄 <span id="rs-undos">0</span> отмен хода
-          </span>
+          <span class="rs-extra-item">🏰 <span id="rs-castled">-</span> рокировка</span>
+          <span class="rs-extra-item">🔄 <span id="rs-undos">0</span> отмен хода</span>
+          <span class="rs-extra-item" id="rs-promo-wrap">♛ <span id="rs-promotions">0</span> превращений</span>
         </div>
-
       </div>
 
-      <!-- Actions -->
+      <!-- Actions (left col, last row) -->
       <div class="result-btn-row">
         <button class="result-btn result-btn-primary" id="btn-result-new-game" data-i18n="board.new_game">
           ♟ Новая игра
