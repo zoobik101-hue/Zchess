@@ -501,10 +501,13 @@ const App = {
     // Game result modal actions
     document.getElementById('btn-result-new-game')?.addEventListener('click', () => {
       this.closeModal('game-result-overlay');
+      // Clean up multiplayer session so player can start a new game
+      if (ZChess.Multiplayer?.status !== 'idle') ZChess.Multiplayer.leave();
       this.navigate('game');
     });
     document.getElementById('btn-result-menu')?.addEventListener('click', () => {
       this.closeModal('game-result-overlay');
+      if (ZChess.Multiplayer?.status !== 'idle') ZChess.Multiplayer.leave();
       this.navigate('home');
     });
 

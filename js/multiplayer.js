@@ -653,11 +653,23 @@ const Multiplayer = {
     }
 
     localStorage.removeItem('zchess_room');
-    this.roomId     = null;
-    this.status     = 'idle';
-    this._lastMoveCount = 0;
-    this._gameEnded     = false;
+    this.roomId        = null;
+    this.localColor    = null;
+    this.localUid      = null;
+    this.status        = 'idle';
+    this._lastMoveCount    = 0;
+    this._gameEnded        = false;
     this._disconnectWarned = false;
+
+    // Hide multiplayer HUD
+    const bar = document.getElementById('mp-status-bar');
+    if (bar) bar.style.display = 'none';
+
+    // Clean up chess board multiplayer state
+    if (ZChess.ChessBoard) {
+      ZChess.ChessBoard.multiplayerMode     = false;
+      ZChess.ChessBoard.multiplayerOpponent = null;
+    }
   },
 
   /* ---- UI helpers ---- */

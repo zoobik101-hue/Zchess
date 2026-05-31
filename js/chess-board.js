@@ -208,7 +208,11 @@ const ChessBoard = {
     el.addEventListener('dragstart', (e) => {
       const { board, turn } = this.gameState;
       const p = board[row][col];
-      if (!p || (this.isAIGame && p.color !== this.playerColor)) {
+      // Block dragging opponent's pieces in AI or multiplayer
+      const notOurPiece = (this.isAIGame || this.multiplayerMode) && p?.color !== this.playerColor;
+      // Block dragging when not our turn in multiplayer
+      const notOurTurn  = this.multiplayerMode && turn !== this.playerColor;
+      if (!p || notOurPiece || notOurTurn) {
         e.preventDefault();
         return;
       }
@@ -465,7 +469,8 @@ const ChessBoard = {
     const { board, turn } = this.gameState;
     const piece = board[row][col];
 
-    if (this.isAIGame && turn !== this.playerColor) return;
+    // In AI or multiplayer: block input when it's not local player's turn
+    if ((this.isAIGame || this.multiplayerMode) && turn !== this.playerColor) return;
 
     if (this.selectedSquare) {
       const move = this.legalMovesForSelected.find(m => m.to.row === row && m.to.col === col);
@@ -482,7 +487,8 @@ const ChessBoard = {
         return;
       }
 
-      if (piece && piece.color === turn) {
+      // In multiplayer: only allow selecting own pieces
+      if (piece && piece.color === turn && (!this.multiplayerMode || piece.color === this.playerColor)) {
         this.selectPiece(row, col);
         return;
       }
@@ -491,7 +497,8 @@ const ChessBoard = {
       return;
     }
 
-    if (piece && piece.color === turn) {
+    // In multiplayer: only allow selecting own pieces
+    if (piece && piece.color === turn && (!this.multiplayerMode || piece.color === this.playerColor)) {
       this.selectPiece(row, col);
     }
   },
