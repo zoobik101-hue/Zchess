@@ -159,7 +159,7 @@ const ChessAI = {
 
     const standPat = this.evaluate(state);
 
-    if (depth >= 4) return standPat;
+    if (depth >= 2) return standPat;
 
     if (isMaximizing) {
       if (standPat >= beta) return beta;

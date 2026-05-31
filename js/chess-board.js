@@ -430,88 +430,91 @@ const ChessBoard = {
     this.showAIThinking(false);
   },
 
-  _computeAIMove(state, difficulty) {
-    return new Promise((resolve) => {
-      const minDelay = difficulty === 'beginner' ? 150 : 300;
+  async _computeAIMove(state, difficulty) {
+    const minDelay = difficulty === 'beginner' ? 150 : 300;
+    const startTime = Date.now();
 
-      if (typeof Worker === 'undefined') {
-        setTimeout(() => resolve(ZChess.AI.getBestMove(state, difficulty)), minDelay);
-        return;
-      }
-
-      let worker = null;
-      let settled = false;
-      const startTime = Date.now();
-
-      const done = (move) => {
-        if (settled) return;
-        settled = true;
-        if (worker) { try { worker.terminate(); } catch(e){} }
-        const wait = Math.max(0, minDelay - (Date.now() - startTime));
-        setTimeout(() => resolve(move), wait);
-      };
-
-      try {
-        // Build worker as Blob to avoid CORS/path issues
-        const workerSrc = this._buildWorkerBlob();
-        worker = new Worker(workerSrc);
-
-        const timeout = setTimeout(() => {
-          console.warn('[AI] Worker timed out');
-          done(ZChess.AI.getBestMove(state, 'medium'));
-        }, 12000);
-
-        worker.onmessage = (e) => {
-          clearTimeout(timeout);
-          done(e.data.move || null);
-        };
-
-        worker.onerror = (err) => {
-          clearTimeout(timeout);
-          console.warn('[AI] Worker error:', err.message);
-          done(ZChess.AI.getBestMove(state, difficulty));
-        };
-
-        worker.postMessage({ state, difficulty });
-
-      } catch (e) {
-        console.warn('[AI] Worker creation failed, using sync');
-        setTimeout(() => done(ZChess.AI.getBestMove(state, difficulty)), minDelay);
-      }
+    const wait = (move) => new Promise(resolve => {
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, minDelay - elapsed);
+      setTimeout(() => resolve(move), remaining);
     });
+
+    // Try Web Worker (fetches scripts inline - no CORS/null-origin issue)
+    if (typeof Worker !== 'undefined') {
+      try {
+        const blobUrl = await this._getWorkerBlobUrl();
+        if (blobUrl) {
+          const move = await this._runWorker(blobUrl, state, difficulty);
+          return wait(move);
+        }
+      } catch (e) {
+        console.warn('[AI] Worker failed, fallback sync:', e.message);
+      }
+    }
+
+    // Sync fallback
+    const move = ZChess.AI.getBestMove(state, difficulty);
+    return wait(move);
   },
 
-  // Build worker as Blob URL - no CORS issues, works on any host
-  _buildWorkerBlob() {
+  async _getWorkerBlobUrl() {
     if (this._workerBlobUrl) return this._workerBlobUrl;
 
-    // Get URLs of engine and AI scripts from page
     const scripts = Array.from(document.querySelectorAll('script[src]'));
     const engineUrl = scripts.find(s => s.src.includes('chess-engine'))?.src;
-    const aiUrl = scripts.find(s => s.src.includes('ai-engine'))?.src;
+    const aiUrl    = scripts.find(s => s.src.includes('ai-engine'))?.src;
+    if (!engineUrl || !aiUrl) return null;
 
-    let workerCode;
-    if (engineUrl && aiUrl) {
-      workerCode = `
+    // Fetch both scripts and inline them - avoids null-origin importScripts issues
+    const [engineText, aiText] = await Promise.all([
+      fetch(engineUrl, { cache: 'force-cache' }).then(r => r.text()),
+      fetch(aiUrl,    { cache: 'force-cache' }).then(r => r.text())
+    ]);
+
+    const workerCode = `
 var window = self;
-importScripts(${JSON.stringify(engineUrl)}, ${JSON.stringify(aiUrl)});
+${engineText}
+${aiText}
 self.onmessage = function(e) {
   try {
     var move = ZChess.AI.getBestMove(e.data.state, e.data.difficulty);
     self.postMessage({ move: move });
   } catch(err) {
-    self.postMessage({ error: err.message });
+    self.postMessage({ move: null, error: String(err) });
   }
 };`;
-    } else {
-      // Minimal fallback - just returns first legal move
-      workerCode = `
-self.onmessage = function(e) { self.postMessage({ move: null }); };`;
-    }
 
     const blob = new Blob([workerCode], { type: 'application/javascript' });
     this._workerBlobUrl = URL.createObjectURL(blob);
     return this._workerBlobUrl;
+  },
+
+  _runWorker(blobUrl, state, difficulty) {
+    return new Promise((resolve, reject) => {
+      let done = false;
+      const worker = new Worker(blobUrl);
+
+      const finish = (move) => {
+        if (done) return;
+        done = true;
+        worker.terminate();
+        resolve(move);
+      };
+
+      const timeout = setTimeout(() => {
+        console.warn('[AI] Worker timeout - using sync fallback');
+        done = true;
+        worker.terminate();
+        try { resolve(ZChess.AI.getBestMove(state, 'medium')); }
+        catch(e) { resolve(null); }
+      }, 10000);
+
+      worker.onmessage = (e) => { clearTimeout(timeout); finish(e.data.move ?? null); };
+      worker.onerror   = (e) => { clearTimeout(timeout); reject(new Error(e.message)); };
+
+      worker.postMessage({ state, difficulty });
+    });
   },
 
   _workerBlobUrl: null,
@@ -628,18 +631,26 @@ self.onmessage = function(e) { self.postMessage({ move: null }); };`;
 
   undoMove() {
     if (!this.isAIGame || this.undoHistory.length === 0 || this.gameOver) return;
-    const targetLen = Math.max(0, this.undoHistory.length - 2);
-    this.gameState = this.undoHistory[targetLen] || this.undoHistory[0];
-    this.undoHistory = this.undoHistory.slice(0, targetLen);
+
+    // Each entry in undoHistory = state BEFORE the player's move.
+    // Pop restores exactly one player+AI move pair.
+    const prevState = this.undoHistory.pop();
+    if (!prevState) return;
+
+    this.gameState = prevState;
     this.selectedSquare = null;
     this.legalMovesForSelected = [];
+    // Critical: reset thinking flag so player can move immediately
     this.isThinking = false;
     this.gameOver = false;
+
+    // Force full board redraw
     this._prevPieces = Array.from({ length: 8 }, () => new Array(8).fill(null));
     this.render();
     this.updateTurnIndicator();
     this.updatePlayerBars();
     this.saveGameState();
+
     if (ZChess.Notifications) ZChess.Notifications.info('Move undone');
   },
 
