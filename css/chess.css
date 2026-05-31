@@ -740,11 +740,16 @@
   position: relative;
   z-index: 2;
   text-align: center;
-  max-width: 480px;
-  width: 90%;
-  padding: 48px 40px;
+  max-width: 500px;
+  width: 92%;
+  max-height: 92vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 40px 36px 36px;
   border-radius: 24px;
   animation: resultCardIn 0.7s cubic-bezier(0.34,1.56,0.64,1) 0.3s both;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(124,58,237,0.3) transparent;
 }
 
 @keyframes resultCardIn {
@@ -875,6 +880,144 @@
   letter-spacing: 1px;
   color: rgba(255,255,255,0.3);
 }
+
+/* ---- Detailed stats block ---- */
+.rs-detail {
+  margin-bottom: 24px;
+  animation: resultFadeUp 0.5s ease 1s both;
+}
+
+/* Accuracy bar */
+.rs-accuracy-wrap {
+  margin-bottom: 16px;
+}
+
+.rs-accuracy-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.rs-accuracy-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.35);
+  font-weight: 600;
+}
+
+.rs-accuracy-track {
+  height: 6px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.rs-accuracy-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #a855f7, #4ade80);
+  border-radius: 99px;
+  transition: width 1s ease 1.2s;
+}
+
+/* Stats grid */
+.rs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.rs-item {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.rs-icon {
+  font-size: 16px;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+.rs-val {
+  font-size: 18px;
+  font-weight: 800;
+  color: #e2d9f3;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.rs-val.col-green { color: #4ade80; }
+.rs-val.col-yellow { color: #fbbf24; }
+.rs-val.col-red { color: #f87171; }
+
+.rs-label {
+  font-size: 10px;
+  color: rgba(255,255,255,0.3);
+  text-align: center;
+  letter-spacing: 0.3px;
+}
+
+/* Move quality row */
+.rs-quality-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.rs-quality-item {
+  flex: 1;
+  border-radius: 10px;
+  padding: 8px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.rs-q-excellent { background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2); }
+.rs-q-good      { background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.2); }
+.rs-q-inaccuracy{ background: rgba(251,146,60,0.08); border: 1px solid rgba(251,146,60,0.2); }
+.rs-q-blunder   { background: rgba(239,68,68,0.08);  border: 1px solid rgba(239,68,68,0.2); }
+
+.rs-q-val {
+  font-size: 20px;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+}
+.rs-q-excellent .rs-q-val { color: #fbbf24; }
+.rs-q-good      .rs-q-val { color: #4ade80; }
+.rs-q-inaccuracy .rs-q-val { color: #fb923c; }
+.rs-q-blunder   .rs-q-val { color: #f87171; }
+
+.rs-q-label {
+  font-size: 9px;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.3px;
+  text-align: center;
+}
+
+/* Extra row (castling/undos) */
+.rs-extra-row {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.rs-extra-item {
+  font-size: 12px;
+  color: rgba(255,255,255,0.35);
+}
+
+/* Shared color util */
+.result-content .positive { color: #4ade80; }
+.result-content .negative { color: #f87171; }
 
 /* Action buttons */
 .result-btn-row {

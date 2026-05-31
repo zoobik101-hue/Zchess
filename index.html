@@ -844,7 +844,7 @@
       <!-- Reason -->
       <p class="result-reason" id="result-reason">Вы поставили мат сопернику</p>
 
-      <!-- Stats row -->
+      <!-- XP / Rating row -->
       <div class="result-stats-row">
         <div class="result-stat-card">
           <span class="result-stat-icon">⚡</span>
@@ -857,6 +857,86 @@
           <span class="result-stat-val positive" id="result-rating">+0</span>
           <span class="result-stat-lbl" data-i18n="board.rating_change">Рейтинг</span>
         </div>
+      </div>
+
+      <!-- Detailed stats block -->
+      <div class="rs-detail" id="rs-detail-block">
+
+        <!-- Accuracy bar -->
+        <div class="rs-accuracy-wrap">
+          <div class="rs-accuracy-header">
+            <span class="rs-accuracy-label">Точность игры</span>
+            <span class="rs-val col-green" id="rs-accuracy">-</span>
+          </div>
+          <div class="rs-accuracy-track">
+            <div class="rs-accuracy-bar" id="rs-accuracy-bar" style="width:0%"></div>
+          </div>
+        </div>
+
+        <!-- Grid of stats -->
+        <div class="rs-grid">
+          <div class="rs-item">
+            <span class="rs-icon">⏱</span>
+            <span class="rs-val" id="rs-time">-</span>
+            <span class="rs-label">Время</span>
+          </div>
+          <div class="rs-item">
+            <span class="rs-icon">♟</span>
+            <span class="rs-val" id="rs-total-moves">-</span>
+            <span class="rs-label">Всего ходов</span>
+          </div>
+          <div class="rs-item">
+            <span class="rs-icon">🎯</span>
+            <span class="rs-val" id="rs-player-moves">-</span>
+            <span class="rs-label">Ваших ходов</span>
+          </div>
+          <div class="rs-item">
+            <span class="rs-icon">⚔</span>
+            <span class="rs-val" id="rs-captures">-</span>
+            <span class="rs-label">Взяли фигур</span>
+          </div>
+          <div class="rs-item">
+            <span class="rs-icon">🛡</span>
+            <span class="rs-val" id="rs-ai-captures">-</span>
+            <span class="rs-label">Потеряли фигур</span>
+          </div>
+          <div class="rs-item">
+            <span class="rs-icon">👑</span>
+            <span class="rs-val" id="rs-checks">-</span>
+            <span class="rs-label">Шахов дали</span>
+          </div>
+        </div>
+
+        <!-- Move quality row -->
+        <div class="rs-quality-row">
+          <div class="rs-quality-item rs-q-excellent">
+            <span class="rs-q-val" id="rs-excellent">0</span>
+            <span class="rs-q-label">✨ Отличных</span>
+          </div>
+          <div class="rs-quality-item rs-q-good">
+            <span class="rs-q-val" id="rs-good">0</span>
+            <span class="rs-q-label">✅ Хороших</span>
+          </div>
+          <div class="rs-quality-item rs-q-inaccuracy">
+            <span class="rs-q-val" id="rs-inaccuracy">0</span>
+            <span class="rs-q-label">⚠ Неточностей</span>
+          </div>
+          <div class="rs-quality-item rs-q-blunder">
+            <span class="rs-q-val" id="rs-blunders">0</span>
+            <span class="rs-q-label">💣 Зевков</span>
+          </div>
+        </div>
+
+        <!-- Extra row -->
+        <div class="rs-extra-row">
+          <span class="rs-extra-item">
+            🏰 <span id="rs-castled">-</span> рокировка
+          </span>
+          <span class="rs-extra-item">
+            🔄 <span id="rs-undos">0</span> отмен хода
+          </span>
+        </div>
+
       </div>
 
       <!-- Actions -->

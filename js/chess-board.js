@@ -23,6 +23,12 @@ const ChessBoard = {
   // Generation counter - incremented on undo/newgame to cancel pending AI moves
   _aiGen: 0,
 
+  // ---- Game statistics tracker ----
+  _gameStats: null,
+
+  // Piece values for material-based quality analysis
+  _pieceVal: { p:1, n:3, b:3, r:5, q:9, k:0 },
+
   // Persistent square DOM elements [row][col]
   _squares: null,
   // Track previous board to only update changed squares
@@ -244,6 +250,24 @@ const ChessBoard = {
     this.selectedSquare = null;
     this.legalMovesForSelected = [];
 
+    // Reset stats
+    this._gameStats = {
+      startTime: Date.now(),
+      playerMoves: 0,
+      aiMoves: 0,
+      playerCaptures: 0,
+      aiCaptures: 0,
+      playerChecks: 0,
+      aiChecks: 0,
+      excellent: 0,
+      good: 0,
+      inaccuracy: 0,
+      blunders: 0,
+      undos: 0,
+      castled: false,
+      promotions: 0
+    };
+
     this.gameState = ZChess.Engine.createInitialState();
 
     // Invalidate any pending AI worker from previous game
@@ -359,6 +383,22 @@ const ChessBoard = {
       this.undoHistory.push(engine.cloneState(this.gameState));
     }
 
+    // --- Track player stats ---
+    if (this._gameStats && this.isAIGame) {
+      this._gameStats.playerMoves++;
+
+      if (move.capture || move.enPassant) {
+        this._gameStats.playerCaptures++;
+        // Quality: compare captured vs attacker piece value
+        const capVal = this._pieceVal[(move.captured?.type || move.enPassant ? 'p' : 'p')] || 1;
+        const atkVal = this._pieceVal[move.piece?.type] || 1;
+        if (capVal > atkVal) this._gameStats.excellent++;
+        else this._gameStats.good++;
+      }
+      if (move.castling) this._gameStats.castled = true;
+      if (move.promotion) this._gameStats.promotions++;
+    }
+
     this.gameState = engine.applyMove(this.gameState, move);
     this.selectedSquare = null;
     this.legalMovesForSelected = [];
@@ -377,6 +417,11 @@ const ChessBoard = {
 
     const status = engine.getGameStatus(this.gameState);
     if (status.status === 'check' && ZChess.Sound) ZChess.Sound.playCheck();
+
+    // Track check given by player
+    if (this._gameStats && status.status === 'check' && this.isAIGame) {
+      this._gameStats.playerChecks++;
+    }
 
     if (status.status !== 'playing' && status.status !== 'check') {
       this.handleGameEnd(status, move);
@@ -412,6 +457,20 @@ const ChessBoard = {
       }
 
       const engine = ZChess.Engine;
+
+      // --- Track AI stats (= player mistakes) ---
+      if (this._gameStats) {
+        this._gameStats.aiMoves++;
+        if (move.capture || move.enPassant) {
+          this._gameStats.aiCaptures++;
+          // Classify the player's previous move quality
+          const capVal = this._pieceVal[move.captured?.type || 'p'] || 1;
+          if (capVal >= 5) this._gameStats.blunders++;        // AI took rook or queen
+          else if (capVal >= 3) this._gameStats.inaccuracy++; // AI took bishop/knight
+          else this._gameStats.inaccuracy++;                  // AI took pawn
+        }
+      }
+
       this.gameState = engine.applyMove(this.gameState, move);
 
       if (ZChess.Sound) {
@@ -428,6 +487,12 @@ const ChessBoard = {
 
       const status = engine.getGameStatus(this.gameState);
       if (status.status === 'check' && ZChess.Sound) ZChess.Sound.playCheck();
+
+      // Track AI giving check (= player is in check)
+      if (this._gameStats && status.status === 'check') {
+        this._gameStats.aiChecks++;
+      }
+
       if (status.status !== 'playing' && status.status !== 'check') {
         this.handleGameEnd(status, move);
       }
@@ -616,10 +681,45 @@ self.onmessage = function(e) {
       if (result) { xpGain = result.xpGain; ratingChange = result.ratingChange; }
     }
 
-    setTimeout(() => this.showGameResultModal(heading, reason, outcome, xpGain, ratingChange), 600);
+    const stats = this._buildGameStats();
+    setTimeout(() => this.showGameResultModal(heading, reason, outcome, xpGain, ratingChange, stats), 600);
   },
 
-  showGameResultModal(heading, reason, outcome, xpGain, ratingChange) {
+  _buildGameStats() {
+    const s = this._gameStats;
+    if (!s) return null;
+
+    const elapsed = Math.floor((Date.now() - s.startTime) / 1000);
+    const mins = Math.floor(elapsed / 60);
+    const secs = elapsed % 60;
+    const timeStr = mins > 0
+      ? `${mins}м ${secs}с`
+      : `${secs}с`;
+
+    const totalMoves = s.playerMoves + s.aiMoves;
+    // Accuracy: 100% base, -5 per inaccuracy, -15 per blunder, +0 per undo (already penalised)
+    const raw = 100 - (s.inaccuracy * 5) - (s.blunders * 15);
+    const accuracy = Math.max(0, Math.min(100, Math.round(raw)));
+
+    return {
+      time: timeStr,
+      totalMoves,
+      playerMoves: s.playerMoves,
+      playerCaptures: s.playerCaptures,
+      aiCaptures: s.aiCaptures,
+      playerChecks: s.playerChecks,
+      excellent: s.excellent,
+      good: s.good,
+      inaccuracy: s.inaccuracy,
+      blunders: s.blunders,
+      castled: s.castled,
+      promotions: s.promotions,
+      undos: s.undos,
+      accuracy
+    };
+  },
+
+  showGameResultModal(heading, reason, outcome, xpGain, ratingChange, stats) {
     const overlay = document.getElementById('game-result-overlay');
     const screen  = document.getElementById('game-result-modal');
     if (!overlay || !screen) return;
@@ -650,12 +750,49 @@ self.onmessage = function(e) {
     ratingEl.textContent = ratingChange >= 0 ? `+${ratingChange}` : `${ratingChange}`;
     ratingEl.className = `result-stat-val ${ratingChange > 0 ? 'positive' : ratingChange < 0 ? 'negative' : 'neutral'}`;
 
+    // Detailed game stats
+    if (stats) {
+      this._fillStatEl('rs-time',       stats.time);
+      this._fillStatEl('rs-total-moves', stats.totalMoves);
+      this._fillStatEl('rs-player-moves', stats.playerMoves);
+      this._fillStatEl('rs-captures',   stats.playerCaptures);
+      this._fillStatEl('rs-ai-captures', stats.aiCaptures);
+      this._fillStatEl('rs-checks',     stats.playerChecks);
+      this._fillStatEl('rs-excellent',  stats.excellent);
+      this._fillStatEl('rs-good',       stats.good);
+      this._fillStatEl('rs-inaccuracy', stats.inaccuracy);
+      this._fillStatEl('rs-blunders',   stats.blunders);
+      this._fillStatEl('rs-undos',      stats.undos);
+      this._fillStatEl('rs-promotions', stats.promotions || 0);
+      this._fillStatEl('rs-castled', stats.castled ? '✓' : '✗');
+
+      const accEl = document.getElementById('rs-accuracy');
+      if (accEl) {
+        accEl.textContent = `${stats.accuracy}%`;
+        accEl.className = `rs-val ${stats.accuracy >= 80 ? 'col-green' : stats.accuracy >= 55 ? 'col-yellow' : 'col-red'}`;
+      }
+
+      const barEl = document.getElementById('rs-accuracy-bar');
+      if (barEl) barEl.style.width = `${stats.accuracy}%`;
+
+      document.getElementById('rs-detail-block')?.removeAttribute('style');
+    } else {
+      // No stats (non-AI or no tracking) - hide block
+      const blk = document.getElementById('rs-detail-block');
+      if (blk) blk.style.display = 'none';
+    }
+
     overlay.classList.add('open');
 
     // Launch confetti for win
     if (outcome === 'win') {
       this._launchConfetti();
     }
+  },
+
+  _fillStatEl(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
   },
 
   _launchConfetti() {
@@ -729,6 +866,7 @@ self.onmessage = function(e) {
     this.gameState = prevState;
     this.selectedSquare = null;
     this.legalMovesForSelected = [];
+    if (this._gameStats) this._gameStats.undos++;
     // Increment generation - cancels any pending AI worker response
     this._aiGen++;
     this.isThinking = false;
@@ -754,7 +892,8 @@ self.onmessage = function(e) {
         moves: this.gameState.history.length });
     }
     if (ZChess.Sound) ZChess.Sound.playLose();
-    this.showGameResultModal(t('board.you_lose'), t('board.resigned_reason'), 'loss', 20, -10);
+    const stats = this._buildGameStats();
+    this.showGameResultModal(t('board.you_lose'), t('board.resigned_reason'), 'loss', 20, -10, stats);
   },
 
   flipBoard() {
