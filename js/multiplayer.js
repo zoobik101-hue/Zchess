@@ -31,8 +31,9 @@ const Multiplayer = {
   MOVE_TIMEOUT:       120, // seconds per move
 
   // Disconnect thresholds (ms)
-  WARN_THRESHOLD:    10_000,  // 10 sec - show warning
-  FORFEIT_THRESHOLD: 20_000,  // 20 sec - claim win
+  // Note: page reload takes ~3-5 sec, give enough time to reconnect
+  WARN_THRESHOLD:    15_000,  // 15 sec - show warning
+  FORFEIT_THRESHOLD: 45_000,  // 45 sec - claim win (enough time to reconnect after refresh)
 
   /* ---- Init ---- */
   init() {
@@ -207,9 +208,19 @@ const Multiplayer = {
   },
 
   handleRoomUpdate(room) {
-    console.log('[MP] handleRoomUpdate: room.status=', room.status, 'this.status=', this.status, 'localColor=', this.localColor);
+    // ① HIGHEST PRIORITY: game already has a result in Firestore
+    if (room.result && !this._gameEnded) {
+      this._gameEnded = true;
+      this.stopMoveTimer();
+      this._hideDisconnectOverlay();
+      this._handleNetworkResult(room.result);
+      return;
+    }
 
-    // Opponent joined → start game
+    // If game already ended on our side - ignore further updates
+    if (this._gameEnded) return;
+
+    // ② Opponent joined → start game
     if (room.status === 'playing' && this.status === 'waiting') {
       this.status = 'playing';
       this._beginGame(room);
@@ -218,7 +229,7 @@ const Multiplayer = {
 
     if (this.status !== 'playing') return;
 
-    // Apply any new moves we haven't seen
+    // ③ Apply any new moves we haven't seen
     if (room.moves.length > this._lastMoveCount) {
       const newMoves = room.moves.slice(this._lastMoveCount);
       this._lastMoveCount = room.moves.length;
@@ -229,15 +240,11 @@ const Multiplayer = {
       });
     }
 
-    // Game result came from Firestore (other player reported it)
-    if (room.result && !this._gameEnded) {
-      this._gameEnded = true;
-      this._handleNetworkResult(room.result);
+    // ④ Disconnect check - only if game is still active
+    if (room.status === 'playing') {
+      const opp = this.localColor === 'w' ? room.black : room.white;
+      if (opp) this._checkOpponentPing(opp.lastPing);
     }
-
-    // Opponent disconnect / ping check
-    const opp = this.localColor === 'w' ? room.black : room.white;
-    if (opp) this._checkOpponentPing(opp.lastPing);
   },
 
   /* ================================================
@@ -344,6 +351,8 @@ const Multiplayer = {
     this._gameEnded = true;
     this.stopMoveTimer();
     this._hideDisconnectOverlay();
+    // Remove from localStorage immediately so a page reload won't reconnect
+    localStorage.removeItem('zchess_room');
 
     await this.db.collection('rooms').doc(this.roomId).update({
       status: 'finished',
@@ -601,6 +610,13 @@ const Multiplayer = {
       if (!doc.exists) { localStorage.removeItem('zchess_room'); return false; }
 
       const room = doc.data();
+
+      // Never reconnect to a finished game
+      if (room.status === 'finished' || room.status === 'abandoned' || room.result) {
+        localStorage.removeItem('zchess_room');
+        return false;
+      }
+
       if (room.status !== 'playing') { localStorage.removeItem('zchess_room'); return false; }
 
       // Determine our color
@@ -612,7 +628,7 @@ const Multiplayer = {
       this.localUid   = user.uid;
       this.status     = 'playing';
       this._lastMoveCount = room.moves.length;
-      this._gameEnded     = !!room.result;
+      this._gameEnded     = false;
 
       this.subscribeRoom(savedId);
       this.startHeartbeat();
