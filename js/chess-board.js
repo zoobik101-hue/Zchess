@@ -20,6 +20,8 @@ const ChessBoard = {
   isThinking: false,
   gameOver: false,
   undoHistory: [],
+  // Generation counter - incremented on undo/newgame to cancel pending AI moves
+  _aiGen: 0,
 
   // Persistent square DOM elements [row][col]
   _squares: null,
@@ -244,6 +246,9 @@ const ChessBoard = {
 
     this.gameState = ZChess.Engine.createInitialState();
 
+    // Invalidate any pending AI worker from previous game
+    this._aiGen++;
+
     // Reset piece tracking
     this._prevPieces = Array.from({ length: 8 }, () => new Array(8).fill(null));
 
@@ -393,10 +398,14 @@ const ChessBoard = {
     this.showAIThinking(true);
     this.updateTurnIndicator();
 
+    // Snapshot generation - if it changes before worker responds, abort
+    const myGen = ++this._aiGen;
+
     try {
       const move = await this._computeAIMove(this.gameState, this.aiDifficulty);
 
-      if (!move || this.gameOver) {
+      // If undo/newgame happened while we were waiting - discard this move
+      if (myGen !== this._aiGen || !move || this.gameOver) {
         this.isThinking = false;
         this.showAIThinking(false);
         return;
@@ -640,7 +649,8 @@ self.onmessage = function(e) {
     this.gameState = prevState;
     this.selectedSquare = null;
     this.legalMovesForSelected = [];
-    // Critical: reset thinking flag so player can move immediately
+    // Increment generation - cancels any pending AI worker response
+    this._aiGen++;
     this.isThinking = false;
     this.gameOver = false;
 
