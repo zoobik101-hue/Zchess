@@ -455,11 +455,10 @@ const App = {
     document.querySelectorAll('.game-mode-card').forEach(card => {
       card.addEventListener('click', () => {
         const mode = card.dataset.mode;
-        // Quick match → open multiplayer lobby
+        // Quick match → open multiplayer lobby (just show it, user picks from 3 options)
         if (mode === 'quick') {
           if (!ZChess.Auth.isLoggedIn()) { this.showAuthModal('login'); return; }
           ZChess.Multiplayer?.showLobby('lobby-choose');
-          setTimeout(() => document.getElementById('btn-lob-quick')?.click(), 150);
           return;
         }
         this.gameSetupOptions.mode = mode;
@@ -786,16 +785,21 @@ const App = {
     // ---- Quick match ----
     document.getElementById('btn-lob-quick')?.addEventListener('click', async () => {
       if (!requireLogin()) return;
+      if (MP.status !== 'idle') return; // prevent double-click
       showState('lobby-searching');
       try {
         const res = await MP.findQuickMatch();
         if (res.found) {
-          // Joined existing room → countdown will start via onSnapshot
+          // Joined existing room → onSnapshot fires → countdown starts automatically
         } else {
-          // Created room, waiting for someone to join → show invite code fallback? 
-          // Actually show "searching" state and wait
+          // Created public room, waiting for someone to join
+          // Show waiting state with invite code (so user can also share it)
+          const codeEl = document.getElementById('lobby-invite-code');
+          if (codeEl) codeEl.textContent = res.code || '------';
+          showState('lobby-waiting');
         }
       } catch (e) {
+        console.error('[Lobby] findQuickMatch error:', e);
         ZChess.Notifications.error('Не удалось начать поиск. Попробуй ещё раз.');
         showState('lobby-choose');
       }
@@ -859,9 +863,11 @@ const App = {
         await MP.joinByCode(code);
         // Status update → onSnapshot fires → countdown starts
       } catch (e) {
-        errEl.textContent = e.message === 'own_room' ? 'Это ваша собственная комната' :
-                            e.message === 'room_not_found' ? 'Комната не найдена' :
-                            'Ошибка подключения';
+        console.error('[Lobby] joinByCode error:', e);
+        errEl.textContent = e.message === 'own_room'      ? 'Это ваша собственная комната' :
+                            e.message === 'room_not_found'? 'Комната не найдена' :
+                            e.message === 'not_logged_in' ? 'Войди в аккаунт' :
+                            'Ошибка: ' + (e.message || 'неизвестно');
         errEl.style.display = '';
       }
     });
@@ -869,16 +875,6 @@ const App = {
     // Enter key in code input
     document.getElementById('room-code-input')?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') document.getElementById('btn-submit-join')?.click();
-    });
-
-    // ---- Wire "Quick Match" button on the play page ----
-    document.addEventListener('click', (e) => {
-      const card = e.target.closest('[data-mode="quick"]');
-      if (card) {
-        if (!requireLogin()) return;
-        MP.showLobby('lobby-choose');
-        setTimeout(() => document.getElementById('btn-lob-quick')?.click(), 100);
-      }
     });
 
     // Auto-reconnect to in-progress multiplayer game after login

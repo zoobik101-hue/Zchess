@@ -89,13 +89,17 @@ const Multiplayer = {
     this._ensureDb();
     const user = this._requireUser();
 
+    // Single-field query to avoid composite index requirement
     const snap = await this.db.collection('rooms')
       .where('inviteCode', '==', code.toUpperCase().trim())
-      .where('status',     '==', 'waiting')
-      .limit(1).get();
+      .limit(5).get();
 
-    if (snap.empty)              throw new Error('room_not_found');
-    const doc  = snap.docs[0];
+    if (snap.empty) throw new Error('room_not_found');
+
+    // Filter client-side
+    const doc = snap.docs.find(d => d.data().status === 'waiting');
+    if (!doc) throw new Error('room_not_found');
+
     const room = doc.data();
     if (room.white.uid === user.uid) throw new Error('own_room');
 
@@ -118,17 +122,16 @@ const Multiplayer = {
     this._ensureDb();
     const user = this._requireUser();
 
-    // Find any public room older than 2s but younger than 2min
+    // Single-field query to avoid composite index requirement
     const cutoff = this._now() - 120_000;
     const snap = await this.db.collection('rooms')
-      .where('status',   '==', 'waiting')
-      .where('isPublic', '==', true)
-      .orderBy('createdAt')
+      .where('status', '==', 'waiting')
       .limit(20).get();
 
+    // Filter client-side: public rooms, not ours, not too old
     const candidate = snap.docs.find(d => {
       const r = d.data();
-      return r.white.uid !== user.uid && r.createdAt > cutoff;
+      return r.isPublic && r.white.uid !== user.uid && r.createdAt > cutoff;
     });
 
     if (candidate) {
