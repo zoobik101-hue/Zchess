@@ -19,159 +19,188 @@ const CATEGORIES = [
   { id: 'endgame',    icon: '🏁', titleKey: 'training.cat_endgame' }
 ];
 
-/** @type {Array<object>} */
+/** Parse UCI: e2e4, e7e8q, e1g1 (castling) */
+function parseUci(uci) {
+  const engine = ZChess.Engine;
+  const from = engine.algebraicToSquare(uci.slice(0, 2));
+  const to   = engine.algebraicToSquare(uci.slice(2, 4));
+  const promotion = uci.length > 4 ? uci[4].toUpperCase() : null;
+  return { from, to, promotion };
+}
+
+function moveMatchesExpected(move, expected) {
+  if (!expected) return false;
+  if (move.from.row !== expected.from.row || move.from.col !== expected.from.col) return false;
+  if (move.to.row !== expected.to.row || move.to.col !== expected.to.col) return false;
+  const mp = move.promotion ? move.promotion.toUpperCase() : null;
+  const ep = expected.promotion ? expected.promotion.toUpperCase() : null;
+  if (mp !== ep) return false;
+  if (expected.castling && move.castling !== expected.castling) return false;
+  return true;
+}
+
+/** Resolve solutionUci to real legal moves from FEN */
+function resolveLessonMoves(lesson) {
+  const engine = ZChess.Engine;
+  let state = engine.parseFEN(lesson.fen);
+  const expected = [];
+  const uciList = lesson.solutionUci || [];
+
+  for (const uci of uciList) {
+    const spec = parseUci(uci);
+    const legal = engine.getLegalMoves(state);
+    let found = legal.find(m => moveMatchesExpected(m, spec));
+
+    if (!found && uci.length === 4) {
+      const toSq = spec.to;
+      found = legal.find(m =>
+        m.from.row === spec.from.row && m.from.col === spec.from.col &&
+        m.to.row === toSq.row && m.to.col === toSq.col
+      );
+    }
+
+    if (!found) {
+      console.warn('[Training] Illegal solution', lesson.id, uci);
+      lesson._broken = true;
+      expected.push(spec);
+    } else {
+      expected.push({
+        from: { ...found.from },
+        to: { ...found.to },
+        promotion: found.promotion || null,
+        castling: found.castling || null,
+        _legal: true
+      });
+      state = engine.applyMove(state, found);
+    }
+  }
+
+  lesson._expected = expected;
+  lesson.maxMoves = expected.length;
+  return expected.length > 0 && expected.every((e, i) => lesson.solutionUci[i]);
+}
+
+/** @type {Array<object>} - FEN + solutionUci verified on board coords */
 const LESSONS = [
-  // --- Basics ---
-  { id: 'basics_develop', category: 'basics', type: 'puzzle', difficulty: 1,
+  { id: 'basics_develop', category: 'basics', difficulty: 1,
     titleKey: 'training.lesson_basics_develop_title',
     descKey: 'training.lesson_basics_develop_desc',
-    fen: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1',
-    color: 'w', maxMoves: 1,
-    hintKeys: ['training.hint_develop_knight'],
-    solution: [{ from: { row: 0, col: 6 }, to: { row: 2, col: 5 } }]
-  },
-  { id: 'basics_center', category: 'basics', type: 'puzzle', difficulty: 1,
+    fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+    color: 'w', solutionUci: ['g1f3'] },
+
+  { id: 'basics_center', category: 'basics', difficulty: 1,
     titleKey: 'training.lesson_basics_center_title',
     descKey: 'training.lesson_basics_center_desc',
     fen: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2',
-    color: 'w', maxMoves: 1,
-    hintKeys: ['training.hint_control_center'],
-    solution: [{ from: { row: 1, col: 4 }, to: { row: 3, col: 4 } }]
-  },
-  { id: 'basics_castle', category: 'basics', type: 'puzzle', difficulty: 2,
+    color: 'w', solutionUci: ['d2d4'] },
+
+  { id: 'basics_castle', category: 'basics', difficulty: 2,
     titleKey: 'training.lesson_basics_castle_title',
     descKey: 'training.lesson_basics_castle_desc',
     fen: 'r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4',
-    color: 'w', maxMoves: 1,
-    hintKeys: ['training.hint_castle_safety'],
-    solution: [{ from: { row: 0, col: 4 }, to: { row: 0, col: 6 }, castling: 'K' }]
-  },
+    color: 'w', solutionUci: ['e1g1'] },
 
-  // --- Tactics ---
-  { id: 'tactics_fork', category: 'tactics', type: 'puzzle', difficulty: 2,
+  { id: 'tactics_fork', category: 'tactics', difficulty: 2,
     titleKey: 'training.lesson_tactics_fork_title',
     descKey: 'training.lesson_tactics_fork_desc',
     fen: 'r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4',
-    color: 'w', maxMoves: 1,
-    hintKeys: ['training.hint_fork_king_queen'],
-    solution: [{ from: { row: 2, col: 5 }, to: { row: 4, col: 4 } }]
-  },
-  { id: 'tactics_pin', category: 'tactics', type: 'puzzle', difficulty: 2,
+    color: 'w', solutionUci: ['f3e5'] },
+
+  { id: 'tactics_pin', category: 'tactics', difficulty: 2,
     titleKey: 'training.lesson_tactics_pin_title',
     descKey: 'training.lesson_tactics_pin_desc',
-    fen: 'rnbqkb1r/pppp1ppp/5n2/4p3/2B1P3/8/PPPP1PPP/RNBQK1NR w KQkq - 2 3',
-    color: 'w', maxMoves: 1,
-    hintKeys: ['training.hint_pin_piece'],
-    solution: [{ from: { row: 2, col: 5 }, to: { row: 5, col: 2 } }]
-  },
-  { id: 'tactics_skewer', category: 'tactics', type: 'puzzle', difficulty: 3,
+    fen: 'r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/3P1N2/PPP2PPP/RNBQK2R w KQkq - 0 4',
+    color: 'w', solutionUci: ['c4b5'] },
+
+  { id: 'tactics_skewer', category: 'tactics', difficulty: 3,
     titleKey: 'training.lesson_tactics_skewer_title',
     descKey: 'training.lesson_tactics_skewer_desc',
-    fen: '6k1/5ppp/8/8/8/8/5PPP/4R1K1 w - - 0 1',
-    color: 'w', maxMoves: 1,
-    hintKeys: ['training.hint_skewer_rook'],
-    solution: [{ from: { row: 0, col: 4 }, to: { row: 7, col: 4 } }]
-  },
-  { id: 'tactics_discovered', category: 'tactics', type: 'puzzle', difficulty: 3,
+    fen: '6k1/5ppp/8/8/8/8/8/R3K2R w KQ - 0 1',
+    color: 'w', solutionUci: ['a1a8'] },
+
+  { id: 'tactics_discovered', category: 'tactics', difficulty: 2,
     titleKey: 'training.lesson_tactics_discovered_title',
     descKey: 'training.lesson_tactics_discovered_desc',
-    fen: 'r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/3P1N2/PPP2PPP/RNBQK2R w KQkq - 0 5',
-    color: 'w', maxMoves: 1,
-    hintKeys: ['training.hint_discovered_attack'],
-    solution: [{ from: { row: 2, col: 5 }, to: { row: 4, col: 4 } }]
-  },
+    fen: 'r1bqkb1r/pppp1ppp/2n5/4p3/2B1P3/8/PPPP1PPP/RNBQK2R w KQkq - 0 3',
+    color: 'w', solutionUci: ['c4f7'] },
 
-  // --- Checkmate ---
-  { id: 'mate_scholar', category: 'checkmate', type: 'puzzle', difficulty: 2,
+  { id: 'mate_scholar', category: 'checkmate', difficulty: 2,
     titleKey: 'training.lesson_mate_scholar_title',
     descKey: 'training.lesson_mate_scholar_desc',
-    fen: 'r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 2 3',
-    color: 'w', maxMoves: 2,
-    hintKeys: ['training.hint_mate_f7', 'training.hint_mate_continue'],
-    solution: [
-      { from: { row: 2, col: 5 }, to: { row: 4, col: 4 } },
-      { from: { row: 3, col: 2 }, to: { row: 7, col: 6 } }
-    ]
-  },
-  { id: 'mate_back_rank', category: 'checkmate', type: 'puzzle', difficulty: 3,
+    fen: 'r1bqkb1r/pppp1ppp/4n3/4p3/2B1P3/5Q2/PPPP1PPP/RNB1K2R w KQkq - 0 4',
+    color: 'w', solutionUci: ['f3f7'] },
+
+  { id: 'mate_back_rank', category: 'checkmate', difficulty: 2,
     titleKey: 'training.lesson_mate_back_rank_title',
     descKey: 'training.lesson_mate_back_rank_desc',
-    fen: '6k1/5ppp/8/8/8/8/5PPP/4R1K1 w - - 0 1',
-    color: 'w', maxMoves: 1,
-    hintKeys: ['training.hint_back_rank_mate'],
-    solution: [{ from: { row: 0, col: 4 }, to: { row: 7, col: 4 } }]
-  },
-  { id: 'mate_queen_king', category: 'checkmate', type: 'puzzle', difficulty: 2,
+    fen: '6k1/5ppp/8/8/8/8/8/R3K2R w KQ - 0 1',
+    color: 'w', solutionUci: ['a1a8'] },
+
+  { id: 'mate_queen_king', category: 'checkmate', difficulty: 2,
     titleKey: 'training.lesson_mate_qk_title',
     descKey: 'training.lesson_mate_qk_desc',
-    fen: '8/8/8/4k3/8/8/8/4QK2 w - - 0 1',
-    color: 'w', maxMoves: 1,
-    hintKeys: ['training.hint_qk_mate'],
-    solution: [{ from: { row: 0, col: 4 }, to: { row: 1, col: 4 } }]
-  },
+    fen: '7k/4Q3/8/8/8/8/8/4K3 w - - 0 1',
+    color: 'w', solutionUci: ['e7f8'] },
 
-  // --- Defense ---
-  { id: 'def_block_check', category: 'defense', type: 'puzzle', difficulty: 2,
+  { id: 'def_block_check', category: 'defense', difficulty: 2,
     titleKey: 'training.lesson_def_block_title',
     descKey: 'training.lesson_def_block_desc',
-    fen: 'rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 1 3',
-    color: 'w', maxMoves: 1,
-    hintKeys: ['training.hint_block_check'],
-    solution: [{ from: { row: 0, col: 2 }, to: { row: 2, col: 4 } }]
-  },
-  { id: 'def_escape', category: 'defense', type: 'puzzle', difficulty: 2,
+    fen: 'rnbqkbnr/pppppppp/8/4p2q/6P1/5P2/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+    color: 'w', solutionUci: ['g2g3'] },
+
+  { id: 'def_escape', category: 'defense', difficulty: 2,
     titleKey: 'training.lesson_def_escape_title',
     descKey: 'training.lesson_def_escape_desc',
-    fen: '8/8/8/8/4k3/8/8/4K2r b - - 0 1',
-    color: 'b', maxMoves: 1,
-    hintKeys: ['training.hint_king_escape'],
-    solution: [{ from: { row: 3, col: 4 }, to: { row: 2, col: 4 } }]
-  },
-  { id: 'def_hanging', category: 'defense', type: 'puzzle', difficulty: 1,
+    fen: '8/8/8/3Q3/4k3/8/8/8 b - - 0 1',
+    color: 'b', solutionUci: ['e4d5'] },
+
+  { id: 'def_hanging', category: 'defense', difficulty: 1,
     titleKey: 'training.lesson_def_hanging_title',
     descKey: 'training.lesson_def_hanging_desc',
-    fen: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1',
-    color: 'w', maxMoves: 1,
-    hintKeys: ['training.hint_dont_hang'],
-    solution: [{ from: { row: 1, col: 4 }, to: { row: 3, col: 4 } }]
-  },
+    fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+    color: 'w', solutionUci: ['e2e4'] },
 
-  // --- Openings ---
-  { id: 'open_italian', category: 'openings', type: 'puzzle', difficulty: 2,
+  { id: 'open_italian', category: 'openings', difficulty: 2,
     titleKey: 'training.lesson_open_italian_title',
     descKey: 'training.lesson_open_italian_desc',
     fen: 'r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4',
-    color: 'w', maxMoves: 1,
-    hintKeys: ['training.hint_italian_develop'],
-    solution: [{ from: { row: 0, col: 6 }, to: { row: 2, col: 5 } }]
-  },
-  { id: 'open_sicilian', category: 'openings', type: 'puzzle', difficulty: 2,
+    color: 'w', solutionUci: ['e1g1'] },
+
+  { id: 'open_sicilian', category: 'openings', difficulty: 2,
     titleKey: 'training.lesson_open_sicilian_title',
     descKey: 'training.lesson_open_sicilian_desc',
-    fen: 'rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2',
-    color: 'w', maxMoves: 1,
-    hintKeys: ['training.hint_sicilian_idea'],
-    solution: [{ from: { row: 1, col: 2 }, to: { row: 2, col: 2 } }]
-  },
+    fen: 'rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2',
+    color: 'w', solutionUci: ['b1c3'] },
 
-  // --- Endgame ---
-  { id: 'end_promote', category: 'endgame', type: 'puzzle', difficulty: 2,
+  { id: 'end_promote', category: 'endgame', difficulty: 2,
     titleKey: 'training.lesson_end_promote_title',
     descKey: 'training.lesson_end_promote_desc',
     fen: '8/4P3/8/8/8/8/8/4K2k w - - 0 1',
-    color: 'w', maxMoves: 1,
-    hintKeys: ['training.hint_push_pawn'],
-    solution: [{ from: { row: 1, col: 4 }, to: { row: 0, col: 4 }, promotion: 'Q' }]
-  },
-  { id: 'end_kq_vs_k', category: 'endgame', type: 'puzzle', difficulty: 3,
+    color: 'w', solutionUci: ['e7e8q'] },
+
+  { id: 'end_kq_vs_k', category: 'endgame', difficulty: 2,
     titleKey: 'training.lesson_end_kq_title',
     descKey: 'training.lesson_end_kq_desc',
-    fen: '8/8/8/4k3/8/8/8/4QK2 w - - 0 1',
-    color: 'w', maxMoves: 1,
-    hintKeys: ['training.hint_kq_technique'],
-    solution: [{ from: { row: 0, col: 4 }, to: { row: 1, col: 4 } }]
-  }
+    fen: '7k/4Q3/8/8/8/8/8/4K3 w - - 0 1',
+    color: 'w', solutionUci: ['e7f8'] }
 ];
+
+LESSONS.forEach(les => resolveLessonMoves(les));
+
+function validateAllLessons() {
+  const broken = LESSONS.filter(l => {
+    if (!l._expected?.length) return true;
+    return l.solutionUci.some((uci, i) => {
+      const e = l._expected[i];
+      return !e || !l._expected[i].from ||
+        (l._expected[i].from.row === undefined);
+    });
+  });
+  if (broken.length) {
+    console.error('[Training] Broken lessons:', broken.map(b => b.id).join(', '));
+  }
+}
+validateAllLessons();
 
 const Training = {
   active: false,
@@ -279,6 +308,12 @@ const Training = {
     const lesson = this.getLesson(lessonId);
     if (!lesson) return;
 
+    resolveLessonMoves(lesson);
+    if (!lesson._expected?.length) {
+      ZChess.Notifications?.error(t('training.lesson_error'));
+      return;
+    }
+
     this.active = true;
     this.mode = 'puzzle';
     this.lesson = lesson;
@@ -340,6 +375,8 @@ const Training = {
     if (!this.lesson) return;
     this._moveIndex = 0;
     this._hintsUsed = 0;
+    resolveLessonMoves(this.lesson);
+    ZChess.ChessBoard.clearTrainingHint?.();
     ZChess.ChessBoard.startTrainingLesson(this.lesson);
     this._updateLessonUI();
   },
@@ -359,8 +396,16 @@ const Training = {
     const step  = document.getElementById('training-step');
     if (title) title.textContent = t(les.titleKey);
     if (desc)  desc.textContent  = t(les.descKey);
-    if (step)  step.textContent  = t('training.step', { current: this._moveIndex + 1, max: les.maxMoves || 1 });
+    if (step) {
+      const goal = this._formatExpectedMove();
+      step.textContent = t('training.step_goal', {
+        current: this._moveIndex + 1,
+        max: les.maxMoves || 1,
+        move: goal || '—'
+      });
+    }
     this._clearFeedback();
+    ZChess.ChessBoard?.clearTrainingHint?.();
   },
 
   _setCoachUI() {
@@ -383,17 +428,24 @@ const Training = {
   },
 
   showHint() {
-    const les = this.lesson;
-    if (!les || !les.hintKeys?.length) {
-      if (this.mode === 'coach') {
-        this._showFeedback('hint', t('training.coach_hint_generic'), 0);
-        return;
-      }
+    if (this.mode === 'coach') {
+      this._showFeedback('hint', t('training.coach_hint_generic'), 0);
       return;
     }
-    const idx = Math.min(this._hintsUsed, les.hintKeys.length - 1);
+
+    const les = this.lesson;
+    const exp = les?._expected?.[this._moveIndex];
+    if (!exp) return;
+
+    const engine = ZChess.Engine;
+    const fromSq = engine.squareToAlgebraic(exp.from.row, exp.from.col);
+    const toSq   = engine.squareToAlgebraic(exp.to.row, exp.to.col);
+    let promo = '';
+    if (exp.promotion) promo = ' → ' + t('training.promote_queen');
+
+    ZChess.ChessBoard?.showTrainingHint(exp.from.row, exp.from.col, exp.to.row, exp.to.col);
     this._hintsUsed++;
-    this._showFeedback('hint', t(les.hintKeys[idx]), 0);
+    this._showFeedback('hint', t('training.hint_move', { from: fromSq, to: toSq }) + promo, 0);
   },
 
   /** Called before player move in training */
@@ -414,7 +466,9 @@ const Training = {
       stateAfter = engine.applyMove(engine.cloneState(this._stateBefore), move);
     }
     const analysis = await this._analyzeMove(stateAfter, move);
-    this._showFeedback(analysis.quality, t('training.puzzle_wrong') + ' ' + analysis.message, analysis.pct);
+    const expected = this._formatExpectedMove();
+    const msg = t('training.puzzle_wrong') + (expected ? ' ' + t('training.try_move', { move: expected }) : '');
+    this._showFeedback(analysis.quality, msg, analysis.pct);
     if (ZChess.Sound) ZChess.Sound.playLose?.();
   },
 
@@ -442,13 +496,17 @@ const Training = {
   },
 
   _checkPuzzleMove(move) {
-    const sol = this.lesson?.solution?.[this._moveIndex];
-    if (!sol) return false;
-    const sameFrom = move.from.row === sol.from.row && move.from.col === sol.from.col;
-    const sameTo   = move.to.row === sol.to.row && move.to.col === sol.to.col;
-    const promOk   = (move.promotion || null) === (sol.promotion || null);
-    const castleOk = !sol.castling || move.castling === sol.castling;
-    return sameFrom && sameTo && promOk && castleOk;
+    const exp = this.lesson?._expected?.[this._moveIndex];
+    if (!exp || !exp._legal) return false;
+    return moveMatchesExpected(move, exp);
+  },
+
+  _formatExpectedMove() {
+    const exp = this.lesson?._expected?.[this._moveIndex];
+    if (!exp) return '';
+    const engine = ZChess.Engine;
+    return engine.squareToAlgebraic(exp.from.row, exp.from.col) +
+      ' → ' + engine.squareToAlgebraic(exp.to.row, exp.to.col);
   },
 
   _completeLesson() {
@@ -555,6 +613,8 @@ const Training = {
     if (ql) ql.textContent = labels[quality] || quality;
   }
 };
+
+Training.prepareLesson = resolveLessonMoves;
 
 window.ZChess.Training = Training;
 console.log('[ZChess] Training module loaded');

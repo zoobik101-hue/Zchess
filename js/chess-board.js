@@ -39,6 +39,7 @@ const ChessBoard = {
   _squares: null,
   // Track previous board to only update changed squares
   _prevPieces: null,
+  _trainingHint: null,
 
   SYMBOLS: {
     wK:'♔', wQ:'♕', wR:'♖', wB:'♗', wN:'♘', wP:'♙',
@@ -148,6 +149,10 @@ const ChessBoard = {
         }
         if (legalSet.has(key)) {
           cls += captureSet.has(key) ? ' can-capture' : ' can-move';
+        }
+        if (this._trainingHint) {
+          if (this._trainingHint.fr === r && this._trainingHint.fc === c) cls += ' hint-from';
+          if (this._trainingHint.tr === r && this._trainingHint.tc === c) cls += ' hint-to';
         }
 
         if (el.className !== cls) el.className = cls;
@@ -335,6 +340,7 @@ const ChessBoard = {
 
     this.gameState = ZChess.Engine.parseFEN(lesson.fen);
     this._prevPieces = Array.from({ length: 8 }, () => new Array(8).fill(null));
+    this.clearTrainingHint();
 
     this.initBoard();
     if (this.flipped) this._reorderSquares();
@@ -545,6 +551,16 @@ const ChessBoard = {
     if (piece && piece.color === turn && (!this.multiplayerMode || piece.color === this.playerColor)) {
       this.selectPiece(row, col);
     }
+  },
+
+  clearTrainingHint() {
+    this._trainingHint = null;
+    if (this._squares) this.render();
+  },
+
+  showTrainingHint(fr, fc, tr, tc) {
+    this._trainingHint = { fr, fc, tr, tc };
+    if (this._squares) this.render();
   },
 
   selectPiece(row, col) {
