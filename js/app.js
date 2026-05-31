@@ -48,8 +48,15 @@ const App = {
     window.addEventListener('hashchange', () => this.handleRoute());
 
     // Listen for auth changes to update UI
-    ZChess.Auth.onAuthChange(() => {
+    ZChess.Auth.onAuthChange((user) => {
       this.updateAuthDependentUI();
+      // Auto-close auth modal when user successfully signs in
+      if (user) {
+        const authModal = document.getElementById('auth-modal-overlay');
+        if (authModal && authModal.classList.contains('open')) {
+          this.closeModal('auth-modal-overlay');
+        }
+      }
     });
 
     // Listen for language changes
@@ -404,9 +411,15 @@ const App = {
       this.handleRegister();
     });
 
-    // Google auth
-    document.getElementById('btn-google-login')?.addEventListener('click', () => ZChess.Auth.loginWithGoogle());
-    document.getElementById('btn-google-register')?.addEventListener('click', () => ZChess.Auth.loginWithGoogle());
+    // Google auth - close modal on success
+    const handleGoogleAuth = async () => {
+      const result = await ZChess.Auth.loginWithGoogle();
+      if (result && result.success !== false) {
+        this.closeModal('auth-modal-overlay');
+      }
+    };
+    document.getElementById('btn-google-login')?.addEventListener('click', handleGoogleAuth);
+    document.getElementById('btn-google-register')?.addEventListener('click', handleGoogleAuth);
 
     // Logout
     document.getElementById('btn-logout')?.addEventListener('click', () => {
