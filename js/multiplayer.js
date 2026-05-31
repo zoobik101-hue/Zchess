@@ -113,12 +113,8 @@ const Multiplayer = {
 
     await doc.ref.update({ status: 'playing', black: blackData });
 
-    this._activateRoom(doc.id, 'b', 'playing');
-
-    // Joiner must start game immediately - handleRoomUpdate won't trigger
-    // because this.status is already 'playing' (not 'waiting')
-    const fullRoom = { ...room, status: 'playing', black: blackData };
-    this._beginGame(fullRoom);
+    // Use 'waiting' so handleRoomUpdate fires _beginGame on first snapshot
+    this._activateRoom(doc.id, 'b', 'waiting');
 
     return { roomId: doc.id };
   },
@@ -150,11 +146,8 @@ const Multiplayer = {
         lastPing:  this._now()
       };
       await doc.ref.update({ status: 'playing', black: blackData });
-      this._activateRoom(doc.id, 'b', 'playing');
-
-      // Joiner starts game immediately (same as joinByCode)
-      this._beginGame({ ...room, status: 'playing', black: blackData });
-
+      // Use 'waiting' so handleRoomUpdate fires _beginGame on first snapshot
+      this._activateRoom(doc.id, 'b', 'waiting');
       return { roomId: doc.id, found: true };
     }
 
@@ -191,6 +184,8 @@ const Multiplayer = {
   },
 
   handleRoomUpdate(room) {
+    console.log('[MP] handleRoomUpdate: room.status=', room.status, 'this.status=', this.status, 'localColor=', this.localColor);
+
     // Opponent joined → start game
     if (room.status === 'playing' && this.status === 'waiting') {
       this.status = 'playing';
@@ -228,38 +223,51 @@ const Multiplayer = {
 
   _beginGame(room) {
     const opp = this.localColor === 'w' ? room.black : room.white;
-    if (!opp) return;
+    if (!opp) {
+      console.error('[MP] _beginGame: opponent is null', room);
+      return;
+    }
 
-    // Make sure lobby overlay is visible to show countdown
+    console.log('[MP] _beginGame called, localColor=', this.localColor, 'opp=', opp);
+
+    // Make sure lobby overlay is open to show countdown
     const overlay = document.getElementById('room-lobby-overlay');
-    if (overlay && !overlay.classList.contains('open')) overlay.classList.add('open');
+    if (overlay) overlay.classList.add('open');
 
     this._showLobbyState('lobby-ready');
     this._updateReadyInfo(opp);
 
-    let n = 3;
-    const el = document.getElementById('lobby-countdown');
-
     const playerColor    = this.localColor;
-    const opponentName   = opp.username || 'Opponent';
+    const opponentName   = opp.username || 'Соперник';
     const opponentRating = opp.rating   || 1200;
+    let   n = 3;
+    const el = document.getElementById('lobby-countdown');
 
     const tick = () => {
       if (el) el.textContent = n;
-      if (n-- <= 0) {
-        // Close lobby modal
+
+      if (n <= 0) {
+        // Close lobby, navigate to board, start game
         if (overlay) overlay.classList.remove('open');
 
-        // Navigate to the chess board page, then start the multiplayer game
-        if (ZChess.App && ZChess.App.navigate) ZChess.App.navigate('play');
-
-        setTimeout(() => {
+        const launch = () => {
           ZChess.ChessBoard.startMultiplayerGame({ playerColor, opponentName, opponentRating });
-        }, 200);
+        };
+
+        if (ZChess.App && ZChess.App.navigate) {
+          ZChess.App.navigate('play');
+          setTimeout(launch, 300);
+        } else {
+          window.location.hash = 'play';
+          setTimeout(launch, 500);
+        }
         return;
       }
+
+      n--;
       setTimeout(tick, 1000);
     };
+
     tick();
   },
 
