@@ -335,7 +335,7 @@ const ChessBoard = {
     this.updateTurnIndicator();
 
     try {
-      const move = await ZChess.AI.getBestMoveAsync(this.gameState, this.aiDifficulty);
+      const move = await this._computeAIMoveInWorker(this.gameState, this.aiDifficulty);
 
       if (!move || this.gameOver) {
         this.isThinking = false;
@@ -343,7 +343,6 @@ const ChessBoard = {
         return;
       }
 
-      // Apply AI move
       const engine = ZChess.Engine;
       this.gameState = engine.applyMove(this.gameState, move);
 
@@ -375,6 +374,92 @@ const ChessBoard = {
 
     this.isThinking = false;
     this.showAIThinking(false);
+  },
+
+  // Run AI in Web Worker to avoid freezing the UI thread
+  _computeAIMoveInWorker(state, difficulty) {
+    return new Promise((resolve) => {
+      // Minimal delay so "thinking" indicator renders before computation
+      const minDelay = difficulty === 'beginner' ? 150 : 250;
+
+      const tryWorker = () => {
+        // Try Web Worker first (best option - separate thread)
+        if (typeof Worker !== 'undefined') {
+          const workerPath = this._getWorkerPath();
+          let worker;
+          let settled = false;
+          let startTime = Date.now();
+
+          try {
+            worker = new Worker(workerPath);
+
+            // Timeout: kill worker after 15 seconds and fall back to sync
+            const timeout = setTimeout(() => {
+              if (!settled) {
+                settled = true;
+                worker.terminate();
+                console.warn('[AI] Worker timed out, falling back to sync');
+                const move = ZChess.AI.getBestMove(state, 'medium'); // fallback lower depth
+                resolve(move);
+              }
+            }, 15000);
+
+            worker.onmessage = (e) => {
+              if (settled) return;
+              settled = true;
+              clearTimeout(timeout);
+              worker.terminate();
+              const elapsed = Date.now() - startTime;
+              // Ensure minimum display time for thinking indicator
+              const remaining = Math.max(0, minDelay - elapsed);
+              setTimeout(() => resolve(e.data.move || null), remaining);
+            };
+
+            worker.onerror = (err) => {
+              if (settled) return;
+              settled = true;
+              clearTimeout(timeout);
+              worker.terminate();
+              console.warn('[AI] Worker error, falling back to sync:', err.message);
+              // Fall back to synchronous computation
+              setTimeout(() => {
+                resolve(ZChess.AI.getBestMove(state, difficulty));
+              }, minDelay);
+            };
+
+            worker.postMessage({ state, difficulty, id: Date.now() });
+            return;
+          } catch (e) {
+            // Worker creation failed, fall through to sync
+            if (worker) worker.terminate();
+          }
+        }
+
+        // Fallback: synchronous (wrapped in setTimeout to let UI paint first)
+        setTimeout(() => {
+          try {
+            resolve(ZChess.AI.getBestMove(state, difficulty));
+          } catch (e) {
+            resolve(null);
+          }
+        }, minDelay);
+      };
+
+      tryWorker();
+    });
+  },
+
+  // Get absolute path to ai-worker.js (works on GitHub Pages subpath)
+  _getWorkerPath() {
+    const scripts = document.querySelectorAll('script[src]');
+    for (const s of scripts) {
+      if (s.src.includes('chess-board.js')) {
+        return s.src.replace('chess-board.js', 'ai-worker.js');
+      }
+    }
+    // Fallback: derive from current page URL
+    const base = location.pathname.replace(/\/[^/]*$/, '');
+    return location.origin + base + '/js/ai-worker.js';
   },
 
   // --- Promotion Dialog ---

@@ -129,9 +129,6 @@ const ChessAI = {
       }
     }
 
-    // Mobility bonus (simplified)
-    const whiteMovCount = state.turn === 'w' ? ZChess.Engine.getLegalMoves(state).length : 0;
-
     return score;
   },
 
@@ -237,15 +234,17 @@ const ChessAI = {
   },
 
   // Get search depth for difficulty level
+  // Depth 5 = ~grandmaster level (millions of positions, but alpha-beta keeps it fast)
+  // Depth 7 was too slow in the main thread; with Web Worker depth 5 is the sweet spot
   getDepth(difficulty) {
     const depths = {
-      beginner: 1,
-      easy: 2,
-      medium: 3,
-      advanced: 4,
-      expert: 5,
-      grandmaster: 6,
-      impossible: 7
+      beginner:    1,
+      easy:        2,
+      medium:      3,
+      advanced:    4,
+      expert:      5,
+      grandmaster: 5,
+      impossible:  5
     };
     return depths[difficulty] || 3;
   },
