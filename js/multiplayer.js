@@ -31,8 +31,8 @@ const Multiplayer = {
   MOVE_TIMEOUT:       120, // seconds per move
 
   // Disconnect thresholds (ms)
-  WARN_THRESHOLD:    12_000,  // 12 sec - show warning
-  FORFEIT_THRESHOLD: 40_000,  // 40 sec - claim win
+  WARN_THRESHOLD:    10_000,  // 10 sec - show warning
+  FORFEIT_THRESHOLD: 20_000,  // 20 sec - claim win
 
   /* ---- Init ---- */
   init() {
@@ -49,15 +49,8 @@ const Multiplayer = {
       }).catch(() => {});
     });
 
-    // Pause heartbeat on tab hide, resume on show
-    document.addEventListener('visibilitychange', () => {
-      if (this.status !== 'playing') return;
-      if (document.hidden) {
-        this.stopHeartbeat();
-      } else {
-        this.startHeartbeat();
-      }
-    });
+    // No visibilitychange pause - we keep heartbeat going in background
+    // (stopping it would make us look disconnected to opponent)
   },
 
   /* ---- Helpers ---- */
@@ -381,26 +374,32 @@ const Multiplayer = {
       heading = t('board.you_win');
       reason  = result.reason === 'resign'     ? t('board.resigned_reason') :
                 result.reason === 'disconnect' ? 'Соперник отключился' :
+                result.reason === 'timeout'    ? 'Время вышло у соперника' :
                 t('board.checkmate');
     } else {
       outcome = 'loss';
       heading = t('board.you_lose');
       reason  = result.reason === 'resign'     ? t('board.resigned_reason') :
-                result.reason === 'disconnect' ? 'Вы были отключены' :
+                result.reason === 'disconnect' ? 'Соперник отключился' :
+                result.reason === 'timeout'    ? 'Время вышло' :
                 t('board.checkmate');
     }
 
     ZChess.ChessBoard.gameOver = true;
+    this.stopMoveTimer();
+    this._hideDisconnectOverlay();
+
     if (ZChess.Sound) {
       if (iWon)        ZChess.Sound.playWin?.();
       else if (isDraw) ZChess.Sound.playDraw?.();
       else             ZChess.Sound.playLose?.();
     }
 
+    // Small delay so last move animation plays out
     setTimeout(() => {
       const stats = ZChess.ChessBoard._buildGameStats?.() || null;
       ZChess.ChessBoard.showGameResultModal(heading, reason, outcome, 0, 0, stats);
-    }, 800);
+    }, 600);
   },
 
   /* ================================================
@@ -500,14 +499,15 @@ const Multiplayer = {
     const age = lastPing ? (this._now() - lastPing) : Infinity;
 
     if (age > this.FORFEIT_THRESHOLD) {
-      // Auto-forfeit
+      // Set flag immediately to prevent duplicate calls
+      this._gameEnded = true;
+      this.stopMoveTimer();
+      this._showDisconnectOverlay(true);
       this.reportResult({ winner: this.localColor, reason: 'disconnect' });
-      this._showDisconnectOverlay(true); // "You won - opponent disconnected"
     } else if (age > this.WARN_THRESHOLD && !this._disconnectWarned) {
       this._disconnectWarned = true;
-      this._setOppStatus('⚠ Соединение потеряно', 'mp-status-warn');
-      this._showDisconnectOverlay(false); // "Opponent disconnected, waiting..."
-      ZChess.Notifications?.warning('Соперник потерял соединение...');
+      this._setOppStatus('⚠ Нет связи', 'mp-status-warn');
+      this._showDisconnectOverlay(false);
     } else if (age < 8_000 && this._disconnectWarned) {
       this._disconnectWarned = false;
       this._setOppStatus('● Онлайн', 'mp-status-ok');
@@ -521,32 +521,61 @@ const Multiplayer = {
   },
 
   _showDisconnectOverlay(isWin) {
-    let ov = document.getElementById('mp-disconnect-overlay');
-    if (!ov) {
-      ov = document.createElement('div');
-      ov.id = 'mp-disconnect-overlay';
-      ov.className = 'mp-disconnect-overlay';
-      document.body.appendChild(ov);
+    // Only show once per game
+    if (document.getElementById('mp-disconnect-overlay')) {
+      const ov = document.getElementById('mp-disconnect-overlay');
+      if (ov) ov.style.display = 'flex';
+      return;
     }
+
+    const ov = document.createElement('div');
+    ov.id = 'mp-disconnect-overlay';
+    ov.className = 'mp-disconnect-overlay';
+    document.body.appendChild(ov);
+
+    const winColor = this.localColor;
     if (isWin) {
       ov.innerHTML = `
         <div class="mp-disconnect-card">
           <div class="mp-dc-icon">🔌</div>
           <h3>Соперник отключился</h3>
           <p>Победа засчитана!</p>
+          <button class="lobby-btn-primary" id="dc-btn-menu">В главное меню</button>
         </div>`;
     } else {
       ov.innerHTML = `
         <div class="mp-disconnect-card">
           <div class="mp-dc-icon">⏳</div>
           <h3>Соперник потерял соединение</h3>
-          <p>Ожидаем переподключения...</p>
-          <button onclick="ZChess.Multiplayer.reportResult({winner:'${this.localColor}',reason:'disconnect'})" class="lobby-btn-primary">
-            Забрать победу
-          </button>
+          <p>Ожидаем переподключения... (20 сек)</p>
+          <button class="lobby-btn-primary" id="dc-btn-claim">Забрать победу</button>
+          <button class="lobby-btn-cancel" id="dc-btn-wait" style="margin-top:8px">Продолжить ждать</button>
         </div>`;
     }
     ov.style.display = 'flex';
+
+    // Wire up buttons after inserting into DOM
+    const btnMenu  = document.getElementById('dc-btn-menu');
+    const btnClaim = document.getElementById('dc-btn-claim');
+    const btnWait  = document.getElementById('dc-btn-wait');
+
+    if (btnMenu) btnMenu.addEventListener('click', () => this._closeAndLeave());
+    if (btnClaim) btnClaim.addEventListener('click', () => {
+      this._gameEnded = true;
+      this.reportResult({ winner: winColor, reason: 'disconnect' });
+      this._showDisconnectOverlay(true);
+      ov.remove();
+    });
+    if (btnWait) btnWait.addEventListener('click', () => { ov.style.display = 'none'; });
+  },
+
+  _closeAndLeave() {
+    this._hideDisconnectOverlay();
+    this.stopMoveTimer();
+    this.leave();
+    const bar = document.getElementById('mp-status-bar');
+    if (bar) bar.style.display = 'none';
+    if (ZChess.App) ZChess.App.navigate('game');
   },
 
   _hideDisconnectOverlay() {

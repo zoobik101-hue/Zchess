@@ -105,6 +105,10 @@ const App = {
       ZChess.Particles.stop();
     }
 
+    // Show/hide multiplayer HUD based on page
+    const mpBar = document.getElementById('mp-status-bar');
+    if (mpBar) mpBar.style.display = (page === 'play' && ZChess.Multiplayer?.status === 'playing') ? '' : 'none';
+
     // Page-specific initialization
     this.onPageEnter(page, params);
 
@@ -850,12 +854,16 @@ const App = {
     // ---- Create room ----
     document.getElementById('btn-lob-create')?.addEventListener('click', async () => {
       if (!requireLogin()) return;
-      showState('lobby-searching'); // temp spinner
+      const btn = document.getElementById('btn-lob-create');
+      if (btn) btn.style.opacity = '0.5';
       try {
         const res = await MP.createRoom(false);
-        document.getElementById('lobby-invite-code').textContent = res.code;
+        if (btn) btn.style.opacity = '';
+        const codeEl = document.getElementById('lobby-invite-code');
+        if (codeEl) codeEl.textContent = res.code;
         showState('lobby-waiting');
       } catch (e) {
+        if (btn) btn.style.opacity = '';
         ZChess.Notifications.error('Ошибка создания комнаты.');
         showState('lobby-choose');
       }
