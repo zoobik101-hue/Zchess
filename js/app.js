@@ -29,6 +29,9 @@ const App = {
     // Init Firebase auth
     await ZChess.Auth.init();
 
+    // Init multiplayer module
+    if (ZChess.Multiplayer) ZChess.Multiplayer.init();
+
     // Bind global events
     this.bindEvents();
 
@@ -451,7 +454,15 @@ const App = {
     // Game setup
     document.querySelectorAll('.game-mode-card').forEach(card => {
       card.addEventListener('click', () => {
-        this.gameSetupOptions.mode = card.dataset.mode;
+        const mode = card.dataset.mode;
+        // Quick match → open multiplayer lobby
+        if (mode === 'quick') {
+          if (!ZChess.Auth.isLoggedIn()) { this.showAuthModal('login'); return; }
+          ZChess.Multiplayer?.showLobby('lobby-choose');
+          setTimeout(() => document.getElementById('btn-lob-quick')?.click(), 150);
+          return;
+        }
+        this.gameSetupOptions.mode = mode;
         this.renderGameSetup();
       });
     });
@@ -524,6 +535,9 @@ const App = {
       if (ZChess.Auth.isLoggedIn()) this.navigate('game');
       else this.showAuthModal('register');
     });
+
+    // ---- Multiplayer lobby ----
+    this.bindLobbyEvents();
 
     // Profile nav link
     document.getElementById('nav-profile-link')?.addEventListener('click', () => this.navigate('profile'));
@@ -744,6 +758,146 @@ const App = {
     setTimeout(checkVersion, 5000);
     // Then every 30 seconds
     setInterval(checkVersion, CHECK_INTERVAL);
+  },
+
+  // =========================================
+  // MULTIPLAYER LOBBY
+  // =========================================
+
+  bindLobbyEvents() {
+    const MP = ZChess.Multiplayer;
+    if (!MP) return;
+
+    const showState = (id) => MP._showLobbyState(id);
+    const requireLogin = () => {
+      if (!ZChess.Auth.isLoggedIn()) {
+        this.showAuthModal('login');
+        return false;
+      }
+      return true;
+    };
+
+    // Close lobby
+    document.getElementById('btn-lobby-close')?.addEventListener('click', async () => {
+      if (MP.status === 'waiting') await MP.leave();
+      this.closeModal('room-lobby-overlay');
+    });
+
+    // ---- Quick match ----
+    document.getElementById('btn-lob-quick')?.addEventListener('click', async () => {
+      if (!requireLogin()) return;
+      showState('lobby-searching');
+      try {
+        const res = await MP.findQuickMatch();
+        if (res.found) {
+          // Joined existing room → countdown will start via onSnapshot
+        } else {
+          // Created room, waiting for someone to join → show invite code fallback? 
+          // Actually show "searching" state and wait
+        }
+      } catch (e) {
+        ZChess.Notifications.error('Не удалось начать поиск. Попробуй ещё раз.');
+        showState('lobby-choose');
+      }
+    });
+
+    document.getElementById('btn-cancel-search')?.addEventListener('click', async () => {
+      await MP.leave();
+      showState('lobby-choose');
+    });
+
+    // ---- Create room ----
+    document.getElementById('btn-lob-create')?.addEventListener('click', async () => {
+      if (!requireLogin()) return;
+      showState('lobby-searching'); // temp spinner
+      try {
+        const res = await MP.createRoom(false);
+        document.getElementById('lobby-invite-code').textContent = res.code;
+        showState('lobby-waiting');
+      } catch (e) {
+        ZChess.Notifications.error('Ошибка создания комнаты.');
+        showState('lobby-choose');
+      }
+    });
+
+    document.getElementById('btn-cancel-room')?.addEventListener('click', async () => {
+      await MP.leave();
+      showState('lobby-choose');
+    });
+
+    // Copy invite link
+    document.getElementById('btn-copy-invite')?.addEventListener('click', () => {
+      const code = document.getElementById('lobby-invite-code')?.textContent || '';
+      const link = `${window.location.origin}${window.location.pathname}#play?room=${code}`;
+      navigator.clipboard.writeText(link).then(() => {
+        ZChess.Notifications.success('Ссылка скопирована!');
+      }).catch(() => {
+        navigator.clipboard.writeText(code).then(() => {
+          ZChess.Notifications.success(`Код скопирован: ${code}`);
+        });
+      });
+    });
+
+    // ---- Join by code ----
+    document.getElementById('btn-lob-join')?.addEventListener('click', () => {
+      if (!requireLogin()) return;
+      document.getElementById('room-code-input').value = '';
+      document.getElementById('join-error').style.display = 'none';
+      showState('lobby-join-code');
+    });
+
+    document.getElementById('btn-back-from-join')?.addEventListener('click', () => {
+      showState('lobby-choose');
+    });
+
+    document.getElementById('btn-submit-join')?.addEventListener('click', async () => {
+      const code = document.getElementById('room-code-input')?.value?.trim();
+      if (!code || code.length < 6) return;
+      const errEl = document.getElementById('join-error');
+      errEl.style.display = 'none';
+      try {
+        await MP.joinByCode(code);
+        // Status update → onSnapshot fires → countdown starts
+      } catch (e) {
+        errEl.textContent = e.message === 'own_room' ? 'Это ваша собственная комната' :
+                            e.message === 'room_not_found' ? 'Комната не найдена' :
+                            'Ошибка подключения';
+        errEl.style.display = '';
+      }
+    });
+
+    // Enter key in code input
+    document.getElementById('room-code-input')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('btn-submit-join')?.click();
+    });
+
+    // ---- Wire "Quick Match" button on the play page ----
+    document.addEventListener('click', (e) => {
+      const card = e.target.closest('[data-mode="quick"]');
+      if (card) {
+        if (!requireLogin()) return;
+        MP.showLobby('lobby-choose');
+        setTimeout(() => document.getElementById('btn-lob-quick')?.click(), 100);
+      }
+    });
+
+    // Auto-reconnect to in-progress multiplayer game after login
+    ZChess.Auth.onAuthChange(async (user) => {
+      if (user && MP.status === 'idle') {
+        await MP.tryReconnect();
+      }
+    });
+
+    // Check for invite code in URL
+    const urlRoom = new URLSearchParams(window.location.hash.split('?')[1] || '').get('room');
+    if (urlRoom && urlRoom.length === 6) {
+      setTimeout(() => {
+        if (!requireLogin()) return;
+        MP.showLobby('lobby-join-code');
+        const inp = document.getElementById('room-code-input');
+        if (inp) inp.value = urlRoom.toUpperCase();
+      }, 1000);
+    }
   }
 };
 

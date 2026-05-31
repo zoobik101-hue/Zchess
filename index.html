@@ -30,6 +30,7 @@
   <link rel="stylesheet" href="css/animations.css">
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/chess.css">
+  <link rel="stylesheet" href="css/multiplayer.css">
 </head>
 <body>
 
@@ -948,6 +949,123 @@
 <!-- Toast Notifications Container -->
 <div id="toast-container" role="status" aria-live="polite"></div>
 
+<!-- ======= ROOM LOBBY MODAL ======= -->
+<div class="modal-overlay" id="room-lobby-overlay" role="dialog" aria-label="Online Game">
+  <div class="lobby-modal">
+    <button class="modal-close lobby-close" id="btn-lobby-close">×</button>
+
+    <!-- STATE: выбор режима -->
+    <div class="lobby-state" id="lobby-choose">
+      <div class="lobby-header">
+        <div class="lobby-icon">🌐</div>
+        <h2 class="lobby-title">Онлайн игра</h2>
+        <p class="lobby-sub">Играй против живых соперников</p>
+      </div>
+      <div class="lobby-mode-grid">
+        <button class="lobby-mode-card" id="btn-lob-quick">
+          <span class="lmc-icon">⚡</span>
+          <span class="lmc-title">Быстрый матч</span>
+          <span class="lmc-desc">Случайный соперник</span>
+        </button>
+        <button class="lobby-mode-card" id="btn-lob-create">
+          <span class="lmc-icon">🏠</span>
+          <span class="lmc-title">Создать комнату</span>
+          <span class="lmc-desc">Пригласить друга</span>
+        </button>
+        <button class="lobby-mode-card" id="btn-lob-join">
+          <span class="lmc-icon">🔗</span>
+          <span class="lmc-title">Войти в комнату</span>
+          <span class="lmc-desc">По коду приглашения</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- STATE: поиск быстрого матча -->
+    <div class="lobby-state" id="lobby-searching" style="display:none">
+      <div class="lobby-header">
+        <div class="lobby-spinner-big"></div>
+        <h2 class="lobby-title">Поиск соперника...</h2>
+        <p class="lobby-sub">Ищем игрока с похожим рейтингом</p>
+      </div>
+      <div class="lobby-dots">
+        <span></span><span></span><span></span>
+      </div>
+      <button class="lobby-btn-cancel" id="btn-cancel-search">Отмена</button>
+    </div>
+
+    <!-- STATE: ожидание в комнате (хост) -->
+    <div class="lobby-state" id="lobby-waiting" style="display:none">
+      <div class="lobby-header">
+        <h2 class="lobby-title">Ожидание соперника</h2>
+        <p class="lobby-sub">Поделись кодом с другом</p>
+      </div>
+      <div class="lobby-code-block">
+        <div class="lobby-code" id="lobby-invite-code">------</div>
+        <button class="lobby-copy-btn" id="btn-copy-invite">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+          </svg>
+          Скопировать ссылку
+        </button>
+      </div>
+      <div class="lobby-waiting-anim">
+        <div class="lobby-dots"><span></span><span></span><span></span></div>
+        <p class="lobby-sub">Ждём когда кто-то войдёт...</p>
+      </div>
+      <button class="lobby-btn-cancel" id="btn-cancel-room">Отменить</button>
+    </div>
+
+    <!-- STATE: ввод кода для входа -->
+    <div class="lobby-state" id="lobby-join-code" style="display:none">
+      <div class="lobby-header">
+        <div class="lobby-icon">🔗</div>
+        <h2 class="lobby-title">Войти в комнату</h2>
+        <p class="lobby-sub">Введи 6-значный код приглашения</p>
+      </div>
+      <div class="lobby-code-input-wrap">
+        <input class="lobby-code-input" id="room-code-input" type="text"
+               placeholder="ABC123" maxlength="6" autocomplete="off"
+               style="text-transform:uppercase">
+        <p class="lobby-error" id="join-error" style="display:none">Комната не найдена</p>
+      </div>
+      <div class="lobby-actions">
+        <button class="lobby-btn-primary" id="btn-submit-join">Войти →</button>
+        <button class="lobby-btn-cancel" id="btn-back-from-join">Назад</button>
+      </div>
+    </div>
+
+    <!-- STATE: соперник найден, обратный отсчёт -->
+    <div class="lobby-state" id="lobby-ready" style="display:none">
+      <div class="lobby-header">
+        <h2 class="lobby-title">Соперник найден!</h2>
+      </div>
+      <div class="lobby-vs">
+        <div class="lobby-player-card">
+          <div class="lpc-avatar" id="ready-my-avatar">Я</div>
+          <div class="lpc-name" id="ready-my-name">Вы</div>
+          <div class="lpc-rating" id="ready-my-rating">1200</div>
+        </div>
+        <div class="lobby-vs-badge">VS</div>
+        <div class="lobby-player-card opp">
+          <div class="lpc-avatar" id="ready-opp-avatar">?</div>
+          <div class="lpc-name" id="ready-opp-name">Соперник</div>
+          <div class="lpc-rating" id="ready-opp-rating">1200</div>
+        </div>
+      </div>
+      <div class="lobby-countdown-wrap">
+        <div class="lobby-countdown" id="lobby-countdown">3</div>
+        <p class="lobby-sub">Игра начнётся через...</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- In-game opponent status bar (shown during multiplayer) -->
+<div class="mp-status-bar" id="mp-status-bar" style="display:none">
+  <span id="mp-opp-status" class="mp-status-ok">● Онлайн</span>
+</div>
+
 <!-- Firebase SDK (optional - comment out if not using Firebase) -->
 <!-- Replace "compat" version if using Firebase modular API -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -969,6 +1087,7 @@
 <script src="js/daily-tasks.js"></script>
 <script src="js/profile.js"></script>
 <script src="js/leaderboard.js"></script>
+<script src="js/multiplayer.js"></script>
 <script src="js/app.js"></script>
 
 </body>

@@ -23,6 +23,10 @@ const ChessBoard = {
   // Generation counter - incremented on undo/newgame to cancel pending AI moves
   _aiGen: 0,
 
+  // ---- Multiplayer ----
+  multiplayerMode: false,
+  multiplayerOpponent: null, // { name, rating }
+
   // ---- Game statistics tracker ----
   _gameStats: null,
 
@@ -299,6 +303,118 @@ const ChessBoard = {
     }
   },
 
+  // =========================================
+  // MULTIPLAYER GAME START
+  // =========================================
+
+  startMultiplayerGame(options = {}) {
+    this.isAIGame        = false;
+    this.multiplayerMode = true;
+    this.playerColor     = options.playerColor || 'w';
+    this.flipped         = this.playerColor === 'b';
+    this.gameOver        = false;
+    this.isThinking      = false;
+    this.undoHistory     = [];
+    this.selectedSquare  = null;
+    this.legalMovesForSelected = [];
+    this.multiplayerOpponent = {
+      name:   options.opponentName   || 'Opponent',
+      rating: options.opponentRating || 1200
+    };
+
+    this._gameStats = {
+      startTime: Date.now(),
+      playerMoves: 0, aiMoves: 0, playerCaptures: 0, aiCaptures: 0,
+      playerChecks: 0, aiChecks: 0, excellent: 0, good: 0,
+      inaccuracy: 0, blunders: 0, undos: 0, castled: false, promotions: 0
+    };
+
+    this._aiGen++;
+    this._prevPieces = Array.from({ length: 8 }, () => new Array(8).fill(null));
+    this.gameState = ZChess.Engine.createInitialState();
+
+    // Replay stored moves (reconnection case)
+    if (options.moves && options.moves.length > 0) {
+      const engine = ZChess.Engine;
+      options.moves.forEach(mv => {
+        const legal = engine.getLegalMoves(this.gameState);
+        const found = legal.find(m =>
+          m.from.row === mv.from.row && m.from.col === mv.from.col &&
+          m.to.row   === mv.to.row   && m.to.col   === mv.to.col   &&
+          (m.promotion || null) === (mv.promotion || null)
+        );
+        if (found) this.gameState = engine.applyMove(this.gameState, found);
+      });
+    }
+
+    this.initBoard();
+    if (this.flipped) this._reorderSquares();
+    this.render();
+    this.updateTurnIndicator();
+    this.updatePlayerBars();
+    this.updateCoordinates();
+
+    // Show multiplayer status bar
+    const bar = document.getElementById('mp-status-bar');
+    if (bar) bar.style.display = '';
+  },
+
+  // =========================================
+  // APPLY OPPONENT NETWORK MOVE
+  // =========================================
+
+  async applyNetworkMove(mv) {
+    if (this.gameOver) return;
+    const engine = ZChess.Engine;
+
+    // Find matching legal move by from/to/promotion
+    const legal = engine.getLegalMoves(this.gameState);
+    const move  = legal.find(m =>
+      m.from.row === mv.from.row && m.from.col === mv.from.col &&
+      m.to.row   === mv.to.row   && m.to.col   === mv.to.col   &&
+      (m.promotion || null) === (mv.promotion || null)
+    );
+    if (!move) return;
+
+    // Track stats for opponent (ai-equivalent)
+    if (this._gameStats) {
+      this._gameStats.aiMoves++;
+      if (move.capture || move.enPassant) {
+        this._gameStats.aiCaptures++;
+        const capVal = this._pieceVal[move.captured?.type || 'p'] || 1;
+        if (capVal >= 5) this._gameStats.blunders++;
+        else             this._gameStats.inaccuracy++;
+      }
+    }
+
+    this.gameState = engine.applyMove(this.gameState, move);
+    this.selectedSquare = null;
+    this.legalMovesForSelected = [];
+
+    if (ZChess.Sound) {
+      if (move.castling)               ZChess.Sound.playCastle();
+      else if (move.capture || move.enPassant) ZChess.Sound.playCapture();
+      else                             ZChess.Sound.playMove();
+    }
+
+    this.render();
+    this.updateTurnIndicator();
+    this.updatePlayerBars();
+
+    const status = engine.getGameStatus(this.gameState);
+    if (status.status === 'check' && ZChess.Sound) ZChess.Sound.playCheck();
+
+    if (this._gameStats && status.status === 'check') this._gameStats.aiChecks++;
+
+    if (status.status !== 'playing' && status.status !== 'check') {
+      // Opponent's move ended the game — report to Firestore
+      const winner = status.status === 'checkmate' ? status.winner : 'draw';
+      const reason = status.status === 'checkmate' ? 'checkmate' : (status.reason || status.status);
+      await ZChess.Multiplayer.reportResult({ winner, reason });
+      this.handleGameEnd(status, move);
+    }
+  },
+
   resumeGame() {
     try {
       const saved = localStorage.getItem(ZChess.STORAGE.GAME_STATE);
@@ -394,7 +510,7 @@ const ChessBoard = {
     }
 
     // --- Track player stats ---
-    if (this._gameStats && this.isAIGame) {
+    if (this._gameStats && (this.isAIGame || this.multiplayerMode)) {
       this._gameStats.playerMoves++;
 
       if (move.capture || move.enPassant) {
@@ -429,17 +545,30 @@ const ChessBoard = {
     if (status.status === 'check' && ZChess.Sound) ZChess.Sound.playCheck();
 
     // Track check given by player
-    if (this._gameStats && status.status === 'check' && this.isAIGame) {
+    if (this._gameStats && status.status === 'check' && (this.isAIGame || this.multiplayerMode)) {
       this._gameStats.playerChecks++;
     }
 
     if (status.status !== 'playing' && status.status !== 'check') {
+      // In multiplayer: report result to Firestore before showing modal
+      if (this.multiplayerMode && ZChess.Multiplayer) {
+        const winner = status.status === 'checkmate' ? status.winner : 'draw';
+        const reason = status.status === 'checkmate' ? 'checkmate' : (status.reason || status.status);
+        await ZChess.Multiplayer.reportResult({ winner, reason });
+      }
       this.handleGameEnd(status, move);
       return;
     }
 
+    // Trigger AI only in AI game mode
     if (this.isAIGame && this.gameState.turn !== this.playerColor) {
       await this.triggerAIMove();
+    }
+    // In multiplayer: just wait for opponent's move via Firestore subscription
+
+    // Push move to Firestore in multiplayer
+    if (this.multiplayerMode && ZChess.Multiplayer) {
+      await ZChess.Multiplayer.sendMove(move);
     }
   },
 
@@ -902,6 +1031,10 @@ self.onmessage = function(e) {
         moves: this.gameState.history.length });
     }
     if (ZChess.Sound) ZChess.Sound.playLose();
+    // In multiplayer: notify opponent
+    if (this.multiplayerMode && ZChess.Multiplayer) {
+      ZChess.Multiplayer.resignOnline();
+    }
     const stats = this._buildGameStats();
     this.showGameResultModal(t('board.you_lose'), t('board.resigned_reason'), 'loss', 20, -10, stats);
   },
