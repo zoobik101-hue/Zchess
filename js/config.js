@@ -14,13 +14,13 @@ window.ZChess = window.ZChess || {};
 // Replace these values with your Firebase project settings
 // ==========================================
 window.ZChess.firebaseConfig = {
-  apiKey: "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-  authDomain: "your-zchess-project.firebaseapp.com",
-  projectId: "your-zchess-project",
-  storageBucket: "your-zchess-project.appspot.com",
-  messagingSenderId: "000000000000",
-  appId: "1:000000000000:web:xxxxxxxxxxxxxxxxxxxx",
-  measurementId: "G-XXXXXXXXXX"
+  apiKey: "AIzaSyCQZ8VJYUA9R6n5f-2_G-F7x6mVhg_Bin8",
+  authDomain: "zchess-6633a.firebaseapp.com",
+  projectId: "zchess-6633a",
+  storageBucket: "zchess-6633a.firebasestorage.app",
+  messagingSenderId: "782009616625",
+  appId: "1:782009616625:web:da477098f57f2f7d46c150",
+  measurementId: "G-5V63J817SV"
 };
 
 // ==========================================
