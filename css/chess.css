@@ -313,15 +313,9 @@
 
 /* --- Promotion Modal --- */
 .promotion-modal-overlay {
-  position: fixed;
-  inset: 0;
+  z-index: 1000;
   background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(8px);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: fadeIn 0.2s ease;
 }
 
 .promotion-modal {
