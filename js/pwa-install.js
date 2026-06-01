@@ -150,10 +150,7 @@ const PwaInstall = {
       if (key) el.textContent = translate(key);
     });
 
-    const hero = document.getElementById('pwa-hero-install');
-    if (hero && hero.style.display !== 'none') {
-      hero.textContent = translate(this._getInstallBtnKey());
-    }
+    this._refreshHeroBtn();
   },
 
   _maybeShowBanner() {

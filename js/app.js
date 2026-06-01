@@ -242,13 +242,16 @@ const App = {
     });
 
     const diffEl = document.getElementById('difficulty-section');
-    if (diffEl) diffEl.style.display = isAi ? 'block' : 'none';
+    if (diffEl) diffEl.style.display = isAi ? '' : 'none';
 
     const trainEl = document.getElementById('training-section');
     if (trainEl) trainEl.style.display = isTraining ? 'block' : 'none';
 
-    const playAsWrap = document.querySelector('#page-game .play-as-selector')?.parentElement;
-    if (playAsWrap) playAsWrap.style.display = (isAi || isTraining) ? 'block' : 'none';
+    const playAsWrap = document.querySelector('#page-game .game-setup-play-as');
+    if (playAsWrap) playAsWrap.style.display = (isAi || isTraining) ? '' : 'none';
+
+    const optionsEl = document.getElementById('game-setup-options');
+    if (optionsEl) optionsEl.style.display = (isAi || isTraining) ? '' : 'none';
 
     const startBtn = document.getElementById('btn-start-game');
     if (startBtn) startBtn.style.display = isTraining ? 'none' : '';
