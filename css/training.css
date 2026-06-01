@@ -1,8 +1,8 @@
 /* ZChess - Training mode */
 
-.game-modes-grid {
+#page-game .game-modes-grid {
   grid-template-columns: repeat(3, 1fr);
-  max-width: 960px;
+  max-width: 100%;
 }
 
 .training-section {

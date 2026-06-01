@@ -297,6 +297,7 @@
         <h1 class="page-header-title" data-i18n="game.title">Choose Your Game</h1>
       </div>
 
+      <div class="game-setup-panel" id="game-setup-panel">
       <!-- Mode Cards -->
       <div class="game-modes-grid">
         <div class="game-mode-card selected" data-mode="ai">
@@ -325,7 +326,7 @@
 
       <div class="game-setup-options" id="game-setup-options">
       <!-- Difficulty (AI only) -->
-      <div id="difficulty-section" class="game-setup-block">
+      <div id="difficulty-section" class="game-setup-row">
         <h3 class="game-setup-label" data-i18n="game.difficulty">Difficulty</h3>
         <div class="difficulty-selector">
           <div class="diff-btn" data-diff="beginner">
@@ -360,12 +361,21 @@
       </div>
 
       <!-- Play As -->
-      <div class="game-setup-block game-setup-play-as">
+      <div class="game-setup-row game-setup-play-as">
         <h3 class="game-setup-label" data-i18n="game.play_as">Play As</h3>
         <div class="play-as-selector">
-          <div class="play-as-btn selected" data-color="w" title="White">♔<br><span class="play-as-label" data-i18n="game.white">White</span></div>
-          <div class="play-as-btn" data-color="b" title="Black">♚<br><span class="play-as-label" data-i18n="game.black">Black</span></div>
-          <div class="play-as-btn" data-color="r" title="Random">🎲<br><span class="play-as-label" data-i18n="game.random">Random</span></div>
+          <div class="play-as-btn selected" data-color="w">
+            <span class="play-as-piece">♔</span>
+            <span class="play-as-label" data-i18n="game.white">White</span>
+          </div>
+          <div class="play-as-btn" data-color="b">
+            <span class="play-as-piece">♚</span>
+            <span class="play-as-label" data-i18n="game.black">Black</span>
+          </div>
+          <div class="play-as-btn" data-color="r">
+            <span class="play-as-piece">🎲</span>
+            <span class="play-as-label" data-i18n="game.random">Random</span>
+          </div>
         </div>
       </div>
       </div>
@@ -375,6 +385,7 @@
         <button class="btn btn-primary btn-lg game-setup-start" id="btn-start-game" data-i18n="game.start_game">
           ▶ Start Game
         </button>
+      </div>
       </div>
     </div>
   </div>
