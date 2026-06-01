@@ -35,6 +35,15 @@
 }
 
 /* --- Player Bars --- */
+.player-bar.player-bar-self {
+  border: 1.5px solid rgba(124, 58, 237, 0.55);
+  box-shadow: 0 0 16px rgba(124, 58, 237, 0.2);
+}
+
+.player-bar.player-bar-opp {
+  opacity: 0.92;
+}
+
 .player-bar {
   display: flex;
   align-items: center;

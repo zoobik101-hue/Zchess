@@ -36,6 +36,15 @@ const App = {
     // Bind global events
     this.bindEvents();
 
+    document.addEventListener('langchange', () => {
+      if (this.currentPage === 'news') this.initNewsPage();
+      if (this.currentPage === 'faq') this.initFAQPage();
+      if (this.currentPage === 'profile' && ZChess.Auth.currentUser) {
+        ZChess.Profile.renderProfile(ZChess.Auth.currentUser);
+        ZChess.Profile.renderStatsChart(ZChess.Auth.currentUser);
+      }
+    });
+
     // Setup navbar scroll effect
     this.initNavbar();
 
@@ -307,8 +316,8 @@ const App = {
           <div class="news-tags">
             <span class="news-tag">${t(`news.tags.${article.tag}`)}</span>
           </div>
-          <div class="news-title">${article.title}</div>
-          <div class="news-excerpt">${article.excerpt}</div>
+          <div class="news-title">${t(article.titleKey)}</div>
+          <div class="news-excerpt">${t(article.excerptKey)}</div>
           <div class="news-footer">
             <span>${t('news.posted')} ${new Date(article.date).toLocaleDateString()}</span>
             <span>${article.readTime} ${t('news.min_read')}</span>

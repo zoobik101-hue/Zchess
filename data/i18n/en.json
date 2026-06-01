@@ -229,7 +229,26 @@
     "resigned_reason": "Resigned",
     "move_undone": "Move undone",
     "ai_opponent": "AI",
-    "opponent": "Opponent"
+    "opponent": "Opponent",
+    "match_info": "Match",
+    "you_white": "You - White",
+    "you_black": "You - Black",
+    "opponent_white": "Opponent - White",
+    "opponent_black": "Opponent - Black",
+    "color_white": "White",
+    "color_black": "Black"
+  },
+  "mp": {
+    "online": "● Online",
+    "connection_unstable": "⚠ Unstable connection",
+    "connection_lost": "⚠ No connection",
+    "wait_reconnect_title": "Opponent lost connection",
+    "wait_reconnect_desc": "Wait for reconnect or claim victory",
+    "claim_win": "Claim victory",
+    "keep_waiting": "Keep waiting",
+    "opponent_left": "Opponent disconnected",
+    "win_claimed": "Victory awarded!",
+    "to_menu": "Main menu"
   },
   "profile": {
     "title": "Profile",
@@ -250,6 +269,7 @@
     "statistics": "Statistics",
     "no_games": "No games played yet. Start playing!",
     "no_achievements": "No achievements unlocked yet.",
+    "max_streak": "Best win streak: {max} · Current: {current}",
     "change_avatar": "Change Avatar",
     "save_profile": "Save",
     "title_label": "Title",
@@ -352,7 +372,19 @@
       "feature": "Feature",
       "event": "Event",
       "announcement": "Announcement"
-    }
+    },
+    "a1_title": "ZChess 1.0 Launch",
+    "a1_excerpt": "Official launch: AI games, online matches, rating and progression.",
+    "a2_title": "Online Multiplayer",
+    "a2_excerpt": "Quick match, room codes, and real-time games with friends via Firebase.",
+    "a3_title": "Training Mode",
+    "a3_excerpt": "Tactics, checkmate and opening lessons. Coach rates every move.",
+    "a4_title": "ZChess Academy",
+    "a4_excerpt": "17 interactive puzzles plus coach mode with move quality feedback.",
+    "a5_title": "Install as App (PWA)",
+    "a5_excerpt": "Add ZChess to your desktop or phone - works like a native app.",
+    "a6_title": "Three Languages",
+    "a6_excerpt": "English, Russian and Ukrainian - switch instantly in the header."
   },
   "faq": {
     "title": "FAQ",
@@ -379,16 +411,20 @@
         "a": "We have 7 difficulty levels. Beginner plays random moves. Higher levels use deeper search algorithms. Grandmaster and Impossible levels play near-perfectly and are a serious challenge even for experienced players."
       },
       {
-        "q": "How do I create a private game?",
-        "a": "Go to Play > Private Room > Create Room. You'll receive a room code that you can share with your friend so they can join."
+        "q": "How do I play with a friend online?",
+        "a": "Go to Play > Quick Match (find opponent) or Create Room. Share the room code. Your friend chooses Join Room and enters the code."
       },
       {
         "q": "How do I undo a move?",
-        "a": "Undo is only available in games against the AI. During online multiplayer matches, undo is not available to keep gameplay fair."
+        "a": "Undo is only available against AI. Online matches do not allow undo for fair play."
       },
       {
-        "q": "What happens if I disconnect mid-game?",
-        "a": "In online multiplayer, you have 30 seconds to reconnect before the game is forfeited. Games against AI are saved automatically and you can resume them."
+        "q": "What if my internet drops?",
+        "a": "Your opponent may see a connection warning. Reload the page to rejoin if the game is still active. Victory can be claimed only if the opponent is offline for about 90 seconds."
+      },
+      {
+        "q": "What is Training mode?",
+        "a": "In Play, choose Training: puzzles with the correct move, on-board hints, and Coach mode that rates your moves vs a weak bot."
       }
     ]
   },

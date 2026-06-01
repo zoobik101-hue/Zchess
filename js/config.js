@@ -150,66 +150,12 @@ window.ZChess.STORAGE = {
 
 // News data (static - would come from Firestore in production)
 window.ZChess.NEWS = [
-  {
-    id: 1,
-    title: 'ZChess 1.0 - Platform Launch!',
-    excerpt: 'We are thrilled to announce the official launch of ZChess. Play chess against AI or real players, track your progress, and climb the leaderboard.',
-    content: 'Today marks a historic day for the ZChess platform. After months of development, we are proud to present a fully-featured chess experience...',
-    tag: 'announcement',
-    emoji: '🎉',
-    date: '2026-05-31',
-    readTime: 3
-  },
-  {
-    id: 2,
-    title: 'Introducing the AI Grandmaster Mode',
-    excerpt: 'Our new Grandmaster AI uses a 6-ply minimax search with alpha-beta pruning and piece-square tables for near-master level play.',
-    content: 'The Grandmaster AI represents our most challenging opponent yet...',
-    tag: 'feature',
-    emoji: '🤖',
-    date: '2026-05-28',
-    readTime: 4
-  },
-  {
-    id: 3,
-    title: 'Achievement System is Live',
-    excerpt: 'Unlock over 20 achievements as you play, win, and improve on ZChess. Each achievement grants XP and brings you closer to the next level.',
-    content: 'We have designed a comprehensive achievement system...',
-    tag: 'feature',
-    emoji: '🏆',
-    date: '2026-05-25',
-    readTime: 2
-  },
-  {
-    id: 4,
-    title: 'First Monthly Tournament - June 2026',
-    excerpt: 'Join our first community tournament starting June 15th. All skill levels welcome. Top 3 players win exclusive titles and badges.',
-    content: 'We are excited to announce our first monthly tournament...',
-    tag: 'event',
-    emoji: '⚔️',
-    date: '2026-05-22',
-    readTime: 3
-  },
-  {
-    id: 5,
-    title: 'PWA Support - Install ZChess on Your Device',
-    excerpt: 'ZChess is now installable as a Progressive Web App. Get the native app experience on any device - mobile, tablet, or desktop.',
-    content: 'ZChess now supports installation as a PWA...',
-    tag: 'update',
-    emoji: '📱',
-    date: '2026-05-20',
-    readTime: 2
-  },
-  {
-    id: 6,
-    title: 'Multilingual Support: English, Russian & Ukrainian',
-    excerpt: 'ZChess now supports three languages. Switch between English, Russian, and Ukrainian instantly from any page.',
-    content: 'We believe chess is for everyone, regardless of language...',
-    tag: 'update',
-    emoji: '🌍',
-    date: '2026-05-18',
-    readTime: 2
-  }
+  { id: 1, titleKey: 'news.a1_title', excerptKey: 'news.a1_excerpt', tag: 'announcement', emoji: '🎉', date: '2026-05-31', readTime: 3 },
+  { id: 2, titleKey: 'news.a2_title', excerptKey: 'news.a2_excerpt', tag: 'feature', emoji: '🤖', date: '2026-05-28', readTime: 4 },
+  { id: 3, titleKey: 'news.a3_title', excerptKey: 'news.a3_excerpt', tag: 'feature', emoji: '🏆', date: '2026-05-25', readTime: 2 },
+  { id: 4, titleKey: 'news.a4_title', excerptKey: 'news.a4_excerpt', tag: 'feature', emoji: '🎓', date: '2026-06-01', readTime: 3 },
+  { id: 5, titleKey: 'news.a5_title', excerptKey: 'news.a5_excerpt', tag: 'update', emoji: '📱', date: '2026-05-20', readTime: 2 },
+  { id: 6, titleKey: 'news.a6_title', excerptKey: 'news.a6_excerpt', tag: 'update', emoji: '🌍', date: '2026-05-18', readTime: 2 }
 ];
 
 console.log('[ZChess] Config loaded v' + ZChess.VERSION);

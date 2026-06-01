@@ -326,6 +326,69 @@
   50%       { transform: scale(1.1); }
 }
 
+/* ---- Match info (side panel) ---- */
+.match-info-panel {
+  padding: 14px;
+  background: var(--bg-card);
+  border: 1.5px solid rgba(124, 58, 237, 0.35);
+  border-radius: var(--radius-lg);
+  margin-bottom: 4px;
+}
+
+.match-info-panel h4 {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+.match-chip-row {
+  margin-bottom: 8px;
+}
+
+.match-chip {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.match-chip-you {
+  background: rgba(124, 58, 237, 0.25);
+  color: #e9d5ff;
+  border: 1px solid rgba(167, 139, 250, 0.5);
+}
+
+.match-chip-opp {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-secondary);
+  border: 1px solid var(--glass-border);
+}
+
+.match-turn-banner {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.match-turn-banner.is-your-turn {
+  background: rgba(34, 197, 94, 0.15);
+  color: #86efac;
+  border: 1px solid rgba(34, 197, 94, 0.4);
+}
+
+.match-turn-banner.is-opp-turn {
+  background: rgba(251, 191, 36, 0.12);
+  color: #fcd34d;
+  border: 1px solid rgba(251, 191, 36, 0.35);
+}
+
 /* ---- In-game multiplayer HUD ---- */
 .mp-status-bar {
   position: fixed;

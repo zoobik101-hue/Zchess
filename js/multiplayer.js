@@ -32,8 +32,9 @@ const Multiplayer = {
 
   // Disconnect thresholds (ms)
   // Note: page reload takes ~3-5 sec, give enough time to reconnect
-  WARN_THRESHOLD:    15_000,  // 15 sec - show warning
-  FORFEIT_THRESHOLD: 45_000,  // 45 sec - claim win (enough time to reconnect after refresh)
+  WARN_THRESHOLD:    28_000,  // 28 sec - soft warning in status bar only
+  FORFEIT_THRESHOLD: 90_000,  // 90 sec - can claim win (page reload / weak network)
+  _oppMissedPings: 0,
 
   /* ---- Init ---- */
   init() {
@@ -243,7 +244,7 @@ const Multiplayer = {
     // ④ Disconnect check - only if game is still active
     if (room.status === 'playing') {
       const opp = this.localColor === 'w' ? room.black : room.white;
-      if (opp) this._checkOpponentPing(opp.lastPing);
+      if (opp) this._checkOpponentPing(opp.lastPing, opp.connected);
     }
   },
 
@@ -426,7 +427,14 @@ const Multiplayer = {
     const timerBox = document.getElementById('mp-move-timer');
     const statusTxt= document.getElementById('mp-turn-label');
 
-    if (statusTxt) statusTxt.textContent = isMyTurn ? '⚡ Ваш ход' : '⏳ Ход соперника';
+    if (statusTxt) {
+      statusTxt.textContent = isMyTurn
+        ? `⚡ ${t('board.your_turn')}`
+        : `⏳ ${t('board.opponent_turn')}`;
+    }
+    if (ZChess.ChessBoard?.updateMatchInfoPanel) {
+      ZChess.ChessBoard.updateMatchInfoPanel();
+    }
 
     if (timerBox) {
       timerBox.style.opacity = isMyTurn ? '1' : '0.4';
@@ -497,7 +505,7 @@ const Multiplayer = {
     };
 
     ping();
-    this.heartbeatTimer = setInterval(ping, 8000);
+    this.heartbeatTimer = setInterval(ping, 5000);
   },
 
   stopHeartbeat() {
@@ -505,24 +513,39 @@ const Multiplayer = {
     if (this._forfeitTimer)  { clearTimeout(this._forfeitTimer);   this._forfeitTimer  = null; }
   },
 
-  _checkOpponentPing(lastPing) {
+  _checkOpponentPing(lastPing, connected) {
     if (this._gameEnded) return;
-    const age = lastPing ? (this._now() - lastPing) : Infinity;
+
+    // lastPing 0 = tab closed or not yet synced; don't treat as instant disconnect
+    if (!lastPing || lastPing < 1000) {
+      if (connected === false) {
+        this._oppMissedPings++;
+      } else {
+        this._oppMissedPings = 0;
+      }
+      if (this._oppMissedPings < 3) return;
+    }
+
+    const age = lastPing > 1000 ? (this._now() - lastPing) : Infinity;
 
     if (age > this.FORFEIT_THRESHOLD) {
-      // Set flag immediately to prevent duplicate calls
-      this._gameEnded = true;
-      this.stopMoveTimer();
-      this._showDisconnectOverlay(true);
-      this.reportResult({ winner: this.localColor, reason: 'disconnect' });
-    } else if (age > this.WARN_THRESHOLD && !this._disconnectWarned) {
-      this._disconnectWarned = true;
-      this._setOppStatus('⚠ Нет связи', 'mp-status-warn');
-      this._showDisconnectOverlay(false);
-    } else if (age < 8_000 && this._disconnectWarned) {
-      this._disconnectWarned = false;
-      this._setOppStatus('● Онлайн', 'mp-status-ok');
-      this._hideDisconnectOverlay();
+      if (!this._disconnectWarned) {
+        this._disconnectWarned = true;
+        this._setOppStatus(t('mp.connection_lost'), 'mp-status-warn');
+        this._showDisconnectOverlay(false);
+      }
+    } else if (age > this.WARN_THRESHOLD) {
+      if (!this._disconnectWarned) {
+        this._disconnectWarned = true;
+        this._setOppStatus(t('mp.connection_unstable'), 'mp-status-warn');
+      }
+    } else if (age < 12_000) {
+      if (this._disconnectWarned) {
+        this._disconnectWarned = false;
+        this._oppMissedPings = 0;
+        this._setOppStatus(t('mp.online'), 'mp-status-ok');
+        this._hideDisconnectOverlay();
+      }
     }
   },
 
@@ -549,18 +572,19 @@ const Multiplayer = {
       ov.innerHTML = `
         <div class="mp-disconnect-card">
           <div class="mp-dc-icon">🔌</div>
-          <h3>Соперник отключился</h3>
-          <p>Победа засчитана!</p>
-          <button class="lobby-btn-primary" id="dc-btn-menu">В главное меню</button>
+          <h3>${t('mp.opponent_left')}</h3>
+          <p>${t('mp.win_claimed')}</p>
+          <button class="lobby-btn-primary" id="dc-btn-menu">${t('mp.to_menu')}</button>
         </div>`;
     } else {
       ov.innerHTML = `
         <div class="mp-disconnect-card">
           <div class="mp-dc-icon">⏳</div>
-          <h3>Соперник потерял соединение</h3>
-          <p>Ожидаем переподключения... (20 сек)</p>
-          <button class="lobby-btn-primary" id="dc-btn-claim">Забрать победу</button>
-          <button class="lobby-btn-cancel" id="dc-btn-wait" style="margin-top:8px">Продолжить ждать</button>
+          <h3>${t('mp.wait_reconnect_title')}</h3>
+          <p>${t('mp.wait_reconnect_desc')}</p>
+          <button class="lobby-btn-primary" id="dc-btn-claim">${t('mp.claim_win')}</button>
+          <button class="lobby-btn-cancel" id="dc-btn-wait" style="margin-top:8px">${t('mp.keep_waiting')}</button>
+          <button class="lobby-btn-cancel" id="dc-btn-close-dc" style="margin-top:8px">${t('common.close')}</button>
         </div>`;
     }
     ov.style.display = 'flex';
@@ -569,15 +593,21 @@ const Multiplayer = {
     const btnMenu  = document.getElementById('dc-btn-menu');
     const btnClaim = document.getElementById('dc-btn-claim');
     const btnWait  = document.getElementById('dc-btn-wait');
+    const btnClose = document.getElementById('dc-btn-close-dc');
 
     if (btnMenu) btnMenu.addEventListener('click', () => this._closeAndLeave());
+    if (btnClose) btnClose.addEventListener('click', () => this._hideDisconnectOverlay());
     if (btnClaim) btnClaim.addEventListener('click', () => {
       this._gameEnded = true;
       this.reportResult({ winner: winColor, reason: 'disconnect' });
       this._showDisconnectOverlay(true);
-      ov.remove();
     });
-    if (btnWait) btnWait.addEventListener('click', () => { ov.style.display = 'none'; });
+    if (btnWait) btnWait.addEventListener('click', () => {
+      this._disconnectWarned = false;
+      this._oppMissedPings = 0;
+      this._hideDisconnectOverlay();
+      this._setOppStatus(t('mp.online'), 'mp-status-ok');
+    });
   },
 
   _closeAndLeave() {

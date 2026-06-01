@@ -237,6 +237,88 @@ const ChessBoard = {
     return el;
   },
 
+  /** Clear and rebuild board DOM (fixes orientation when re-entering a game) */
+  _rebuildBoard() {
+    const boardEl = document.getElementById('chess-board');
+    if (boardEl) boardEl.innerHTML = '';
+    this._squares = null;
+    this._prevPieces = Array.from({ length: 8 }, () => new Array(8).fill(null));
+    this.initBoard();
+    this._reorderSquares();
+    this.updateCoordinates();
+  },
+
+  /** Your pieces always at bottom in multiplayer / when playing black */
+  _applyBoardOrientation() {
+    const wantFlip = this.playerColor === 'b';
+    if (this.flipped !== wantFlip || !this._squares) {
+      this.flipped = wantFlip;
+      this._rebuildBoard();
+    } else {
+      this._reorderSquares();
+      this.updateCoordinates();
+    }
+    this._layoutPlayerBars();
+  },
+
+  _layoutPlayerBars() {
+    const blackBar = document.getElementById('player-bar-black');
+    const whiteBar = document.getElementById('player-bar-white');
+    const boardWrap = document.querySelector('.chess-board-wrap');
+    if (!blackBar || !whiteBar) return;
+
+    if (this.multiplayerMode || this.isAIGame || this.trainingMode) {
+      const selfIsWhite = this.playerColor === 'w';
+      blackBar.style.order = selfIsWhite ? '1' : '3';
+      whiteBar.style.order = selfIsWhite ? '3' : '1';
+      if (boardWrap) boardWrap.style.order = '2';
+      blackBar.classList.toggle('player-bar-self', !selfIsWhite);
+      whiteBar.classList.toggle('player-bar-self', selfIsWhite);
+      blackBar.classList.toggle('player-bar-opp', selfIsWhite);
+      whiteBar.classList.toggle('player-bar-opp', !selfIsWhite);
+    } else {
+      blackBar.style.order = '1';
+      whiteBar.style.order = '3';
+      if (boardWrap) boardWrap.style.order = '2';
+      blackBar.classList.remove('player-bar-self', 'player-bar-opp');
+      whiteBar.classList.remove('player-bar-self', 'player-bar-opp');
+    }
+    this.updateMatchInfoPanel();
+  },
+
+  updateMatchInfoPanel() {
+    const panel = document.getElementById('match-info-panel');
+    if (!panel) return;
+
+    const show = this.multiplayerMode && !this.gameOver;
+    panel.style.display = show ? '' : 'none';
+    if (!show) return;
+
+    const youChip = document.getElementById('match-you-chip');
+    const oppChip = document.getElementById('match-opp-chip');
+    const banner  = document.getElementById('match-turn-banner');
+    const opp = this.multiplayerOpponent;
+
+    const youLabel = this.playerColor === 'w'
+      ? `♔ ${t('board.you_white')}`
+      : `♚ ${t('board.you_black')}`;
+    const oppLabel = this.playerColor === 'w'
+      ? `♚ ${t('board.opponent_black')}`
+      : `♔ ${t('board.opponent_white')}`;
+
+    if (youChip) youChip.textContent = youLabel;
+    if (oppChip) {
+      const name = opp?.name || t('board.opponent');
+      oppChip.textContent = `${oppLabel} · ${name}`;
+    }
+
+    if (banner) {
+      const myTurn = this.gameState?.turn === this.playerColor;
+      banner.className = `match-turn-banner ${myTurn ? 'is-your-turn' : 'is-opp-turn'}`;
+      banner.textContent = myTurn ? t('board.your_turn') : t('board.opponent_turn');
+    }
+  },
+
   // Re-order square elements when board is flipped
   _reorderSquares() {
     const boardEl = document.getElementById('chess-board');
@@ -270,7 +352,6 @@ const ChessBoard = {
     this.isAIGame = options.mode === 'ai' || isCoach;
     this.aiDifficulty = options.difficulty || 'medium';
     this.playerColor = options.playerColor || 'w';
-    this.flipped = this.playerColor === 'b';
     this.gameOver = false;
     this.isThinking = false;
     this.undoHistory = [];
@@ -303,12 +384,10 @@ const ChessBoard = {
     // Reset piece tracking
     this._prevPieces = Array.from({ length: 8 }, () => new Array(8).fill(null));
 
-    this.initBoard();
-    if (this.flipped) this._reorderSquares();
+    this._applyBoardOrientation();
     this.render();
     this.updateTurnIndicator();
     this.updatePlayerBars();
-    this.updateCoordinates();
     this.saveGameState();
 
     if (this.isAIGame && this.playerColor === 'b') {
@@ -329,7 +408,6 @@ const ChessBoard = {
     this.isAIGame = false;
     this.multiplayerMode = false;
     this.playerColor = lesson.color || 'w';
-    this.flipped = this.playerColor === 'b';
     this.gameOver = false;
     this.isThinking = false;
     this.undoHistory = [];
@@ -342,12 +420,10 @@ const ChessBoard = {
     this._prevPieces = Array.from({ length: 8 }, () => new Array(8).fill(null));
     this.clearTrainingHint();
 
-    this.initBoard();
-    if (this.flipped) this._reorderSquares();
+    this._applyBoardOrientation();
     this.render();
     this.updateTurnIndicator();
     this.updatePlayerBars();
-    this.updateCoordinates();
 
     if (ZChess.Training) {
       ZChess.Training.active = true;
@@ -366,7 +442,6 @@ const ChessBoard = {
     this.trainingPuzzle  = false;
     this.multiplayerMode = true;
     this.playerColor     = options.playerColor || 'w';
-    this.flipped         = this.playerColor === 'b';
     this.gameOver        = false;
     this.isThinking      = false;
     this.undoHistory     = [];
@@ -402,12 +477,10 @@ const ChessBoard = {
       });
     }
 
-    this.initBoard();
-    if (this.flipped) this._reorderSquares();
+    this._applyBoardOrientation();
     this.render();
     this.updateTurnIndicator();
     this.updatePlayerBars();
-    this.updateCoordinates();
 
     // Show multiplayer status bar
     const bar = document.getElementById('mp-status-bar');
@@ -1139,9 +1212,12 @@ self.onmessage = function(e) {
 
   flipBoard() {
     this.flipped = !this.flipped;
-    this._reorderSquares();
-    this.updateCoordinates();
-    // Force full piece re-render after flip
+    if (!this._squares) {
+      this._rebuildBoard();
+    } else {
+      this._reorderSquares();
+      this.updateCoordinates();
+    }
     this._prevPieces = Array.from({ length: 8 }, () => new Array(8).fill(null));
     this.render();
   },
@@ -1170,11 +1246,15 @@ self.onmessage = function(e) {
         ${t('board.ai_thinking')}
       </div>`;
     } else {
-      const isPlayerTurn = !this.isAIGame || turn === this.playerColor;
+      const isPlayerTurn = turn === this.playerColor;
       el.className = `turn-indicator ${isPlayerTurn ? 'your-turn' : 'opponent-turn'}`;
-      el.innerHTML = `<div class="turn-dot"></div>
-        ${isPlayerTurn ? t('board.your_turn') : (this.isAIGame ? t('board.ai_thinking') : t('board.opponent_turn'))}`;
+      let label = t('board.your_turn');
+      if (!isPlayerTurn) {
+        label = this.isAIGame ? t('board.ai_thinking') : t('board.opponent_turn');
+      }
+      el.innerHTML = `<div class="turn-dot"></div> ${label}`;
     }
+    this.updateMatchInfoPanel();
   },
 
   updatePlayerBars() {
@@ -1191,8 +1271,15 @@ self.onmessage = function(e) {
       if (!bar) return;
       bar.classList.toggle('active', this.gameState.turn === color);
       const isPlayer = this.playerColor === color;
-      const name = isPlayer ? userName : (this.isAIGame ? `${t('board.ai_opponent')} (${diffName})` : t('board.opponent'));
-      const rating = isPlayer ? userRating : '';
+      let name = isPlayer ? userName : t('board.opponent');
+      if (!isPlayer && this.isAIGame) {
+        name = `${t('board.ai_opponent')} (${diffName})`;
+      } else if (!isPlayer && this.multiplayerMode && this.multiplayerOpponent?.name) {
+        name = this.multiplayerOpponent.name;
+      } else if (isPlayer) {
+        name = `${userName} (${color === 'w' ? t('board.color_white') : t('board.color_black')})`;
+      }
+      const rating = isPlayer ? userRating : (this.multiplayerMode && !isPlayer ? (this.multiplayerOpponent?.rating || '') : '');
       const nameEl = bar.querySelector('.player-name-sm');
       const ratingEl = bar.querySelector('.player-rating-sm');
       if (nameEl) nameEl.textContent = name;
@@ -1201,6 +1288,7 @@ self.onmessage = function(e) {
 
     updateBar('player-bar-white', 'w');
     updateBar('player-bar-black', 'b');
+    this._layoutPlayerBars();
   },
 
   updateMoveHistory() {

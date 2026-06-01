@@ -124,7 +124,7 @@ const Profile = {
       <div style="display:flex;flex-direction:column;gap:10px">
         <div>
           <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
-            <span style="color:var(--color-success)">Wins</span>
+            <span style="color:var(--color-success)">${t('profile.wins')}</span>
             <span style="color:var(--color-success)">${user.wins || 0} (${wPct}%)</span>
           </div>
           <div class="task-progress-bar" style="height:8px">
@@ -133,7 +133,7 @@ const Profile = {
         </div>
         <div>
           <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
-            <span style="color:var(--color-error)">Losses</span>
+            <span style="color:var(--color-error)">${t('profile.losses')}</span>
             <span style="color:var(--color-error)">${user.losses || 0} (${lPct}%)</span>
           </div>
           <div class="task-progress-bar" style="height:8px">
@@ -142,7 +142,7 @@ const Profile = {
         </div>
         <div>
           <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
-            <span style="color:var(--text-muted)">Draws</span>
+            <span style="color:var(--text-muted)">${t('profile.draws')}</span>
             <span style="color:var(--text-muted)">${user.draws || 0} (${dPct}%)</span>
           </div>
           <div class="task-progress-bar" style="height:8px">
@@ -150,7 +150,7 @@ const Profile = {
           </div>
         </div>
         <div style="font-size:12px;color:var(--text-muted);margin-top:6px">
-          Max Win Streak: ${user.maxWinStreak || 0} · Current: ${user.winStreak || 0}
+          ${t('profile.max_streak', { max: user.maxWinStreak || 0, current: user.winStreak || 0 })}
         </div>
       </div>
     `;

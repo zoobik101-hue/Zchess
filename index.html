@@ -435,6 +435,18 @@
       <!-- Side Panel -->
       <div class="chess-side-panel">
 
+        <!-- Match info (multiplayer) -->
+        <div class="match-info-panel" id="match-info-panel" style="display:none">
+          <h4 data-i18n="board.match_info">Match</h4>
+          <div class="match-chip-row">
+            <span class="match-chip match-chip-you" id="match-you-chip">♔ You</span>
+          </div>
+          <div class="match-chip-row">
+            <span class="match-chip match-chip-opp" id="match-opp-chip">♚ Opponent</span>
+          </div>
+          <div class="match-turn-banner" id="match-turn-banner"></div>
+        </div>
+
         <!-- Game Controls -->
         <div class="game-controls-panel">
           <button class="btn-game-control" id="btn-flip-board">
@@ -642,7 +654,7 @@
        PAGE: SETTINGS
   ====================================== -->
   <div id="page-settings" class="page">
-    <div class="container" style="padding-top:40px;padding-bottom:60px">
+    <div class="container settings-page-container" style="padding-top:40px;padding-bottom:60px">
       <div class="page-header">
         <h1 class="page-header-title" data-i18n="settings.title">Settings</h1>
       </div>
