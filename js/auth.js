@@ -320,14 +320,20 @@ const Auth = {
     const newLevel = ZChess.getLevelFromXP(newXP);
     const newRating = Math.max(ZChess.ELO.MIN_RATING, user.rating + ratingChange);
 
-    // Game record
     const gameRecord = {
+      id: result.id || ('g_' + Date.now()),
       date: new Date().toISOString(),
       outcome,
-      opponent: result.opponent || (isAI ? `AI (${aiDifficulty})` : 'Unknown'),
-      ratingChange,
+      opponentType: result.opponentType || (isAI ? 'ai' : result.opponentUsername ? 'human' : 'unknown'),
+      opponentUsername: result.opponentUsername || null,
       aiDifficulty: isAI ? aiDifficulty : null,
-      moves: result.moves || 0
+      opponentRating: opponentRating || null,
+      ratingChange,
+      moves: result.moves || result.moveHistory?.length || 0,
+      durationSec: result.durationSec ?? 0,
+      playerColor: result.playerColor || 'w',
+      mode: result.mode || (isAI ? 'ai' : 'local'),
+      moveHistory: result.moveHistory || []
     };
 
     const updates = {

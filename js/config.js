@@ -26,7 +26,7 @@ window.ZChess.firebaseConfig = {
 // ==========================================
 // APP CONSTANTS
 // ==========================================
-window.ZChess.VERSION = '1.1.0';
+window.ZChess.VERSION = '1.1.1';
 window.ZChess.APP_NAME = 'ZChess';
 window.ZChess.SITE_URL = 'https://zoobik101-hue.github.io/Zchess/';
 
@@ -42,6 +42,50 @@ window.ZChess.LEAGUES = [
 window.ZChess.getLeague = function(rating) {
   const r = Math.max(0, Number(rating) || ZChess.ELO.INITIAL_RATING);
   return ZChess.LEAGUES.find(l => r >= l.min && r <= l.max) || ZChess.LEAGUES[0];
+};
+
+window.ZChess.formatGameOpponent = function(game) {
+  if (!game) return typeof t === 'function' ? t('profile.opponent_unknown') : '?';
+
+  if (game.opponentType === 'ai' && game.aiDifficulty) {
+    const diff = typeof t === 'function' ? t(`game.difficulty_${game.aiDifficulty}`) : game.aiDifficulty;
+    return `${typeof t === 'function' ? t('profile.opponent_ai') : 'AI'} · ${diff}`;
+  }
+
+  if (game.opponentUsername) return game.opponentUsername;
+  if (game.opponentType === 'human') {
+    return typeof t === 'function' ? t('profile.opponent_player') : 'Player';
+  }
+
+  if (game.opponent && /^AI\s*\(/i.test(game.opponent)) {
+    const m = game.opponent.match(/\((\w+)\)/i);
+    if (m) {
+      const diff = typeof t === 'function' ? t(`game.difficulty_${m[1]}`) : m[1];
+      return `${typeof t === 'function' ? t('profile.opponent_ai') : 'AI'} · ${diff}`;
+    }
+  }
+
+  return typeof t === 'function' ? t('profile.opponent_unknown') : (game.opponent || '?');
+};
+
+window.ZChess.formatDuration = function(sec) {
+  const s = Math.max(0, Math.round(Number(sec) || 0));
+  if (s < 60) return `${s} ${t('profile.sec_short')}`;
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  if (r === 0) return `${m} ${t('profile.min_short')}`;
+  return `${m} ${t('profile.min_short')} ${r} ${t('profile.sec_short')}`;
+};
+
+window.ZChess.serializeMoveHistory = function(history) {
+  if (!history || !history.length) return [];
+  return history.map(m => ({
+    from: { row: m.from.row, col: m.from.col },
+    to: { row: m.to.row, col: m.to.col },
+    promotion: m.promotion || null,
+    castling: m.castling || null,
+    notation: m.notation || ''
+  }));
 };
 
 window.ZChess.leagueBadgeHTML = function(rating, extraClass) {

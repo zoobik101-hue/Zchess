@@ -48,6 +48,7 @@
   <link rel="stylesheet" href="css/game-setup.css">
   <link rel="stylesheet" href="css/chess-decor.css">
   <link rel="stylesheet" href="css/theme-arena.css">
+  <link rel="stylesheet" href="css/game-replay.css">
   <link rel="stylesheet" href="css/mobile.css">
 </head>
 <body>
@@ -1061,6 +1062,41 @@
   </div>
 </div>
 
+<!-- Game replay viewer -->
+<div class="modal-overlay" id="game-replay-overlay" role="dialog" aria-label="Game replay">
+  <div class="replay-modal">
+    <button type="button" class="modal-close replay-close" id="replay-close" aria-label="Close">×</button>
+    <header class="replay-header">
+      <div>
+        <h2 class="replay-title" id="replay-title">—</h2>
+        <p class="replay-subtitle" id="replay-subtitle"></p>
+      </div>
+      <div class="replay-header-badges">
+        <span class="badge" id="replay-outcome-badge"></span>
+        <span class="replay-rating-delta" id="replay-rating-delta"></span>
+      </div>
+    </header>
+    <div class="replay-body">
+      <div class="replay-board-wrap">
+        <div class="replay-board" id="replay-board"></div>
+        <div class="replay-controls">
+          <button type="button" class="replay-ctrl-btn" id="replay-first" title="Start">⏮</button>
+          <button type="button" class="replay-ctrl-btn" id="replay-prev" title="Previous">◀</button>
+          <button type="button" class="replay-ctrl-btn replay-ctrl-play" id="replay-play" title="Play">▶</button>
+          <button type="button" class="replay-ctrl-btn" id="replay-next" title="Next">▶</button>
+          <button type="button" class="replay-ctrl-btn" id="replay-last" title="End">⏭</button>
+          <button type="button" class="replay-ctrl-btn" id="replay-flip" title="Flip board">🔄</button>
+          <span class="replay-ply-label" id="replay-ply-label">0 / 0</span>
+        </div>
+      </div>
+      <div class="replay-moves-panel">
+        <h3 class="replay-moves-title" data-i18n="replay.moves">Ходы</h3>
+        <div class="replay-move-list" id="replay-move-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Toast Notifications Container -->
 <div id="toast-container" role="status" aria-live="polite"></div>
 
@@ -1239,6 +1275,7 @@
 <script src="js/ai-engine.js"></script>
 <script src="js/chess-board.js"></script>
 <script src="js/game-review.js"></script>
+<script src="js/game-replay.js"></script>
 <script src="js/achievements.js"></script>
 <script src="js/daily-tasks.js"></script>
 <script src="js/profile.js"></script>

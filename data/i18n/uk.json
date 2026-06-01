@@ -276,7 +276,30 @@
     "change_avatar": "Змінити аватар",
     "save_profile": "Зберегти",
     "title_label": "Титул",
-    "frame_label": "Рамка"
+    "frame_label": "Рамка",
+    "opponent_ai": "ШІ",
+    "opponent_player": "Гравець",
+    "opponent_unknown": "Суперник",
+    "outcome_win": "Перемога",
+    "outcome_loss": "Поразка",
+    "outcome_draw": "Нічия",
+    "moves_label": "ходів",
+    "min_short": "хв",
+    "sec_short": "сек",
+    "you_white": "ви за білих",
+    "you_black": "ви за чорних",
+    "view_replay": "Дивитись партію",
+    "no_replay_data": "Запис недоступний",
+    "mode_ai": "Проти ШІ",
+    "mode_online": "Онлайн",
+    "mode_training": "Навчання",
+    "mode_local": "Локально"
+  },
+  "replay": {
+    "title": "Перегляд партії",
+    "moves": "Ходи",
+    "start": "Початок",
+    "unavailable": "Запис цієї партії недоступний"
   },
   "leaderboard": {
     "title": "Таблиця лідерів",

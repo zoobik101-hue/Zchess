@@ -979,19 +979,51 @@ self.onmessage = function(e) {
         beginner: 600, easy: 800, medium: 1000, advanced: 1300,
         expert: 1600, grandmaster: 1900, impossible: 2400
       };
+      const meta = this._getGameSaveMeta();
       const result = await ZChess.Auth.saveGameResult({
         outcome,
         isAI: this.isAIGame,
         aiDifficulty: this.aiDifficulty,
-        opponentRating: this.isAIGame ? aiRatings[this.aiDifficulty] : 1200,
+        opponentRating: this.isAIGame ? aiRatings[this.aiDifficulty] : (this.multiplayerOpponent?.rating || 1200),
         moves: this.gameState.history.length,
-        lastPiece: lastMove?.piece?.type
+        lastPiece: lastMove?.piece?.type,
+        ...meta
       });
       if (result) { xpGain = result.xpGain; ratingChange = result.ratingChange; }
     }
 
     const stats = this._buildGameStats();
     setTimeout(() => this.showGameResultModal(heading, reason, outcome, xpGain, ratingChange, stats), 600);
+  },
+
+  _getGameSaveMeta() {
+    const s = this._gameStats;
+    const durationSec = s ? Math.floor((Date.now() - s.startTime) / 1000) : 0;
+    let opponentType = 'unknown';
+    let opponentUsername = null;
+
+    if (this.isAIGame) opponentType = 'ai';
+    else if (this.multiplayerMode) {
+      opponentType = 'human';
+      opponentUsername = this.multiplayerOpponent?.name || null;
+    }
+
+    const mode = this.trainingMode ? 'training'
+      : this.isAIGame ? 'ai'
+      : this.multiplayerMode ? 'online'
+      : 'local';
+
+    return {
+      id: 'g_' + Date.now(),
+      durationSec,
+      playerColor: this.playerColor,
+      mode,
+      opponentType,
+      opponentUsername,
+      moveHistory: ZChess.serializeMoveHistory
+        ? ZChess.serializeMoveHistory(this.gameState?.history || [])
+        : []
+    };
   },
 
   _buildGameStats() {
@@ -1225,9 +1257,14 @@ self.onmessage = function(e) {
     this.gameOver = true;
     localStorage.removeItem(ZChess.STORAGE.GAME_STATE);
     if (ZChess.Auth && ZChess.Auth.isLoggedIn()) {
-      ZChess.Auth.saveGameResult({ outcome: 'loss', isAI: this.isAIGame,
-        aiDifficulty: this.aiDifficulty, opponentRating: 1200,
-        moves: this.gameState.history.length });
+      ZChess.Auth.saveGameResult({
+        outcome: 'loss',
+        isAI: this.isAIGame,
+        aiDifficulty: this.aiDifficulty,
+        opponentRating: 1200,
+        moves: this.gameState.history.length,
+        ...this._getGameSaveMeta()
+      });
     }
     if (ZChess.Sound) ZChess.Sound.playLose();
     // In multiplayer: notify opponent

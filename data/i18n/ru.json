@@ -276,7 +276,30 @@
     "change_avatar": "Изменить аватар",
     "save_profile": "Сохранить",
     "title_label": "Титул",
-    "frame_label": "Рамка"
+    "frame_label": "Рамка",
+    "opponent_ai": "ИИ",
+    "opponent_player": "Игрок",
+    "opponent_unknown": "Соперник",
+    "outcome_win": "Победа",
+    "outcome_loss": "Поражение",
+    "outcome_draw": "Ничья",
+    "moves_label": "ходов",
+    "min_short": "мин",
+    "sec_short": "сек",
+    "you_white": "вы за белых",
+    "you_black": "вы за чёрных",
+    "view_replay": "Смотреть партию",
+    "no_replay_data": "Запись недоступна",
+    "mode_ai": "Против ИИ",
+    "mode_online": "Онлайн",
+    "mode_training": "Обучение",
+    "mode_local": "Локально"
+  },
+  "replay": {
+    "title": "Просмотр партии",
+    "moves": "Ходы",
+    "start": "Начало",
+    "unavailable": "Запись этой партии недоступна"
   },
   "leaderboard": {
     "title": "Таблица лидеров",

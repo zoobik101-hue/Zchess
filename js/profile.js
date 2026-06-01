@@ -8,6 +8,7 @@
 window.ZChess = window.ZChess || {};
 
 const Profile = {
+  _recentGames: [],
 
   renderProfile(user) {
     if (!user) return;
@@ -22,14 +23,9 @@ const Profile = {
 
     const title = ZChess.getTitleForLevel(level);
 
-    // Avatar
     const setEl = (id, val) => {
       const el = document.getElementById(id);
       if (el) el.textContent = val;
-    };
-    const setHTML = (id, val) => {
-      const el = document.getElementById(id);
-      if (el) el.innerHTML = val;
     };
 
     setEl('profile-username', user.username || 'Player');
@@ -56,7 +52,6 @@ const Profile = {
       : '-';
     setEl('profile-member-since', memberDate);
 
-    // XP bar
     const xpFill = document.getElementById('profile-xp-fill');
     if (xpFill) {
       setTimeout(() => {
@@ -64,20 +59,29 @@ const Profile = {
       }, 100);
     }
 
-    // Recent games
     this.renderRecentGames(user.recentGames || []);
 
-    // Achievements
     if (ZChess.Achievements) {
       ZChess.Achievements.renderAchievementsGrid('profile-achievements-grid');
     }
+  },
+
+  _modeLabel(mode) {
+    const key = `profile.mode_${mode || 'local'}`;
+    return t(key) !== key ? t(key) : mode;
+  },
+
+  _hasReplay(game) {
+    return Array.isArray(game.moveHistory) && game.moveHistory.length > 0;
   },
 
   renderRecentGames(games) {
     const el = document.getElementById('profile-recent-games');
     if (!el) return;
 
-    if (!games || games.length === 0) {
+    this._recentGames = games || [];
+
+    if (!this._recentGames.length) {
       el.innerHTML = `
         <div class="empty-state">
           <div class="empty-state-icon">♟️</div>
@@ -87,32 +91,69 @@ const Profile = {
       return;
     }
 
-    el.innerHTML = games.slice(0, 10).map(game => {
-      const dateStr = game.date ? new Date(game.date).toLocaleDateString() : '';
-      const outcomeClass = game.outcome === 'win' ? 'success' : game.outcome === 'loss' ? 'error' : '';
-      const outcomeLabel = game.outcome === 'win' ? '✓ Win' : game.outcome === 'loss' ? '✕ Loss' : '= Draw';
-      const ratingStr = game.ratingChange !== undefined
-        ? (game.ratingChange >= 0 ? `+${game.ratingChange}` : game.ratingChange)
+    el.innerHTML = this._recentGames.slice(0, 12).map((game, index) => {
+      const dateStr = game.date
+        ? new Date(game.date).toLocaleString(undefined, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
         : '';
-      const ratingClass = game.ratingChange > 0 ? 'text-success' : game.ratingChange < 0 ? 'text-error' : '';
+      const outcome = game.outcome || 'draw';
+      const outcomeClass = outcome === 'win' ? 'success' : outcome === 'loss' ? 'error' : 'primary';
+      const outcomeLabel = t(`profile.outcome_${outcome}`);
+      const opponent = ZChess.formatGameOpponent ? ZChess.formatGameOpponent(game) : (game.opponent || t('profile.opponent_unknown'));
+      const moveCount = game.moves || game.moveHistory?.length || 0;
+      const duration = game.durationSec != null && ZChess.formatDuration
+        ? ZChess.formatDuration(game.durationSec)
+        : '';
+      const colorLabel = game.playerColor === 'w'
+        ? t('profile.you_white')
+        : game.playerColor === 'b'
+          ? t('profile.you_black')
+          : '';
+      const modeLabel = this._modeLabel(game.mode);
+      const canReplay = this._hasReplay(game);
+      const ratingStr = game.ratingChange !== undefined && game.ratingChange !== 0
+        ? (game.ratingChange > 0 ? `+${game.ratingChange}` : `${game.ratingChange}`)
+        : '';
+      const ratingClass = game.ratingChange > 0 ? 'positive' : game.ratingChange < 0 ? 'negative' : '';
+
+      const metaParts = [dateStr, duration, `${moveCount} ${t('profile.moves_label')}`, colorLabel].filter(Boolean);
 
       return `
-        <div class="task-item" style="padding:12px 16px;margin-bottom:6px">
-          <div style="flex:1">
-            <div style="font-size:14px;font-weight:600;color:var(--text-primary)">${game.opponent || 'Unknown'}</div>
-            <div style="font-size:12px;color:var(--text-muted)">${dateStr} · ${game.moves || 0} moves</div>
+        <button type="button" class="recent-game-card${canReplay ? ' can-replay' : ' no-replay'}" data-game-index="${index}" ${canReplay ? '' : 'disabled'}>
+          <div class="recent-game-main">
+            <div class="recent-game-opponent">${this._escapeHtml(opponent)}</div>
+            <div class="recent-game-meta">${metaParts.map(p => this._escapeHtml(p)).join(' · ')}</div>
+            <div class="recent-game-tags">
+              <span class="recent-game-mode">${this._escapeHtml(modeLabel)}</span>
+              ${canReplay ? `<span class="recent-game-replay-hint">${t('profile.view_replay')}</span>` : `<span class="recent-game-replay-hint muted">${t('profile.no_replay_data')}</span>`}
+            </div>
           </div>
-          <div style="text-align:right">
-            <div class="badge badge-${outcomeClass || 'primary'}" style="margin-bottom:4px">${outcomeLabel}</div>
-            ${ratingStr ? `<div class="text-sm ${ratingClass}">${ratingStr}</div>` : ''}
+          <div class="recent-game-side">
+            <span class="badge badge-${outcomeClass}">${outcomeLabel}</span>
+            ${ratingStr ? `<span class="recent-game-rating ${ratingClass}">${ratingStr}</span>` : ''}
+            ${canReplay ? '<span class="recent-game-arrow" aria-hidden="true">›</span>' : ''}
           </div>
-        </div>
+        </button>
       `;
     }).join('');
+
+    el.querySelectorAll('.recent-game-card.can-replay').forEach(card => {
+      card.addEventListener('click', () => {
+        const idx = parseInt(card.dataset.gameIndex, 10);
+        const game = this._recentGames[idx];
+        if (game && ZChess.GameReplay) ZChess.GameReplay.open(game);
+      });
+    });
+  },
+
+  _escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
   },
 
   renderStatsChart(user) {
-    // Simple text-based stats - would use Chart.js in production
     const el = document.getElementById('profile-stats-chart');
     if (!el || !user) return;
 

@@ -276,7 +276,30 @@
     "change_avatar": "Change Avatar",
     "save_profile": "Save",
     "title_label": "Title",
-    "frame_label": "Frame"
+    "frame_label": "Frame",
+    "opponent_ai": "AI",
+    "opponent_player": "Player",
+    "opponent_unknown": "Opponent",
+    "outcome_win": "Win",
+    "outcome_loss": "Loss",
+    "outcome_draw": "Draw",
+    "moves_label": "moves",
+    "min_short": "min",
+    "sec_short": "sec",
+    "you_white": "you played White",
+    "you_black": "you played Black",
+    "view_replay": "View game",
+    "no_replay_data": "Replay unavailable",
+    "mode_ai": "vs AI",
+    "mode_online": "Online",
+    "mode_training": "Training",
+    "mode_local": "Local"
+  },
+  "replay": {
+    "title": "Game replay",
+    "moves": "Moves",
+    "start": "Start",
+    "unavailable": "Replay is not available for this game"
   },
   "leaderboard": {
     "title": "Leaderboard",
