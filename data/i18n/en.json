@@ -617,6 +617,16 @@
   "update": {
     "after_game": "Site update available - will apply after your game"
   },
+  "online": {
+    "title": "Online now",
+    "subtitle": "Players on ZChess right now - tap an avatar to view their profile",
+    "empty": "No one online yet - sign in and be the first!",
+    "in_game": "In a game",
+    "status_online": "Online",
+    "status_playing": "Playing a game",
+    "status_lobby": "Looking for a match",
+    "nav_aria": "Online: {count}"
+  },
   "common": {
     "loading": "Loading...",
     "error": "Error",

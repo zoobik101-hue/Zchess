@@ -189,6 +189,7 @@ const Multiplayer = {
     this.localColor = color;
     this.localUid   = ZChess.Auth.currentUser.uid;
     this.status     = status;
+    if (ZChess.Presence?.pulse) ZChess.Presence.pulse();
     this._lastMoveCount = 0;
     this._gameEnded     = false;
     this._disconnectWarned = false;
@@ -227,6 +228,7 @@ const Multiplayer = {
     // ② Opponent joined → start game
     if (room.status === 'playing' && this.status === 'waiting') {
       this.status = 'playing';
+      if (ZChess.Presence?.pulse) ZChess.Presence.pulse();
       this._beginGame(room);
       return;
     }
@@ -720,6 +722,7 @@ const Multiplayer = {
       this.status     = 'playing';
       this._lastMoveCount = room.moves.length;
       this._gameEnded     = false;
+      if (ZChess.Presence?.pulse) ZChess.Presence.pulse();
 
       this.subscribeRoom(savedId);
       this.startHeartbeat();
@@ -766,6 +769,7 @@ const Multiplayer = {
     this.localColor    = null;
     this.localUid      = null;
     this.status        = 'idle';
+    if (ZChess.Presence?.pulse) ZChess.Presence.pulse();
     this._lastMoveCount    = 0;
     this._gameEnded        = false;
     this._disconnectWarned = false;

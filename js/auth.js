@@ -464,6 +464,7 @@ const Auth = {
     }
 
     if (ZChess.UserDisplay) ZChess.UserDisplay.refreshAll();
+    if (ZChess.Presence?.pulse) await ZChess.Presence.pulse();
 
     return { success: true };
   },
@@ -524,6 +525,7 @@ const Auth = {
     }
 
     if (ZChess.UserDisplay) ZChess.UserDisplay.refreshAll();
+    if (ZChess.Presence?.pulse) await ZChess.Presence.pulse();
 
     return { success: true };
   },
@@ -532,6 +534,7 @@ const Auth = {
     if (!this.currentUser) return;
     await this.updateProfile({ avatar: null });
     if (ZChess.UserDisplay) ZChess.UserDisplay.refreshAll();
+    if (ZChess.Presence?.pulse) await ZChess.Presence.pulse();
   },
 
   notifyListeners() {

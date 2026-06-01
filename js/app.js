@@ -45,6 +45,8 @@ const App = {
     // Init Firebase auth
     await ZChess.Auth.init();
 
+    if (ZChess.Presence) ZChess.Presence.init();
+
     // Init multiplayer module
     if (ZChess.Multiplayer) ZChess.Multiplayer.init();
     if (ZChess.Training) ZChess.Training.init();
@@ -56,6 +58,7 @@ const App = {
     document.addEventListener('langchange', () => {
       if (this.currentPage === 'news') this.initNewsPage();
       if (this.currentPage === 'faq') this.initFAQPage();
+      if (this.currentPage === 'home' && ZChess.Presence) ZChess.Presence.render();
       if (this.currentPage === 'profile' && ZChess.Auth.currentUser) {
         ZChess.Profile.renderProfile(ZChess.Auth.currentUser);
         ZChess.Profile.renderStatsChart(ZChess.Auth.currentUser);
@@ -240,6 +243,7 @@ const App = {
     }
 
     this.animateCounters();
+    if (ZChess.Presence) ZChess.Presence.render();
   },
 
   animateCounters() {
