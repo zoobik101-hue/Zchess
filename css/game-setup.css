@@ -31,40 +31,76 @@
 #page-game .arena-deco {
   position: absolute;
   line-height: 1;
-  color: rgba(212, 175, 85, 0.055);
+  color: rgba(212, 175, 85, 0.14);
   user-select: none;
   font-weight: 400;
+  text-shadow: 0 0 60px rgba(124, 58, 237, 0.15);
 }
 
 #page-game .arena-deco-1 {
-  right: 4%;
-  bottom: 12%;
-  font-size: clamp(140px, 22vw, 260px);
-  transform: rotate(-14deg);
+  right: 2%;
+  bottom: 10%;
+  font-size: clamp(160px, 24vw, 280px);
+  transform: rotate(-12deg);
+  opacity: 0.2;
 }
 
 #page-game .arena-deco-2 {
-  left: 3%;
-  top: 18%;
-  font-size: clamp(70px, 12vw, 120px);
-  transform: rotate(18deg);
-  color: rgba(232, 224, 208, 0.04);
+  left: 2%;
+  top: 14%;
+  font-size: clamp(80px, 13vw, 130px);
+  transform: rotate(16deg);
+  color: rgba(232, 224, 208, 0.12);
 }
 
 #page-game .arena-deco-3 {
-  right: 18%;
-  top: 8%;
-  font-size: clamp(56px, 9vw, 90px);
-  transform: rotate(8deg);
-  color: rgba(232, 224, 208, 0.035);
+  right: 14%;
+  top: 6%;
+  font-size: clamp(64px, 10vw, 100px);
+  transform: rotate(6deg);
+  color: rgba(232, 224, 208, 0.1);
 }
 
 #page-game .arena-deco-4 {
-  left: 12%;
-  bottom: 8%;
-  font-size: clamp(48px, 8vw, 72px);
-  transform: rotate(-22deg);
-  color: rgba(61, 139, 122, 0.05);
+  left: 10%;
+  bottom: 6%;
+  font-size: clamp(56px, 9vw, 88px);
+  transform: rotate(-20deg);
+  color: rgba(167, 139, 250, 0.12);
+}
+
+#page-game .arena-deco-5 {
+  left: 22%;
+  top: 42%;
+  font-size: clamp(72px, 11vw, 110px);
+  transform: rotate(8deg);
+  color: rgba(232, 224, 208, 0.11);
+  opacity: 0.85;
+}
+
+#page-game .arena-deco-6 {
+  right: 20%;
+  bottom: 38%;
+  font-size: clamp(68px, 10vw, 105px);
+  transform: rotate(-6deg);
+  color: rgba(212, 175, 85, 0.13);
+  opacity: 0.9;
+}
+
+#page-game .arena-deco-7 {
+  left: 6%;
+  top: 52%;
+  font-size: clamp(36px, 5vw, 52px);
+  transform: rotate(24deg);
+  color: rgba(232, 224, 208, 0.09);
+}
+
+#page-game .arena-deco-8 {
+  right: 8%;
+  top: 48%;
+  font-size: clamp(32px, 4.5vw, 48px);
+  transform: rotate(-18deg);
+  color: rgba(232, 224, 208, 0.08);
 }
 
 #page-game .game-setup-shell {
@@ -419,10 +455,14 @@
   }
 }
 
-/* Only strip heaviest decor in perf-lite */
-html.perf-lite #page-game .arena-deco,
+/* perf-lite: hide only heavy panel pattern */
 html.perf-lite #page-game .game-setup-panel::before,
-html[data-no-animations="true"] #page-game .arena-deco,
 html[data-no-animations="true"] #page-game .game-setup-panel::before {
   display: none;
+}
+
+html.perf-lite #page-game .arena-deco,
+html[data-no-animations="true"] #page-game .arena-deco {
+  opacity: 0.08 !important;
+  text-shadow: none;
 }
