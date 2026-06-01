@@ -111,6 +111,7 @@ const Presence = {
   stop() {
     this.stopHeartbeat();
     this._markOffline();
+    this._localUid = null;
   },
 
   unsubscribe() {
