@@ -116,6 +116,15 @@ const App = {
   },
 
   navigate(page, params = []) {
+    const PP = ZChess.PublicProfile;
+    if (page === 'profile' && PP?.hasActiveGameSession?.()) {
+      const me = ZChess.Auth?.currentUser;
+      if (me) {
+        PP.open({ uid: me.uid, username: me.username });
+        return;
+      }
+    }
+
     if (this.currentPage === 'play' && page !== 'play' && ZChess.ChessBoard?.trainingMode && ZChess.Training?.active) {
       ZChess.Training.cleanup();
     }

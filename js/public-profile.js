@@ -9,6 +9,19 @@ window.ZChess = window.ZChess || {};
 
 const PublicProfile = {
   _current: null,
+  _returnToGame: false,
+
+  /** Active game on board page (multiplayer, AI, local) */
+  hasActiveGameSession() {
+    const board = ZChess.ChessBoard;
+    if (!board?.gameState || board.gameOver) return false;
+    if (ZChess.App?.currentPage !== 'play') return false;
+    return true;
+  },
+
+  isOpen() {
+    return document.getElementById('public-profile-overlay')?.classList.contains('open') || false;
+  },
 
   sanitize(data, uid) {
     if (!data) return null;
@@ -71,7 +84,14 @@ const PublicProfile = {
     if (!opts.uid && !opts.username) return;
 
     const me = ZChess.Auth?.currentUser;
-    if (me && ((opts.uid && me.uid === opts.uid) || (opts.username && me.username === opts.username))) {
+    const isSelf = me && (
+      (opts.uid && me.uid === opts.uid) ||
+      (opts.username && me.username === opts.username)
+    );
+
+    this._returnToGame = this.hasActiveGameSession();
+
+    if (isSelf && !this._returnToGame) {
       if (ZChess.App) ZChess.App.navigate('profile');
       return;
     }
@@ -100,9 +120,16 @@ const PublicProfile = {
   },
 
   close() {
-    document.getElementById('public-profile-overlay')?.classList.remove('open');
+    const overlay = document.getElementById('public-profile-overlay');
+    overlay?.classList.remove('open', 'pp-during-game');
     document.body.style.overflow = '';
+    document.body.classList.remove('public-profile-game-pause');
     this._current = null;
+    this._returnToGame = false;
+  },
+
+  returnToGame() {
+    this.close();
   },
 
   render(user) {
@@ -117,6 +144,7 @@ const PublicProfile = {
       : '-';
 
     body.innerHTML = `
+      ${this._returnToGame ? `<p class="pp-game-hint">${t('public_profile.game_continues_hint')}</p>` : ''}
       <div class="pp-hero">
         <div class="pp-avatar" id="pp-avatar"></div>
         <div class="pp-hero-info">
@@ -150,6 +178,8 @@ const PublicProfile = {
     }
 
     this._renderRecent(user.recentGames || []);
+
+    document.getElementById('pp-back-to-game')?.addEventListener('click', () => this.returnToGame());
   },
 
   _renderRecent(games) {
@@ -239,7 +269,7 @@ const PublicProfile = {
       if (e.target.id === 'public-profile-overlay') this.close();
     });
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') this.close();
+      if (e.key === 'Escape' && this.isOpen()) this.close();
     });
   }
 };

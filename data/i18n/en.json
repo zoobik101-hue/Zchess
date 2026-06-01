@@ -318,7 +318,9 @@
     "member_since": "Member since",
     "best_streak": "Best streak",
     "recent_games": "Recent games",
-    "no_games": "No games yet"
+    "no_games": "No games yet",
+    "back_to_game": "Back to game",
+    "game_continues_hint": "The game is still in progress - close this profile to return to the board"
   },
   "replay": {
     "title": "Game replay",

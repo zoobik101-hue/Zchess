@@ -4,6 +4,36 @@
   z-index: 940;
 }
 
+#public-profile-overlay.pp-during-game {
+  background: rgba(0, 0, 0, 0.72);
+}
+
+body.public-profile-game-pause {
+  overflow: hidden;
+}
+
+.pp-actions {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(201, 162, 77, 0.2);
+}
+
+.pp-actions .btn-block {
+  width: 100%;
+}
+
+.pp-game-hint {
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: center;
+  color: var(--arena-gold-bright, #e8d5a3);
+  background: rgba(201, 162, 77, 0.1);
+  border: 1px solid rgba(201, 162, 77, 0.25);
+  border-radius: 4px;
+}
+
 .public-profile-modal {
   position: relative;
   width: min(520px, 94vw);
