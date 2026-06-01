@@ -26,7 +26,7 @@ window.ZChess.firebaseConfig = {
 // ==========================================
 // APP CONSTANTS
 // ==========================================
-window.ZChess.VERSION = '1.0.7';
+window.ZChess.VERSION = '1.0.8';
 window.ZChess.APP_NAME = 'ZChess';
 
 // Elo system constants

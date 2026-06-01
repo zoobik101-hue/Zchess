@@ -37,70 +37,55 @@
   text-shadow: 0 0 60px rgba(124, 58, 237, 0.15);
 }
 
+/* One piece per corner + mid-edge (no stacking) */
 #page-game .arena-deco-1 {
-  right: 2%;
-  bottom: 10%;
-  font-size: clamp(160px, 24vw, 280px);
-  transform: rotate(-12deg);
-  opacity: 0.2;
+  right: 1%;
+  bottom: 8%;
+  font-size: clamp(130px, 20vw, 220px);
+  transform: rotate(-10deg);
+  opacity: 0.18;
 }
 
 #page-game .arena-deco-2 {
-  left: 2%;
-  top: 14%;
-  font-size: clamp(80px, 13vw, 130px);
-  transform: rotate(16deg);
-  color: rgba(232, 224, 208, 0.12);
+  left: 1%;
+  top: 10%;
+  font-size: clamp(72px, 11vw, 115px);
+  transform: rotate(14deg);
+  color: rgba(232, 224, 208, 0.11);
 }
 
 #page-game .arena-deco-3 {
-  right: 14%;
-  top: 6%;
-  font-size: clamp(64px, 10vw, 100px);
-  transform: rotate(6deg);
+  right: 2%;
+  top: 8%;
+  font-size: clamp(58px, 9vw, 92px);
+  transform: rotate(5deg);
   color: rgba(232, 224, 208, 0.1);
 }
 
 #page-game .arena-deco-4 {
-  left: 10%;
-  bottom: 6%;
-  font-size: clamp(56px, 9vw, 88px);
-  transform: rotate(-20deg);
-  color: rgba(167, 139, 250, 0.12);
+  left: 2%;
+  bottom: 8%;
+  font-size: clamp(52px, 8vw, 84px);
+  transform: rotate(-18deg);
+  color: rgba(167, 139, 250, 0.11);
 }
 
 #page-game .arena-deco-5 {
-  left: 22%;
-  top: 42%;
-  font-size: clamp(72px, 11vw, 110px);
-  transform: rotate(8deg);
-  color: rgba(232, 224, 208, 0.11);
+  left: 0;
+  top: 44%;
+  font-size: clamp(48px, 7vw, 76px);
+  transform: rotate(6deg);
+  color: rgba(212, 175, 85, 0.1);
   opacity: 0.85;
 }
 
 #page-game .arena-deco-6 {
-  right: 20%;
-  bottom: 38%;
-  font-size: clamp(68px, 10vw, 105px);
-  transform: rotate(-6deg);
-  color: rgba(212, 175, 85, 0.13);
-  opacity: 0.9;
-}
-
-#page-game .arena-deco-7 {
-  left: 6%;
-  top: 52%;
-  font-size: clamp(36px, 5vw, 52px);
-  transform: rotate(24deg);
+  right: 0;
+  top: 36%;
+  font-size: clamp(40px, 6vw, 62px);
+  transform: rotate(-12deg);
   color: rgba(232, 224, 208, 0.09);
-}
-
-#page-game .arena-deco-8 {
-  right: 8%;
-  top: 48%;
-  font-size: clamp(32px, 4.5vw, 48px);
-  transform: rotate(-18deg);
-  color: rgba(232, 224, 208, 0.08);
+  opacity: 0.8;
 }
 
 #page-game .game-setup-shell {

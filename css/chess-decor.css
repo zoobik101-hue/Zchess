@@ -1,79 +1,8 @@
-/* ZChess - Shared ambient chess piece decor (static, lightweight) */
-
-.page-ambient {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  overflow: hidden;
-}
-
-#page-home.page-home-decor {
-  position: relative;
-}
-
-#page-home .page-ambient-home {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-}
-
-#page-home .page-ambient-home .ambient-piece {
-  position: absolute;
-  line-height: 1;
-  font-weight: 400;
-  color: rgba(212, 175, 85, 0.1);
-  text-shadow: 0 0 50px rgba(124, 58, 237, 0.12);
-  user-select: none;
-}
-
-#page-home .page-ambient-home .ap-1 {
-  top: 8%;
-  left: 4%;
-  font-size: clamp(100px, 14vw, 180px);
-  transform: rotate(-8deg);
-  opacity: 0.14;
-}
-
-#page-home .page-ambient-home .ap-2 {
-  top: 20%;
-  right: 5%;
-  font-size: clamp(72px, 10vw, 120px);
-  transform: rotate(14deg);
-  color: rgba(200, 190, 255, 0.12);
-}
-
-#page-home .page-ambient-home .ap-3 {
-  bottom: 15%;
-  left: 8%;
-  font-size: clamp(56px, 8vw, 90px);
-  transform: rotate(20deg);
-  color: rgba(232, 224, 208, 0.1);
-}
-
-#page-home .page-ambient-home .ap-4 {
-  bottom: 10%;
-  right: 6%;
-  font-size: clamp(120px, 16vw, 200px);
-  transform: rotate(-10deg);
-  opacity: 0.12;
-}
+/* ZChess - page z-index for sections (ambient pieces live in hero / arena) */
 
 #page-home .hero-section,
 #page-home .features-section,
 #page-home .cta-section {
   position: relative;
   z-index: 1;
-}
-
-html.perf-lite #page-home .page-ambient-home,
-html[data-no-animations="true"] #page-home .page-ambient-home {
-  opacity: 0.5;
-}
-
-@media (max-width: 768px) {
-  #page-home .page-ambient-home .ambient-piece {
-    opacity: 0.07;
-    font-size: clamp(48px, 12vw, 80px) !important;
-  }
 }
