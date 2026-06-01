@@ -21,7 +21,7 @@ const Presence = {
   init() {
     this._boundUnload = () => this._markOffline();
     document.addEventListener('visibilitychange', () => {
-      if (!document.hidden && ZChess.Auth?.currentUser) this.pulse();
+      if (!document.hidden && ZChess.Auth?.currentUser?.uid) this.pulse();
     });
     document.addEventListener('langchange', () => this.render());
 
@@ -76,6 +76,7 @@ const Presence = {
         avatar: user.avatar || null,
         rating: user.rating ?? ZChess.ELO?.INITIAL_RATING ?? 1200,
         level,
+        isGuest: !!user.isGuest,
         lastSeen: Date.now(),
         status: this._status()
       }, { merge: true });
@@ -218,11 +219,15 @@ const Presence = {
     const show = list.slice(0, this.MAX_SHOW);
     const extra = list.length - show.length;
 
+    const guestLbl = typeof t === 'function' ? t('online.guest_badge') : 'Guest';
+
     strip.innerHTML = show.map((p, i) => {
       const status = p.status || 'online';
       const statusClass = status === 'playing' ? 'is-playing' : status === 'lobby' ? 'is-lobby' : 'is-online';
+      const isGuest = !!(p.isGuest || /^guest\s/i.test(p.username || ''));
+      const meta = isGuest ? guestLbl : `Lvl ${p.level || 1}`;
       return `
-        <button type="button" class="online-chip player-profile-link ${statusClass}"
+        <button type="button" class="online-chip player-profile-link ${statusClass}${isGuest ? ' is-guest' : ''}"
           data-player-uid="${this._esc(p.uid)}"
           data-player-username="${this._esc(p.username)}"
           id="online-chip-${i}"
@@ -230,7 +235,7 @@ const Presence = {
           <span class="online-chip-ring" aria-hidden="true"></span>
           <span class="online-chip-avatar" id="online-chip-av-${i}"></span>
           <span class="online-chip-name">${this._esc(p.username)}</span>
-          <span class="online-chip-meta">Lvl ${p.level || 1}</span>
+          <span class="online-chip-meta">${this._esc(meta)}</span>
         </button>
       `;
     }).join('') + (extra > 0

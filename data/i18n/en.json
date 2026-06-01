@@ -320,7 +320,8 @@
     "recent_games": "Recent games",
     "no_games": "No games yet",
     "back_to_game": "Back to game",
-    "game_continues_hint": "The game is still in progress - close this profile to return to the board"
+    "game_continues_hint": "The game is still in progress - close this profile to return to the board",
+    "guest_note": "Guest player. Sign up to save stats and rating."
   },
   "replay": {
     "title": "Game replay",
@@ -625,7 +626,9 @@
     "status_online": "Online",
     "status_playing": "Playing a game",
     "status_lobby": "Looking for a match",
-    "nav_aria": "Online: {count}"
+    "nav_aria": "Online: {count}",
+    "guest_badge": "Guest",
+    "empty": "No one online yet - open the site to appear in the list!"
   },
   "common": {
     "loading": "Loading...",

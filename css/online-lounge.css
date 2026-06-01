@@ -203,6 +203,27 @@
   border-color: rgba(201, 162, 77, 0.35);
 }
 
+.online-chip.is-guest .online-chip-ring {
+  border-color: rgba(160, 180, 200, 0.45);
+}
+
+.online-chip.is-guest .online-chip-meta {
+  color: rgba(180, 200, 220, 0.85);
+  font-style: italic;
+}
+
+.pp-guest-note {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: center;
+  color: var(--text-secondary);
+  background: rgba(120, 140, 160, 0.12);
+  border: 1px solid rgba(120, 140, 160, 0.25);
+  border-radius: 4px;
+}
+
 .online-chip-avatar {
   width: 40px;
   height: 40px;

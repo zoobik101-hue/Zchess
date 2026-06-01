@@ -22,6 +22,18 @@ body.public-profile-game-pause {
   width: 100%;
 }
 
+.pp-guest-note {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: center;
+  color: var(--text-secondary);
+  background: rgba(120, 140, 160, 0.12);
+  border: 1px solid rgba(120, 140, 160, 0.25);
+  border-radius: 4px;
+}
+
 .pp-game-hint {
   margin: 0 0 16px;
   padding: 10px 12px;

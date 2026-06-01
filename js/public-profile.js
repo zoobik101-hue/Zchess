@@ -54,6 +54,23 @@ const PublicProfile = {
       if (uid) {
         const doc = await db.collection('users').doc(uid).get();
         if (doc.exists) return this.sanitize(doc.data(), doc.id);
+
+        const pres = await db.collection('presence').doc(uid).get();
+        if (pres.exists) {
+          const d = pres.data();
+          return this.sanitize({
+            username: d.username,
+            avatar: d.avatar,
+            rating: d.rating,
+            level: d.level,
+            wins: 0,
+            losses: 0,
+            draws: 0,
+            gamesPlayed: 0,
+            isGuest: d.isGuest,
+            recentGames: []
+          }, uid);
+        }
       }
 
       const name = (username || '').trim();
@@ -143,8 +160,13 @@ const PublicProfile = {
       ? new Date(user.createdAt).toLocaleDateString()
       : '-';
 
+    const guestNote = user.isGuest
+      ? `<p class="pp-guest-note">${t('public_profile.guest_note')}</p>`
+      : '';
+
     body.innerHTML = `
       ${this._returnToGame ? `<p class="pp-game-hint">${t('public_profile.game_continues_hint')}</p>` : ''}
+      ${guestNote}
       <div class="pp-hero">
         <div class="pp-avatar" id="pp-avatar"></div>
         <div class="pp-hero-info">

@@ -14,6 +14,7 @@ const Auth = {
   auth: null,
   db: null,
   listeners: [],
+  _guestSignInPending: false,
 
   async init() {
     // Initialize Firebase if config is provided
@@ -60,12 +61,19 @@ const Auth = {
 
   async handleAuthChange(firebaseUser) {
     if (firebaseUser) {
+      if (firebaseUser.isAnonymous) {
+        this.currentUser = this._buildGuestUser(firebaseUser.uid);
+        this.notifyListeners();
+        this.updateNavUI();
+        return;
+      }
+
       // Load user profile from Firestore
       try {
         if (this.db) {
           const doc = await this.db.collection('users').doc(firebaseUser.uid).get();
           if (doc.exists) {
-            this.currentUser = { uid: firebaseUser.uid, email: firebaseUser.email, ...doc.data() };
+            this.currentUser = { uid: firebaseUser.uid, email: firebaseUser.email, isGuest: false, ...doc.data() };
           } else {
             // Create profile for new user
             this.currentUser = await this.createUserProfile(firebaseUser);
@@ -99,6 +107,7 @@ const Auth = {
           uid: firebaseUser.uid,
           email: firebaseUser.email,
           username: firebaseUser.email?.split('@')[0] || 'Player',
+          isGuest: false,
           rating: ZChess.ELO.INITIAL_RATING,
           xp: 0, wins: 0, losses: 0, draws: 0, gamesPlayed: 0,
           createdAt: new Date().toISOString(),
@@ -106,8 +115,14 @@ const Auth = {
         };
       }
     } else {
-      this.currentUser = null;
-      localStorage.removeItem(ZChess.STORAGE.USER_CACHE);
+      await this.ensureGuestSession();
+      if (!this.auth?.currentUser) {
+        this.currentUser = null;
+        localStorage.removeItem(ZChess.STORAGE.USER_CACHE);
+        this.notifyListeners();
+        this.updateNavUI();
+      }
+      return;
     }
 
     // Notify listeners
@@ -115,6 +130,41 @@ const Auth = {
 
     // Update UI
     this.updateNavUI();
+  },
+
+  _buildGuestUser(uid) {
+    const suffix = (uid || '').slice(-4).toUpperCase() || String(1000 + Math.floor(Math.random() * 9000));
+    const guestLabel = typeof t === 'function' ? t('common.guest') : 'Guest';
+    return {
+      uid,
+      username: `${guestLabel} ${suffix}`,
+      isGuest: true,
+      email: '',
+      rating: ZChess.ELO.INITIAL_RATING,
+      xp: 0,
+      level: 1,
+      wins: 0,
+      losses: 0,
+      draws: 0,
+      gamesPlayed: 0,
+      avatar: null,
+      achievements: []
+    };
+  },
+
+  async ensureGuestSession() {
+    if (!this.auth || this._guestSignInPending) return;
+    if (this.auth.currentUser) return;
+
+    this._guestSignInPending = true;
+    try {
+      await this.auth.signInAnonymously();
+      console.log('[Auth] Guest session started (anonymous)');
+    } catch (err) {
+      console.warn('[Auth] Anonymous sign-in failed. Enable Anonymous auth in Firebase Console.', err);
+    } finally {
+      this._guestSignInPending = false;
+    }
   },
 
   async createUserProfile(firebaseUser) {
@@ -564,7 +614,11 @@ const Auth = {
   },
 
   isLoggedIn() {
-    return !!this.currentUser;
+    return !!this.currentUser && !this.currentUser.isGuest;
+  },
+
+  isGuestSession() {
+    return !!this.currentUser?.isGuest;
   }
 };
 
