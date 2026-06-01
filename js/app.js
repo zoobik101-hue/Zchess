@@ -15,8 +15,8 @@ const App = {
   // --- Performance mode (weak devices / reduced motion) ---
 
   _initPerfMode() {
-    const lowCpu = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
-    const lowMem = navigator.deviceMemory && navigator.deviceMemory <= 4;
+    const lowCpu = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2;
+    const lowMem = navigator.deviceMemory && navigator.deviceMemory <= 2;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (lowCpu || lowMem || reducedMotion) {
       document.documentElement.classList.add('perf-lite');
@@ -817,9 +817,10 @@ const App = {
 
   startVersionCheck() {
     const VERSION_KEY = 'zchess_version';
-    const CHECK_INTERVAL = 30000;
+    const CHECK_INTERVAL = 120000;
 
     const checkVersion = () => {
+      if (document.hidden) return;
       const verUrl = (window.ZChess.getBasePath?.() || '') + '/version.json?t=' + Date.now();
       fetch(verUrl, { cache: 'no-store' })
         .then(r => r.json())

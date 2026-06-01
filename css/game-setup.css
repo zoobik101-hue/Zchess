@@ -1,6 +1,6 @@
-/* ZChess - Game setup: Chess Arena (performance-optimized) */
+/* ZChess - Game setup: Chess Arena */
 
-/* --- Arena page scope --- */
+/* --- Arena page --- */
 #page-game.page-game-arena {
   --arena-bg: #050506;
   --arena-panel-border: rgba(201, 162, 77, 0.35);
@@ -9,22 +9,62 @@
   --arena-ivory: #e8e0d0;
   --arena-sq-light: rgba(232, 224, 208, 0.06);
   position: relative;
-  contain: layout style;
 }
 
 #page-game.page-game-arena.active {
   background: var(--arena-bg);
 }
 
-/* Light ambient - no repeating gradients (GPU friendly) */
+/* Page backdrop + chess decor (lightweight, no blur/fixed) */
 #page-game .game-setup-ambient {
   position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 0;
+  overflow: hidden;
   background:
-    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(212, 175, 85, 0.1), transparent 60%),
-    radial-gradient(ellipse 50% 40% at 100% 100%, rgba(61, 139, 122, 0.05), transparent);
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(212, 175, 85, 0.12), transparent 60%),
+    radial-gradient(ellipse 45% 35% at 0% 80%, rgba(61, 139, 122, 0.07), transparent),
+    radial-gradient(ellipse 40% 30% at 100% 70%, rgba(124, 58, 237, 0.06), transparent);
+}
+
+#page-game .arena-deco {
+  position: absolute;
+  line-height: 1;
+  color: rgba(212, 175, 85, 0.055);
+  user-select: none;
+  font-weight: 400;
+}
+
+#page-game .arena-deco-1 {
+  right: 4%;
+  bottom: 12%;
+  font-size: clamp(140px, 22vw, 260px);
+  transform: rotate(-14deg);
+}
+
+#page-game .arena-deco-2 {
+  left: 3%;
+  top: 18%;
+  font-size: clamp(70px, 12vw, 120px);
+  transform: rotate(18deg);
+  color: rgba(232, 224, 208, 0.04);
+}
+
+#page-game .arena-deco-3 {
+  right: 18%;
+  top: 8%;
+  font-size: clamp(56px, 9vw, 90px);
+  transform: rotate(8deg);
+  color: rgba(232, 224, 208, 0.035);
+}
+
+#page-game .arena-deco-4 {
+  left: 12%;
+  bottom: 8%;
+  font-size: clamp(48px, 8vw, 72px);
+  transform: rotate(-22deg);
+  color: rgba(61, 139, 122, 0.05);
 }
 
 #page-game .game-setup-shell {
@@ -70,11 +110,25 @@
   max-width: 860px;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(165deg, #181612 0%, #0a0a0c 100%);
+  background: linear-gradient(165deg, rgba(24, 22, 18, 0.97) 0%, rgba(8, 8, 10, 0.99) 100%);
   border: 1px solid var(--arena-panel-border);
   border-radius: 4px;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
-  contain: layout paint;
+  overflow: hidden;
+}
+
+/* Subtle chess board inside panel (2 gradients only) */
+#page-game .game-setup-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.22;
+  background-image:
+    linear-gradient(45deg, rgba(255, 255, 255, 0.045) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.045) 75%),
+    linear-gradient(45deg, rgba(255, 255, 255, 0.045) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.045) 75%);
+  background-size: 26px 26px;
+  background-position: 0 0, 13px 13px;
 }
 
 #page-game .panel-corner {
@@ -111,6 +165,8 @@
 #page-game .game-setup-row {
   padding: 22px 28px 0;
   border-top: 1px solid rgba(201, 162, 77, 0.12);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 #page-game .game-setup-options .game-setup-row:first-child {
@@ -121,21 +177,26 @@
 #page-game .game-setup-options {
   display: flex;
   flex-direction: column;
+  width: 100%;
 }
 
 #page-game .game-setup-footer {
   padding: 22px 28px 26px;
   border-top: 1px solid rgba(201, 162, 77, 0.12);
   text-align: center;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 #page-game .game-modes-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 0;
+  width: 100%;
   margin: 0;
   padding: 24px 24px 8px;
   border-bottom: 1px solid rgba(201, 162, 77, 0.1);
+  box-sizing: border-box;
 }
 
 #page-game .game-mode-card {
@@ -191,25 +252,30 @@
   color: rgba(232, 224, 208, 0.55);
 }
 
+/* Full-width symmetric chip grids */
 #page-game .difficulty-selector,
 #page-game .play-as-selector {
   display: grid;
   gap: 8px;
+  width: 100%;
+  max-width: 100%;
   margin: 0;
+  box-sizing: border-box;
 }
 
 #page-game .difficulty-selector {
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
 }
 
 #page-game .play-as-selector {
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 #page-game .diff-btn,
 #page-game .play-as-btn {
   padding: 12px 6px;
   min-height: 70px;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -220,6 +286,7 @@
   border-radius: 2px;
   cursor: pointer;
   transition: border-color 0.2s ease, background 0.2s ease;
+  box-sizing: border-box;
 }
 
 #page-game .play-as-piece {
@@ -232,6 +299,7 @@
   font-size: 10px;
   font-weight: 600;
   color: rgba(232, 224, 208, 0.5);
+  text-align: center;
 }
 
 #page-game .diff-emoji {
@@ -294,6 +362,8 @@
     padding: 16px 24px 8px;
     max-height: 42vh;
     overflow-y: auto;
+    width: 100%;
+    box-sizing: border-box;
   }
 }
 
@@ -311,6 +381,10 @@
 @media (max-width: 768px) {
   #page-game .game-setup-shell {
     padding: 16px 16px 32px;
+  }
+
+  #page-game .arena-deco {
+    opacity: 0.7;
   }
 
   #page-game .game-modes-grid {
@@ -341,12 +415,14 @@
   }
 
   #page-game .difficulty-selector {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
-/* Lite mode: strip decorative layers */
-html.perf-lite #page-game .game-setup-ambient,
-html[data-no-animations="true"] #page-game .game-setup-ambient {
+/* Only strip heaviest decor in perf-lite */
+html.perf-lite #page-game .arena-deco,
+html.perf-lite #page-game .game-setup-panel::before,
+html[data-no-animations="true"] #page-game .arena-deco,
+html[data-no-animations="true"] #page-game .game-setup-panel::before {
   display: none;
 }

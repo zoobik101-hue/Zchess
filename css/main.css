@@ -2215,24 +2215,17 @@ p { color: var(--text-secondary); }
   justify-content: center;
 }
 
-/* --- Performance: reduce GPU-heavy effects --- */
+/* --- Performance: reduce GPU-heavy effects (keep static decor) --- */
 html.perf-lite .hero-canvas,
 html[data-no-animations="true"] .hero-canvas {
   display: none !important;
 }
 
-html.perf-lite .hero-bg-orbs,
-html.perf-lite .hero-piece {
-  display: none;
-}
-
 html.perf-lite .hero-orb,
-html.perf-lite .cta-card::before {
-  animation: none !important;
-}
-
+html.perf-lite .hero-piece,
+html.perf-lite .cta-card::before,
 html.perf-lite .hero-badge-dot {
-  animation: none;
+  animation: none !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

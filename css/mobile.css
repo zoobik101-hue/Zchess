@@ -162,7 +162,8 @@ body.pwa-banner-visible {
   box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.55);
   transform: translateY(110%);
   transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-  backdrop-filter: blur(16px);
+  backdrop-filter: none;
+  background: rgba(8, 8, 16, 0.98);
 }
 
 .pwa-install-banner.visible {
