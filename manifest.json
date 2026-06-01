@@ -7,8 +7,8 @@
   "scope": "/Zchess/",
   "display": "standalone",
   "display_override": ["standalone", "fullscreen"],
-  "background_color": "#0a0a0f",
-  "theme_color": "#7c3aed",
+  "background_color": "#050506",
+  "theme_color": "#a67c2e",
   "orientation": "any",
   "lang": "ru",
   "icons": [

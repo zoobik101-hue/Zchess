@@ -1,0 +1,564 @@
+/* ZChess - Global Chess Arena theme (unified with Play page) */
+
+:root {
+  --font-display: 'Cinzel', Georgia, 'Times New Roman', serif;
+
+  --arena-bg: #050506;
+  --arena-ivory: #e8e0d0;
+  --arena-gold: #d4af55;
+  --arena-gold-bright: #f0d78c;
+  --arena-gold-dark: #a67c2e;
+  --arena-panel-border: rgba(201, 162, 77, 0.35);
+
+  --bg-primary: #050506;
+  --bg-secondary: #0a090c;
+  --bg-tertiary: #121018;
+  --bg-card: rgba(14, 12, 18, 0.92);
+  --bg-card-hover: rgba(22, 18, 14, 0.95);
+
+  --accent-primary: #c9a24d;
+  --accent-secondary: #f0d78c;
+  --accent-tertiary: #d4af55;
+  --accent-glow: rgba(212, 175, 85, 0.35);
+  --accent-gradient: linear-gradient(180deg, #f0d78c 0%, #c9a24d 48%, #a67c2e 100%);
+  --accent-gradient-hero: linear-gradient(135deg, #f0d78c 0%, #d4af55 40%, #c9a24d 70%, #a855f7 100%);
+  --accent-gradient-text: linear-gradient(135deg, #f5e6b8 0%, #d4af55 50%, #e9d5ff 100%);
+  --accent-purple: #7c3aed;
+
+  --text-primary: #e8e0d0;
+  --text-secondary: rgba(232, 224, 208, 0.62);
+  --text-muted: rgba(232, 224, 208, 0.38);
+
+  --border-color: rgba(201, 162, 77, 0.22);
+  --border-active: rgba(212, 175, 85, 0.55);
+  --border-subtle: rgba(255, 255, 255, 0.05);
+
+  --glass-bg: rgba(0, 0, 0, 0.35);
+  --glass-border: rgba(201, 162, 77, 0.12);
+
+  --shadow-purple: 0 0 20px rgba(212, 175, 85, 0.2);
+  --shadow-card: 0 12px 40px rgba(0, 0, 0, 0.45);
+  --shadow-glow: 0 0 32px rgba(212, 175, 85, 0.18);
+}
+
+body::before {
+  background:
+    radial-gradient(ellipse 70% 45% at 50% -5%, rgba(212, 175, 85, 0.1), transparent 55%),
+    radial-gradient(ellipse 40% 30% at 10% 90%, rgba(124, 58, 237, 0.06), transparent),
+    radial-gradient(ellipse 35% 28% at 95% 75%, rgba(61, 139, 122, 0.05), transparent);
+}
+
+/* --- Typography --- */
+.page-header-title,
+.section-title,
+.hero-title,
+.game-setup-title,
+.rules-card-title,
+.news-card-title,
+.auth-modal-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--arena-ivory);
+}
+
+.gradient-text {
+  background: var(--accent-gradient-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* --- Navbar --- */
+.navbar {
+  border-bottom: 1px solid var(--arena-panel-border);
+  background: rgba(5, 5, 6, 0.97);
+}
+
+.logo-icon {
+  background: linear-gradient(145deg, #f0d78c, #a67c2e);
+  box-shadow: 0 0 16px rgba(212, 175, 85, 0.35);
+}
+
+.logo-text {
+  background: linear-gradient(135deg, #f5e6b8, #d4af55);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.nav-link.active {
+  color: var(--arena-gold-bright);
+  background: rgba(212, 175, 85, 0.12);
+  border: 1px solid rgba(201, 162, 77, 0.25);
+}
+
+.nav-link:hover {
+  color: var(--arena-ivory);
+  background: rgba(212, 175, 85, 0.06);
+}
+
+.lang-switcher {
+  border-color: var(--arena-panel-border);
+}
+
+.lang-btn.active {
+  background: rgba(212, 175, 85, 0.2);
+  color: var(--arena-gold-bright);
+}
+
+.user-avatar {
+  background: linear-gradient(145deg, #d4af55, #7c3aed);
+}
+
+/* --- Buttons --- */
+.btn-primary {
+  color: #1a1408;
+  font-weight: 700;
+  background: var(--accent-gradient);
+  border: 1px solid rgba(255, 230, 160, 0.45);
+  box-shadow: 0 4px 0 #6b5220, 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.btn-primary:hover {
+  filter: brightness(1.06);
+  box-shadow: 0 5px 0 #6b5220, 0 12px 28px rgba(212, 175, 85, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  border-color: var(--arena-panel-border);
+  color: var(--arena-ivory);
+}
+
+.btn-secondary:hover {
+  border-color: var(--border-active);
+  background: rgba(212, 175, 85, 0.08);
+}
+
+.btn-outline {
+  color: var(--arena-gold-bright);
+  border-color: var(--arena-gold);
+}
+
+.btn-outline:hover {
+  background: rgba(212, 175, 85, 0.1);
+  box-shadow: var(--shadow-glow);
+}
+
+/* --- Cards & panels --- */
+.card,
+.feature-card,
+.rules-card,
+.news-card,
+.settings-section,
+.faq-item,
+.auth-modal,
+.lobby-modal {
+  background: linear-gradient(165deg, rgba(24, 22, 18, 0.95) 0%, rgba(8, 8, 10, 0.98) 100%);
+  border: 1px solid var(--arena-panel-border);
+  border-radius: 4px;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.card:hover,
+.feature-card:hover,
+.news-card:hover {
+  border-color: rgba(212, 175, 85, 0.45);
+  box-shadow: var(--shadow-card);
+}
+
+.feature-card::before {
+  background: linear-gradient(135deg, rgba(212, 175, 85, 0.08), transparent);
+}
+
+.feature-icon {
+  color: var(--arena-gold);
+  background: rgba(212, 175, 85, 0.1);
+  border-color: rgba(201, 162, 77, 0.28);
+}
+
+.feature-card:hover .feature-icon {
+  background: rgba(212, 175, 85, 0.18);
+  box-shadow: 0 0 16px rgba(212, 175, 85, 0.2);
+}
+
+.feature-card:hover::before {
+  background: linear-gradient(90deg, transparent, rgba(212, 175, 85, 0.35), transparent);
+  opacity: 1;
+}
+
+.feature-title,
+.cta-title {
+  font-family: var(--font-display);
+  color: var(--arena-ivory);
+}
+
+.hero-title {
+  color: var(--arena-ivory);
+}
+
+.hero-subtitle {
+  color: var(--text-secondary);
+}
+
+/* Inner pages: arena panel (not home, play, game setup, profile hero) */
+.page.active:not(#page-home):not(#page-play):not(#page-game):not(#page-profile) > .container {
+  max-width: 920px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 28px 28px 44px !important;
+  background: linear-gradient(165deg, rgba(24, 22, 18, 0.97) 0%, rgba(8, 8, 10, 0.99) 100%);
+  border: 1px solid var(--arena-panel-border);
+  border-radius: 4px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+  position: relative;
+}
+
+.page.active:not(#page-home):not(#page-play):not(#page-game) .page-header {
+  border-bottom: 1px solid rgba(201, 162, 77, 0.12);
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+}
+
+.page-header-sub {
+  color: var(--text-secondary);
+}
+
+/* --- Section tags (home) --- */
+.section-tag,
+.hero-badge {
+  background: rgba(212, 175, 85, 0.1);
+  border: 1px solid rgba(201, 162, 77, 0.3);
+  color: var(--arena-gold-bright);
+}
+
+.hero-badge-dot {
+  background: var(--arena-gold);
+}
+
+.hero-stat-value {
+  background: var(--accent-gradient-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.hero-piece {
+  color: rgba(212, 175, 85, 0.4);
+}
+
+.hero-piece:nth-child(even) {
+  color: rgba(232, 224, 208, 0.28);
+}
+
+.hero-orb-1 {
+  background: #d4af55;
+}
+
+.hero-orb-2 {
+  background: var(--accent-purple);
+}
+
+.hero-orb-3 {
+  background: #3d8b7a;
+}
+
+/* --- Tabs --- */
+.tab-nav {
+  border-color: var(--arena-panel-border);
+}
+
+.tab-btn.active {
+  background: rgba(212, 175, 85, 0.22);
+  color: var(--arena-gold-bright);
+  box-shadow: inset 0 0 0 1px rgba(240, 215, 140, 0.2);
+}
+
+.tab-btn:hover {
+  color: var(--arena-ivory);
+}
+
+/* --- Settings --- */
+.settings-section-header {
+  color: var(--arena-gold);
+  border-bottom-color: rgba(201, 162, 77, 0.12);
+  letter-spacing: 0.12em;
+}
+
+.toggle-switch.on {
+  background: var(--arena-gold);
+}
+
+.form-select,
+.form-input {
+  border-color: var(--arena-panel-border);
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.form-select:focus,
+.form-input:focus {
+  border-color: var(--border-active);
+  box-shadow: 0 0 0 2px rgba(212, 175, 85, 0.15);
+}
+
+/* --- Leaderboard --- */
+.leaderboard-table th {
+  color: var(--arena-gold);
+  border-bottom-color: rgba(201, 162, 77, 0.2);
+}
+
+.leaderboard-table tr:hover td {
+  background: rgba(212, 175, 85, 0.06);
+}
+
+.leaderboard-rank-1,
+.leaderboard-rank-2,
+.leaderboard-rank-3 {
+  color: var(--arena-gold-bright);
+}
+
+/* --- FAQ --- */
+.faq-item.open {
+  border-color: var(--border-active);
+}
+
+.faq-question {
+  color: var(--arena-ivory);
+}
+
+/* --- CTA --- */
+.cta-card {
+  background: linear-gradient(135deg, rgba(212, 175, 85, 0.12), rgba(124, 58, 237, 0.08));
+  border-color: var(--arena-panel-border);
+}
+
+.cta-card::before {
+  background: radial-gradient(circle, rgba(212, 175, 85, 0.08) 0%, transparent 60%);
+}
+
+/* --- Footer --- */
+.footer {
+  border-top: 1px solid var(--arena-panel-border);
+  background: rgba(5, 5, 6, 0.9);
+}
+
+.footer-heading {
+  color: var(--arena-gold);
+  letter-spacing: 0.1em;
+}
+
+.footer-link:hover {
+  color: var(--arena-gold-bright);
+}
+
+/* --- Toast & badges --- */
+.badge-primary {
+  background: rgba(212, 175, 85, 0.15);
+  border-color: rgba(201, 162, 77, 0.35);
+  color: var(--arena-gold-bright);
+}
+
+.toast {
+  border-color: var(--arena-panel-border);
+}
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar-thumb {
+  background: rgba(201, 162, 77, 0.35);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--arena-gold);
+}
+
+/* --- Mobile menu --- */
+.mobile-nav {
+  border-bottom-color: var(--arena-panel-border);
+}
+
+/* Game page keeps its own shell */
+#page-game > .container.game-setup-shell {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  max-width: 960px;
+}
+
+/* Profile */
+#page-profile .profile-hero {
+  background: linear-gradient(180deg, rgba(212, 175, 85, 0.1) 0%, transparent 100%);
+  border-bottom: 1px solid var(--arena-panel-border);
+}
+
+#page-profile .profile-username {
+  font-family: var(--font-display);
+  color: var(--arena-ivory);
+}
+
+#page-profile .profile-title-badge {
+  background: rgba(212, 175, 85, 0.12);
+  border-color: rgba(201, 162, 77, 0.35);
+  color: var(--arena-gold-bright);
+}
+
+#page-profile .profile-avatar-large {
+  color: #1a1408;
+  box-shadow: 0 0 0 4px rgba(201, 162, 77, 0.35), var(--shadow-glow);
+}
+
+#page-profile .profile-avatar-large:hover {
+  box-shadow: 0 0 0 4px rgba(212, 175, 85, 0.55), 0 0 24px rgba(212, 175, 85, 0.3);
+}
+
+#page-profile > .container {
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#page-profile h3 {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+  color: var(--arena-gold);
+}
+
+.stat-card,
+.achievement-card,
+.task-item {
+  background: linear-gradient(165deg, rgba(24, 22, 18, 0.92) 0%, rgba(8, 8, 10, 0.96) 100%);
+  border: 1px solid var(--arena-panel-border);
+  border-radius: 4px;
+}
+
+.stat-card:hover,
+.achievement-card:hover {
+  border-color: rgba(212, 175, 85, 0.45);
+  box-shadow: var(--shadow-card);
+}
+
+.achievement-card.unlocked {
+  border-color: rgba(212, 175, 85, 0.5);
+  background: rgba(212, 175, 85, 0.06);
+}
+
+.task-icon {
+  background: rgba(212, 175, 85, 0.1);
+  border: 1px solid rgba(201, 162, 77, 0.2);
+}
+
+.xp-bar-fill {
+  background: var(--accent-gradient);
+}
+
+/* News */
+.news-thumbnail {
+  background: linear-gradient(135deg, rgba(212, 175, 85, 0.25), rgba(124, 58, 237, 0.15));
+}
+
+.news-tag {
+  background: rgba(212, 175, 85, 0.12);
+  color: var(--arena-gold-bright);
+}
+
+.news-title {
+  font-family: var(--font-display);
+  color: var(--arena-ivory);
+}
+
+/* Auth */
+.auth-tab.active {
+  background: var(--accent-gradient);
+  color: #1a1408;
+  box-shadow: 0 2px 12px rgba(212, 175, 85, 0.35);
+}
+
+.auth-tabs {
+  border-color: var(--arena-panel-border);
+}
+
+/* Leaderboard extras */
+.leaderboard-table tr.current-user td {
+  background: rgba(212, 175, 85, 0.08);
+}
+
+.faq-icon {
+  color: var(--arena-gold);
+}
+
+/* Multiplayer lobby */
+.lobby-modal {
+  background: linear-gradient(165deg, rgba(24, 22, 18, 0.99) 0%, rgba(8, 8, 10, 0.99) 100%);
+  border-color: var(--arena-panel-border);
+  border-radius: 4px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 40px rgba(212, 175, 85, 0.08);
+}
+
+.lobby-title {
+  font-family: var(--font-display);
+  color: var(--arena-ivory);
+}
+
+.lobby-sub {
+  color: var(--text-secondary);
+}
+
+.lobby-mode-card {
+  background: rgba(212, 175, 85, 0.06);
+  border-color: var(--arena-panel-border);
+  border-radius: 4px;
+}
+
+.lobby-mode-card:hover {
+  border-color: var(--border-active);
+  background: rgba(212, 175, 85, 0.12);
+  box-shadow: var(--shadow-glow);
+}
+
+.lobby-spinner-big {
+  border-color: rgba(201, 162, 77, 0.2);
+  border-top-color: var(--arena-gold);
+}
+
+.lobby-dots span {
+  background: var(--arena-gold);
+}
+
+.lobby-code {
+  color: var(--arena-gold-bright);
+  background: rgba(212, 175, 85, 0.08);
+  border-color: var(--arena-panel-border);
+  text-shadow: 0 0 16px rgba(212, 175, 85, 0.35);
+}
+
+.lobby-copy-btn {
+  background: rgba(212, 175, 85, 0.1);
+  border-color: var(--arena-panel-border);
+  color: var(--arena-ivory);
+}
+
+.lobby-copy-btn:hover {
+  background: rgba(212, 175, 85, 0.18);
+  border-color: var(--border-active);
+}
+
+/* PWA banner */
+.pwa-install-banner {
+  border-top: 1px solid var(--arena-panel-border);
+  background: linear-gradient(180deg, rgba(14, 12, 18, 0.98), rgba(5, 5, 6, 0.99));
+}
+
+.pwa-install-title {
+  color: var(--arena-ivory);
+}
+
+/* Mobile: panel padding */
+@media (max-width: 768px) {
+  .page.active:not(#page-home):not(#page-play):not(#page-game):not(#page-profile) > .container {
+    padding: 20px 16px 32px !important;
+    margin-left: 12px;
+    margin-right: 12px;
+    max-width: none;
+  }
+}
