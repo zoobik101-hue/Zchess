@@ -99,14 +99,17 @@ const Leaderboard = {
         ? ZChess.leagueBadgeHTML(rating, 'league-badge-sm')
         : '';
 
+      const uidAttr = player.uid ? ` data-player-uid="${player.uid}"` : '';
+      const nameAttr = player.username ? ` data-player-username="${this._escAttr(player.username)}"` : '';
+
       return `
-        <tr class="${isCurrentUser ? 'current-user' : ''}">
+        <tr class="lb-row-clickable${isCurrentUser ? ' current-user' : ''}"${uidAttr}${nameAttr} data-player-index="${i}">
           <td><div class="rank-badge ${rankClass}">${rank}</div></td>
           <td>
-            <div class="leaderboard-player">
-              <div class="lb-avatar" id="${lbAvatarId}"></div>
+            <div class="leaderboard-player player-profile-link"${uidAttr}${nameAttr}>
+              <div class="lb-avatar player-profile-link" id="${lbAvatarId}"${uidAttr}${nameAttr}></div>
               <div>
-                <div class="lb-name">${player.username || 'Unknown'}</div>
+                <div class="lb-name">${this._esc(player.username || 'Unknown')}</div>
                 <div class="lb-title" style="font-size:11px;color:var(--text-muted)">Lvl ${player.level || 1}</div>
               </div>
             </div>
@@ -133,8 +136,42 @@ const Leaderboard = {
       });
     }
 
+    this._bindProfileClicks();
+
     // Update current user's rank
     this.updateUserRank();
+  },
+
+  _esc(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  },
+
+  _escAttr(s) {
+    return String(s).replace(/"/g, '&quot;');
+  },
+
+  _bindProfileClicks() {
+    const PP = ZChess.PublicProfile;
+    if (!PP) return;
+
+    this.data.forEach((player, i) => {
+      const opts = { uid: player.uid || null, username: player.username || null };
+      if (!opts.uid && !opts.username) return;
+
+      const row = document.querySelector(`tr[data-player-index="${i}"]`);
+      if (row) PP.bindClick(row, opts);
+
+      const rank = i + 1;
+      const av = document.getElementById(`lb-avatar-${player.uid || rank}`);
+      if (av) PP.bindClick(av, opts);
+
+      const playerCell = row?.querySelector('.leaderboard-player');
+      if (playerCell) PP.bindClick(playerCell, opts);
+    });
   },
 
   updateUserRank() {

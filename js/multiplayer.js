@@ -251,6 +251,7 @@ const Multiplayer = {
         this._checkOpponentPing(opp.lastPing, opp.connected);
         if (ZChess.ChessBoard?.multiplayerMode) {
           ZChess.ChessBoard.multiplayerOpponent = {
+            uid: opp.uid || null,
             name: opp.username || ZChess.ChessBoard.multiplayerOpponent?.name,
             rating: opp.rating || 1200,
             avatar: opp.avatar || null
@@ -285,6 +286,7 @@ const Multiplayer = {
     const opponentName   = opp.username || 'Соперник';
     const opponentRating = opp.rating   || 1200;
     const opponentAvatar = opp.avatar   || null;
+    const opponentUid    = opp.uid      || null;
     let   n = 3;
     const el = document.getElementById('lobby-countdown');
 
@@ -296,7 +298,7 @@ const Multiplayer = {
         if (overlay) overlay.classList.remove('open');
 
         const launch = () => {
-          ZChess.ChessBoard.startMultiplayerGame({ playerColor, opponentName, opponentRating, opponentAvatar });
+          ZChess.ChessBoard.startMultiplayerGame({ playerColor, opponentName, opponentRating, opponentAvatar, opponentUid });
         };
 
         if (ZChess.App && ZChess.App.navigate) {
@@ -333,6 +335,14 @@ const Multiplayer = {
         username: opp.username || '?',
         avatar: opp.avatar || null
       });
+    }
+
+    const PP = ZChess.PublicProfile;
+    if (PP && opp.uid) {
+      const opts = { uid: opp.uid, username: opp.username };
+      PP.bindClick(document.getElementById('ready-opp-card'), opts);
+      PP.bindClick(document.getElementById('ready-opp-avatar'), opts);
+      PP.bindClick(document.getElementById('ready-opp-name'), opts);
     }
   },
 
@@ -720,6 +730,7 @@ const Multiplayer = {
         opponentName:   opp?.username || 'Opponent',
         opponentRating: opp?.rating   || 1200,
         opponentAvatar: opp?.avatar   || null,
+        opponentUid:    opp?.uid      || null,
         moves:          room.moves
       });
 

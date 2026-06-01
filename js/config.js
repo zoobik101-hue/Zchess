@@ -26,7 +26,7 @@ window.ZChess.firebaseConfig = {
 // ==========================================
 // APP CONSTANTS
 // ==========================================
-window.ZChess.VERSION = '1.1.2';
+window.ZChess.VERSION = '1.1.3';
 window.ZChess.APP_NAME = 'ZChess';
 window.ZChess.SITE_URL = 'https://zoobik101-hue.github.io/Zchess/';
 

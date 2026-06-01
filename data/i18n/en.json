@@ -311,6 +311,15 @@
     "avatar_not_image": "Please choose an image file",
     "avatar_error": "Could not upload avatar"
   },
+  "public_profile": {
+    "loading": "Loading profile...",
+    "not_found": "Player not found",
+    "view_profile": "View profile",
+    "member_since": "Member since",
+    "best_streak": "Best streak",
+    "recent_games": "Recent games",
+    "no_games": "No games yet"
+  },
   "replay": {
     "title": "Game replay",
     "moves": "Moves",

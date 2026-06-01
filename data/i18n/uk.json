@@ -311,6 +311,15 @@
     "avatar_not_image": "Оберіть файл зображення",
     "avatar_error": "Не вдалося завантажити аватар"
   },
+  "public_profile": {
+    "loading": "Завантаження профілю...",
+    "not_found": "Гравця не знайдено",
+    "view_profile": "Відкрити профіль",
+    "member_since": "У ZChess з",
+    "best_streak": "Найкраща серія",
+    "recent_games": "Останні партії",
+    "no_games": "Партій поки немає"
+  },
   "replay": {
     "title": "Перегляд партії",
     "moves": "Ходи",

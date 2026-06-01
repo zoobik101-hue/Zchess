@@ -448,6 +448,7 @@ const ChessBoard = {
     this.selectedSquare  = null;
     this.legalMovesForSelected = [];
     this.multiplayerOpponent = {
+      uid:    options.opponentUid    || null,
       name:   options.opponentName   || 'Opponent',
       rating: options.opponentRating || 1200,
       avatar: options.opponentAvatar || null
@@ -1002,11 +1003,13 @@ self.onmessage = function(e) {
     const durationSec = s ? Math.floor((Date.now() - s.startTime) / 1000) : 0;
     let opponentType = 'unknown';
     let opponentUsername = null;
+    let opponentUid = null;
 
     if (this.isAIGame) opponentType = 'ai';
     else if (this.multiplayerMode) {
       opponentType = 'human';
       opponentUsername = this.multiplayerOpponent?.name || null;
+      opponentUid = this.multiplayerOpponent?.uid || null;
     }
 
     const mode = this.trainingMode ? 'training'
@@ -1021,6 +1024,7 @@ self.onmessage = function(e) {
       mode,
       opponentType,
       opponentUsername,
+      opponentUid,
       moveHistory: ZChess.serializeMoveHistory
         ? ZChess.serializeMoveHistory(this.gameState?.history || [])
         : []
@@ -1363,6 +1367,22 @@ self.onmessage = function(e) {
           avatarEl.classList.remove('has-avatar-img');
         } else {
           ZChess.UserDisplay.renderAvatar(avatarEl, { username: name, avatar: null });
+        }
+      }
+
+      const infoEl = bar.querySelector('.player-info-text');
+      const PP = ZChess.PublicProfile;
+      if (PP && infoEl) {
+        if (isPlayer && user?.uid) {
+          PP.bindClick(infoEl, { uid: user.uid, username: user.username });
+          if (avatarEl) PP.bindClick(avatarEl, { uid: user.uid, username: user.username });
+        } else if (!isPlayer && this.multiplayerMode && this.multiplayerOpponent?.uid) {
+          const o = this.multiplayerOpponent;
+          PP.bindClick(infoEl, { uid: o.uid, username: o.name });
+          if (avatarEl) PP.bindClick(avatarEl, { uid: o.uid, username: o.name });
+        } else {
+          infoEl.classList.remove('player-profile-link');
+          if (avatarEl) avatarEl.classList.remove('player-profile-link');
         }
       }
     };

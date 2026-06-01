@@ -116,6 +116,12 @@ const Profile = {
       const outcomeClass = outcome === 'win' ? 'success' : outcome === 'loss' ? 'error' : 'primary';
       const outcomeLabel = t(`profile.outcome_${outcome}`);
       const opponent = ZChess.formatGameOpponent ? ZChess.formatGameOpponent(game) : (game.opponent || t('profile.opponent_unknown'));
+      const oppUid = game.opponentUid || null;
+      const oppName = game.opponentUsername || null;
+      const oppClickClass = oppUid ? ' player-profile-link' : '';
+      const oppDataAttrs = oppUid
+        ? ` data-player-uid="${oppUid}"${oppName ? ` data-player-username="${this._escapeAttr(oppName)}"` : ''}`
+        : '';
       const moveCount = game.moves || game.moveHistory?.length || 0;
       const duration = game.durationSec != null && ZChess.formatDuration
         ? ZChess.formatDuration(game.durationSec)
@@ -137,7 +143,7 @@ const Profile = {
       return `
         <button type="button" class="recent-game-card${canReplay ? ' can-replay' : ' no-replay'}" data-game-index="${index}" ${canReplay ? '' : 'disabled'}>
           <div class="recent-game-main">
-            <div class="recent-game-opponent">${this._escapeHtml(opponent)}</div>
+            <span class="recent-game-opponent${oppClickClass}"${oppDataAttrs}>${this._escapeHtml(opponent)}</span>
             <div class="recent-game-meta">${metaParts.map(p => this._escapeHtml(p)).join(' · ')}</div>
             <div class="recent-game-tags">
               <span class="recent-game-mode">${this._escapeHtml(modeLabel)}</span>
@@ -152,6 +158,15 @@ const Profile = {
         </button>
       `;
     }).join('');
+
+    if (ZChess.PublicProfile) {
+      el.querySelectorAll('.recent-game-opponent.player-profile-link').forEach(elOpp => {
+        ZChess.PublicProfile.bindClick(elOpp, {
+          uid: elOpp.dataset.playerUid,
+          username: elOpp.dataset.playerUsername
+        });
+      });
+    }
 
     el.querySelectorAll('.recent-game-card.can-replay').forEach(card => {
       card.addEventListener('click', () => {
@@ -233,6 +248,10 @@ const Profile = {
         saveBtn.disabled = false;
       }
     });
+  },
+
+  _escapeAttr(str) {
+    return String(str).replace(/"/g, '&quot;');
   },
 
   _escapeHtml(str) {

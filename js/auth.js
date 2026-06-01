@@ -326,6 +326,7 @@ const Auth = {
       outcome,
       opponentType: result.opponentType || (isAI ? 'ai' : result.opponentUsername ? 'human' : 'unknown'),
       opponentUsername: result.opponentUsername || null,
+      opponentUid: result.opponentUid || null,
       aiDifficulty: isAI ? aiDifficulty : null,
       opponentRating: opponentRating || null,
       ratingChange,

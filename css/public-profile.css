@@ -1,0 +1,227 @@
+/* Public player profile modal */
+
+#public-profile-overlay {
+  z-index: 940;
+}
+
+.public-profile-modal {
+  position: relative;
+  width: min(520px, 94vw);
+  max-height: 90vh;
+  overflow-y: auto;
+  margin: auto;
+  padding: 28px 24px 24px;
+  background: linear-gradient(165deg, rgba(24, 22, 18, 0.99) 0%, rgba(8, 8, 10, 0.99) 100%);
+  border: 1px solid var(--arena-panel-border, rgba(201, 162, 77, 0.35));
+  border-radius: 4px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+}
+
+.public-profile-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  z-index: 2;
+}
+
+.public-profile-loading,
+.public-profile-empty {
+  text-align: center;
+  padding: 40px 16px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.pp-hero {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(201, 162, 77, 0.2);
+}
+
+.pp-avatar {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--accent-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: 800;
+  color: #1a1408;
+  overflow: hidden;
+  box-shadow: 0 0 0 3px rgba(201, 162, 77, 0.35);
+}
+
+.pp-username {
+  font-family: var(--font-display, 'Cinzel', serif);
+  font-size: 1.5rem;
+  color: var(--arena-ivory, var(--text-primary));
+  margin-bottom: 4px;
+}
+
+.pp-title {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.pp-league {
+  margin-bottom: 6px;
+}
+
+.league-badge-lg {
+  font-size: 13px;
+  padding: 5px 14px;
+}
+
+.pp-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.pp-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.pp-stat {
+  text-align: center;
+  padding: 12px 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--arena-panel-border, rgba(201, 162, 77, 0.2));
+  border-radius: 4px;
+}
+
+.pp-stat.highlight {
+  border-color: rgba(212, 175, 85, 0.45);
+  background: rgba(212, 175, 85, 0.08);
+}
+
+.pp-stat-val {
+  display: block;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--arena-ivory, var(--text-primary));
+  line-height: 1.2;
+}
+
+.pp-stat.highlight .pp-stat-val {
+  color: var(--arena-gold-bright, #f0d78c);
+}
+
+.pp-stat-lbl {
+  display: block;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pp-recent-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--arena-gold, #d4af55);
+  margin-bottom: 12px;
+}
+
+.pp-recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.pp-recent-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(201, 162, 77, 0.15);
+  border-radius: 4px;
+}
+
+.pp-recent-opp {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.pp-recent-meta {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.pp-recent-empty {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 16px;
+}
+
+/* Clickable players */
+.player-profile-link {
+  cursor: pointer;
+  transition: opacity 0.15s, color 0.15s;
+}
+
+.player-profile-link:hover {
+  opacity: 0.9;
+}
+
+.leaderboard-player.player-profile-link:hover .lb-name {
+  color: var(--arena-gold-bright, #f0d78c);
+}
+
+tr.lb-row-clickable {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+tr.lb-row-clickable:hover td {
+  background: rgba(212, 175, 85, 0.06);
+}
+
+.player-bar .player-info-text.player-profile-link:hover .player-name-sm {
+  color: var(--arena-gold-bright, #f0d78c);
+}
+
+.lobby-player-card.player-profile-link:hover .lpc-name {
+  color: var(--arena-gold-bright, #f0d78c);
+}
+
+.recent-game-opponent.player-profile-link {
+  text-decoration: underline;
+  text-decoration-color: rgba(212, 175, 85, 0.35);
+  text-underline-offset: 2px;
+}
+
+.recent-game-opponent.player-profile-link:hover {
+  color: var(--arena-gold-bright, #f0d78c);
+}
+
+@media (max-width: 520px) {
+  .pp-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .pp-hero {
+    flex-direction: column;
+    text-align: center;
+  }
+}

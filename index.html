@@ -49,6 +49,7 @@
   <link rel="stylesheet" href="css/chess-decor.css">
   <link rel="stylesheet" href="css/theme-arena.css">
   <link rel="stylesheet" href="css/game-replay.css">
+  <link rel="stylesheet" href="css/public-profile.css">
   <link rel="stylesheet" href="css/mobile.css">
 </head>
 <body>
@@ -1082,6 +1083,14 @@
   </div>
 </div>
 
+<!-- Public player profile -->
+<div class="modal-overlay" id="public-profile-overlay" role="dialog" aria-label="Player profile">
+  <div class="public-profile-modal">
+    <button type="button" class="modal-close public-profile-close" id="public-profile-close" aria-label="Close">×</button>
+    <div id="public-profile-body"></div>
+  </div>
+</div>
+
 <!-- Game replay viewer -->
 <div class="modal-overlay" id="game-replay-overlay" role="dialog" aria-label="Game replay">
   <div class="replay-modal">
@@ -1217,7 +1226,7 @@
           <div class="lpc-rating" id="ready-my-rating">1200</div>
         </div>
         <div class="lobby-vs-badge">VS</div>
-        <div class="lobby-player-card opp">
+        <div class="lobby-player-card opp" id="ready-opp-card">
           <div class="lpc-avatar" id="ready-opp-avatar">?</div>
           <div class="lpc-name" id="ready-opp-name">Соперник</div>
           <div class="lpc-rating" id="ready-opp-rating">1200</div>
@@ -1292,6 +1301,7 @@
 <script src="js/particles.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/user-display.js"></script>
+<script src="js/public-profile.js"></script>
 <script src="js/chess-engine.js"></script>
 <script src="js/ai-engine.js"></script>
 <script src="js/chess-board.js"></script>
