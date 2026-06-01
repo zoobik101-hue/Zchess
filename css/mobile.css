@@ -21,6 +21,133 @@ body.pwa-banner-visible {
   padding-top: var(--safe-top);
 }
 
+/* Mobile header - fit on screen */
+@media (max-width: 768px) {
+  :root {
+    --nav-height: 56px;
+  }
+
+  .navbar-inner {
+    padding: 0 10px;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .navbar-logo {
+    gap: 6px;
+    font-size: 17px;
+    min-width: 0;
+    flex-shrink: 1;
+  }
+
+  .logo-icon {
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+  }
+
+  .navbar-right {
+    gap: 6px;
+    min-width: 0;
+    flex-shrink: 1;
+    justify-content: flex-end;
+  }
+
+  .lang-switcher {
+    padding: 2px;
+    flex-shrink: 0;
+  }
+
+  .lang-btn {
+    padding: 3px 6px;
+    font-size: 10px;
+    min-width: 26px;
+  }
+
+  #nav-guest-btns {
+    gap: 4px !important;
+    flex-shrink: 1;
+    min-width: 0;
+  }
+
+  #nav-guest-btns .btn-sm {
+    padding: 6px 10px;
+    font-size: 11px;
+    line-height: 1.2;
+  }
+
+  #btn-register {
+    display: none;
+  }
+
+  .user-menu {
+    min-width: 0;
+  }
+
+  .user-name-nav {
+    display: none;
+  }
+
+  .user-avatar-btn {
+    padding: 4px 6px;
+    gap: 4px;
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+    flex-shrink: 0;
+    margin-left: 2px;
+    padding: 6px;
+  }
+}
+
+@media (max-width: 380px) {
+  .logo-text {
+    display: none;
+  }
+
+  #nav-guest-btns .btn-sm {
+    padding: 6px 8px;
+    font-size: 10px;
+  }
+}
+
+/* Mobile nav drawer */
+.mobile-nav {
+  display: none;
+  position: fixed;
+  top: calc(var(--nav-height) + var(--safe-top));
+  left: 0;
+  right: 0;
+  z-index: 99;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px 14px;
+  background: rgba(8, 8, 16, 0.98);
+  border-bottom: 1px solid var(--glass-border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transform: translateY(-8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.mobile-nav.open {
+  display: flex;
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mobile-nav .nav-link {
+  display: block;
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 15px;
+  border-radius: var(--radius-sm);
+}
+
 /* ---- PWA install banner ---- */
 .pwa-install-banner {
   position: fixed;
@@ -110,16 +237,27 @@ body.pwa-banner-visible {
 }
 
 .pwa-install-actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
-  flex-wrap: wrap;
 }
 
 .pwa-install-actions .btn {
-  flex: 1;
-  min-width: 120px;
-  padding: 10px 14px;
-  font-size: 13px;
+  flex: none;
+  min-width: 0;
+  width: 100%;
+  padding: 9px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: normal;
+  text-align: center;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+.pwa-install-actions .pwa-btn-later {
+  font-size: 12px;
 }
 
 .pwa-install-close {

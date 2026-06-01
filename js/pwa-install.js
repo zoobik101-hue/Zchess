@@ -10,6 +10,14 @@ window.ZChess = window.ZChess || {};
 const DISMISS_KEY = 'zchess_pwa_install_dismiss';
 const DISMISS_DAYS = 5;
 
+function translate(key) {
+  if (window.ZChess.I18n && typeof ZChess.I18n.t === 'function') {
+    return ZChess.I18n.t(key);
+  }
+  if (typeof window.t === 'function') return window.t(key);
+  return key;
+}
+
 const PwaInstall = {
 
   deferredPrompt: null,
@@ -17,6 +25,7 @@ const PwaInstall = {
   isAndroid: false,
   isMobile: false,
   isStandalone: false,
+  bannerVisible: false,
 
   init() {
     this.isStandalone = this._checkStandalone();
@@ -37,10 +46,16 @@ const PwaInstall = {
     window.addEventListener('appinstalled', () => {
       this.deferredPrompt = null;
       this._hideBanner();
-      ZChess.Notifications?.success(typeof t === 'function' ? t('pwa.installed') : 'ZChess installed!');
+      ZChess.Notifications?.success(translate('pwa.installed'));
     });
 
     this._bindBanner();
+
+    document.addEventListener('langchange', () => {
+      if (this.bannerVisible) this._refreshBannerCopy();
+      this._refreshHeroBtn();
+    });
+
     this._showMobileInstallUi();
     setTimeout(() => this._maybeShowBanner(), 2500);
   },
@@ -49,8 +64,15 @@ const PwaInstall = {
     if (this.isStandalone || !this.isMobile) return;
     const hero = document.getElementById('pwa-hero-install');
     if (hero) hero.style.display = 'inline-flex';
+    this._refreshHeroBtn();
     const settingsBlock = document.getElementById('settings-pwa-section');
     if (settingsBlock) settingsBlock.style.display = '';
+  },
+
+  _refreshHeroBtn() {
+    const hero = document.getElementById('pwa-hero-install');
+    if (!hero || hero.style.display === 'none') return;
+    hero.textContent = translate(this._getInstallBtnKey());
   },
 
   forceShowBanner() {
@@ -84,66 +106,73 @@ const PwaInstall = {
     this._hideBanner();
   },
 
+  _getDescKey() {
+    if (this.isIOS) return 'pwa.ios_desc';
+    if (this.deferredPrompt) return 'pwa.android_desc';
+    if (this.isAndroid) return 'pwa.android_manual';
+    return 'pwa.generic_desc';
+  },
+
+  _getInstallBtnKey() {
+    if (window.matchMedia('(max-width: 520px)').matches) {
+      return 'pwa.install_btn_short';
+    }
+    return 'pwa.install_btn';
+  },
+
+  _refreshBannerCopy() {
+    const title = document.getElementById('pwa-install-title');
+    const desc = document.getElementById('pwa-install-desc');
+    const btn = document.getElementById('pwa-btn-install');
+    const later = document.getElementById('pwa-btn-later');
+    const iosSteps = document.getElementById('pwa-ios-steps');
+
+    if (title) title.textContent = translate('pwa.title');
+    if (desc) desc.textContent = translate(this._getDescKey());
+    if (later) later.textContent = translate('pwa.later');
+    if (btn && btn.style.display !== 'none') {
+      btn.textContent = translate(this._getInstallBtnKey());
+    }
+
+    if (this.isIOS) {
+      if (iosSteps) iosSteps.classList.add('active');
+      if (btn) btn.style.display = 'none';
+    } else if (this.deferredPrompt) {
+      if (iosSteps) iosSteps.classList.remove('active');
+      if (btn) btn.style.display = '';
+    } else {
+      if (iosSteps) iosSteps.classList.remove('active');
+      if (btn) btn.style.display = 'none';
+    }
+
+    document.querySelectorAll('[data-pwa-step]').forEach(el => {
+      const key = el.dataset.pwaStep;
+      if (key) el.textContent = translate(key);
+    });
+
+    const hero = document.getElementById('pwa-hero-install');
+    if (hero && hero.style.display !== 'none') {
+      hero.textContent = translate(this._getInstallBtnKey());
+    }
+  },
+
   _maybeShowBanner() {
     if (this.isStandalone || this._wasDismissed() || !this.isMobile) return;
 
     const banner = document.getElementById('pwa-install-banner');
     if (!banner) return;
 
-    const iosSteps = document.getElementById('pwa-ios-steps');
-    const btnInstall = document.getElementById('pwa-btn-install');
-    const desc = document.getElementById('pwa-install-desc');
-
-    if (this.isIOS) {
-      if (iosSteps) iosSteps.classList.add('active');
-      if (btnInstall) btnInstall.style.display = 'none';
-      if (desc && typeof t === 'function') {
-        desc.textContent = t('pwa.ios_desc');
-      }
-    } else if (this.deferredPrompt) {
-      if (iosSteps) iosSteps.classList.remove('active');
-      if (btnInstall) btnInstall.style.display = '';
-      if (desc && typeof t === 'function') {
-        desc.textContent = t('pwa.android_desc');
-      }
-    } else if (this.isAndroid) {
-      if (iosSteps) iosSteps.classList.remove('active');
-      if (btnInstall) btnInstall.style.display = 'none';
-      if (desc && typeof t === 'function') {
-        desc.textContent = t('pwa.android_manual');
-      }
-    } else {
-      if (iosSteps) iosSteps.classList.remove('active');
-      if (btnInstall) btnInstall.style.display = 'none';
-      if (desc && typeof t === 'function') {
-        desc.textContent = t('pwa.generic_desc');
-      }
-    }
-
+    this._refreshBannerCopy();
     banner.classList.add('visible');
     document.body.classList.add('pwa-banner-visible');
-    this._updateBannerText();
-  },
-
-  _updateBannerText() {
-    const title = document.getElementById('pwa-install-title');
-    const desc = document.getElementById('pwa-install-desc');
-    const btn = document.getElementById('pwa-btn-install');
-    const later = document.getElementById('pwa-btn-later');
-    if (title && typeof t === 'function') title.textContent = t('pwa.title');
-    if (later && typeof t === 'function') later.textContent = t('pwa.later');
-    if (btn && typeof t === 'function') btn.textContent = t('pwa.install_btn');
-
-    document.querySelectorAll('[data-pwa-step]').forEach(el => {
-      const key = el.dataset.pwaStep;
-      if (key && typeof t === 'function') el.textContent = t(key);
-    });
+    this.bannerVisible = true;
   },
 
   _hideBanner() {
     const banner = document.getElementById('pwa-install-banner');
     if (banner) banner.classList.remove('visible');
     document.body.classList.remove('pwa-banner-visible');
+    this.bannerVisible = false;
   },
 
   _bindBanner() {
@@ -164,12 +193,6 @@ const PwaInstall = {
         this._triggerInstall();
       } else {
         this.forceShowBanner();
-      }
-    });
-
-    document.addEventListener('langchange', () => {
-      if (document.getElementById('pwa-install-banner')?.classList.contains('visible')) {
-        this._updateBannerText();
       }
     });
   },

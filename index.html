@@ -95,15 +95,24 @@
           </div>
         </div>
       </div>
-
-      <!-- Mobile Menu Button -->
-      <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">
-        <div class="menu-bar"></div>
-        <div class="menu-bar"></div>
-        <div class="menu-bar"></div>
-      </button>
     </div>
+
+    <button class="mobile-menu-btn" id="mobile-menu-btn" type="button" data-i18n-aria="nav.menu_open" aria-label="Menu">
+      <div class="menu-bar"></div>
+      <div class="menu-bar"></div>
+      <div class="menu-bar"></div>
+    </button>
   </div>
+</nav>
+
+<!-- Mobile navigation drawer -->
+<nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
+  <a class="nav-link" data-page="home" href="#home" data-i18n="nav.home">Home</a>
+  <a class="nav-link" data-page="game" href="#game" data-i18n="nav.play">Play</a>
+  <a class="nav-link" data-page="leaderboard" href="#leaderboard" data-i18n="nav.leaderboard">Leaderboard</a>
+  <a class="nav-link" data-page="news" href="#news" data-i18n="nav.news">News</a>
+  <a class="nav-link" data-page="faq" href="#faq" data-i18n="nav.faq">FAQ</a>
+  <a class="nav-link" data-page="rules" href="#rules" data-i18n="nav.rules">Rules</a>
 </nav>
 
 <!-- Main App Container -->
@@ -139,7 +148,7 @@
       <div class="hero-content">
         <div class="hero-badge">
           <span class="hero-badge-dot"></span>
-          <span>⚡ ZChess Platform v1.0 — Now Live</span>
+          <span data-i18n="home.hero_badge">⚡ ZChess v1.0 - уже доступно</span>
         </div>
 
         <h1 class="hero-title" data-i18n="home.hero_title">
@@ -154,9 +163,7 @@
           <button class="btn btn-primary btn-lg" id="btn-hero-play" data-i18n="home.play_now">
             ▶ Play Now
           </button>
-          <button class="btn btn-secondary btn-lg" id="pwa-hero-install" data-i18n="pwa.install_btn" style="display:none">
-            📲 Install App
-          </button>
+          <button class="btn btn-secondary btn-lg" id="pwa-hero-install" style="display:none"></button>
           <button class="btn btn-secondary btn-lg" id="btn-hero-how" data-i18n="home.how_to_play">
             How to Play
           </button>
@@ -1139,8 +1146,8 @@
   <div class="pwa-install-inner">
     <img src="assets/icon.svg" alt="ZChess" class="pwa-install-icon" width="48" height="48">
     <div class="pwa-install-body">
-      <div class="pwa-install-title" id="pwa-install-title">Install ZChess</div>
-      <p class="pwa-install-desc" id="pwa-install-desc">Add to your home screen for the best experience.</p>
+      <div class="pwa-install-title" id="pwa-install-title"></div>
+      <p class="pwa-install-desc" id="pwa-install-desc"></p>
       <div class="pwa-install-ios-steps" id="pwa-ios-steps">
         <div class="pwa-ios-step">
           <span class="pwa-ios-step-num">1</span>
@@ -1156,8 +1163,8 @@
         </div>
       </div>
       <div class="pwa-install-actions">
-        <button type="button" class="btn btn-primary" id="pwa-btn-install">Install</button>
-        <button type="button" class="btn btn-secondary" id="pwa-btn-later">Later</button>
+        <button type="button" class="btn btn-primary pwa-btn-install" id="pwa-btn-install"></button>
+        <button type="button" class="btn btn-secondary pwa-btn-later" id="pwa-btn-later"></button>
       </div>
     </div>
   </div>

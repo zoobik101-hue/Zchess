@@ -122,6 +122,8 @@ const App = {
     this.currentPage = page;
     pageEl.classList.add('active');
 
+    document.getElementById('mobile-nav')?.classList.remove('open');
+
     // Update active nav link
     document.querySelectorAll('.nav-link').forEach(link => {
       link.classList.toggle('active', link.dataset.page === page);

@@ -1,5 +1,6 @@
 {
   "nav": {
+    "menu_open": "Menu",
     "home": "Home",
     "play": "Play",
     "leaderboard": "Leaderboard",
@@ -31,6 +32,7 @@
     "registering": "Creating account..."
   },
   "home": {
+    "hero_badge": "⚡ ZChess v1.0 - Now Live",
     "hero_title": "Chess at a<br><span class='gradient-text'>New Level</span>",
     "hero_subtitle": "Join millions of players worldwide. Compete, improve, and dominate the board.",
     "play_now": "Play Now",
@@ -521,6 +523,7 @@
   "pwa": {
     "title": "Install ZChess on your phone",
     "install_btn": "Install App",
+    "install_btn_short": "Install",
     "later": "Later",
     "installed": "ZChess added to your home screen!",
     "ios_desc": "On iPhone and iPad, ZChess works best as a home screen app.",
