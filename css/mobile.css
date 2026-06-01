@@ -1,0 +1,272 @@
+/* ZChess - Mobile & PWA install */
+
+/* Safe areas (notch, home indicator) */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+body {
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
+}
+
+body.pwa-banner-visible {
+  padding-bottom: calc(88px + var(--safe-bottom));
+}
+
+.navbar {
+  padding-top: var(--safe-top);
+}
+
+/* ---- PWA install banner ---- */
+.pwa-install-banner {
+  position: fixed;
+  left: var(--safe-left);
+  right: var(--safe-right);
+  bottom: 0;
+  z-index: 900;
+  padding: 12px 14px calc(12px + var(--safe-bottom));
+  background: linear-gradient(180deg, rgba(14, 8, 28, 0.97) 0%, rgba(10, 10, 15, 0.99) 100%);
+  border-top: 1px solid rgba(124, 58, 237, 0.45);
+  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.55);
+  transform: translateY(110%);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  backdrop-filter: blur(16px);
+}
+
+.pwa-install-banner.visible {
+  transform: translateY(0);
+}
+
+.pwa-install-inner {
+  max-width: 520px;
+  margin: 0 auto;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.pwa-install-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.35);
+}
+
+.pwa-install-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.pwa-install-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.pwa-install-desc {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+.pwa-install-ios-steps {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.pwa-install-ios-steps.active {
+  display: flex;
+}
+
+.pwa-ios-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.pwa-ios-step-num {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(124, 58, 237, 0.3);
+  color: #e9d5ff;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pwa-install-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pwa-install-actions .btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 10px 14px;
+  font-size: 13px;
+}
+
+.pwa-install-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 20px;
+  line-height: 1;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+/* Standalone app mode - hide banner area */
+@media (display-mode: standalone) {
+  .pwa-install-banner { display: none !important; }
+}
+
+/* ---- Mobile layout tweaks ---- */
+@media (max-width: 768px) {
+  .page-header-title {
+    font-size: clamp(1.5rem, 6vw, 2rem);
+  }
+
+  .chess-side-panel {
+    flex-direction: column;
+    max-width: 100%;
+  }
+
+  .match-info-panel,
+  .training-panel,
+  .game-controls-panel {
+    width: 100%;
+  }
+
+  .game-controls-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .btn-game-control {
+    min-width: 0;
+    padding: 12px 10px;
+    font-size: 12px;
+  }
+
+  .move-history-panel {
+    width: 100%;
+    min-width: 0;
+    height: 140px;
+  }
+
+  .mp-status-bar {
+    bottom: calc(12px + var(--safe-bottom));
+    left: 12px;
+    right: 12px;
+    transform: none;
+    width: auto;
+    min-width: 0;
+  }
+
+  body.pwa-banner-visible .mp-status-bar {
+    bottom: calc(96px + var(--safe-bottom));
+  }
+
+  .training-cat-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+
+  .training-cat-tab {
+    flex-shrink: 0;
+  }
+
+  .settings-page-container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .settings-pwa-hint {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+  }
+
+  #settings-pwa-section .btn {
+    width: 100%;
+  }
+
+  .pwa-hero-cta {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .pwa-hero-cta .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --board-size: min(calc(100vw - 12px), calc(100dvh - 280px));
+  }
+
+  .chess-game-wrapper {
+    padding: 8px 4px;
+  }
+
+  .player-bar {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .turn-indicator {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+
+  .game-controls-panel {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .lobby-modal {
+    width: calc(100vw - 20px);
+    max-height: 90dvh;
+  }
+}
+
+/* Touch-friendly */
+@media (hover: none) and (pointer: coarse) {
+  .btn,
+  .nav-link,
+  .game-mode-card,
+  .chess-square,
+  .btn-game-control {
+    touch-action: manipulation;
+  }
+
+  .chess-piece {
+    -webkit-tap-highlight-color: transparent;
+  }
+}

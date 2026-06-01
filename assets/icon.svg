@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="ZChess">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a0a2e"/>
+      <stop offset="100%" stop-color="#0a0a0f"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="108" fill="url(#bg)"/>
+  <rect x="48" y="48" width="416" height="416" rx="72" fill="none" stroke="url(#glow)" stroke-width="8" opacity="0.5"/>
+  <text x="256" y="310" font-size="220" text-anchor="middle" fill="#e9d5ff" font-family="Georgia, serif">&#9819;</text>
+  <text x="256" y="420" font-size="52" text-anchor="middle" fill="#a78bfa" font-family="Arial, sans-serif" font-weight="700">ZChess</text>
+</svg>

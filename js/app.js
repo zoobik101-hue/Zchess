@@ -32,6 +32,7 @@ const App = {
     // Init multiplayer module
     if (ZChess.Multiplayer) ZChess.Multiplayer.init();
     if (ZChess.Training) ZChess.Training.init();
+    if (ZChess.PwaInstall) ZChess.PwaInstall.init();
 
     // Bind global events
     this.bindEvents();
@@ -752,10 +753,11 @@ const App = {
   registerSW() {
     if (!('serviceWorker' in navigator)) return;
 
-    const swPath = '/Zchess/sw.js';
+    const base = window.ZChess.getBasePath ? window.ZChess.getBasePath() : '';
+    const swPath = (base || '') + '/sw.js';
 
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register(swPath).then(reg => {
+      navigator.serviceWorker.register(swPath, { scope: base ? base + '/' : '/' }).then(reg => {
         console.log('[ZChess] Service Worker registered');
 
         // When a new SW is waiting, activate it immediately
@@ -791,7 +793,8 @@ const App = {
     const CHECK_INTERVAL = 30000;
 
     const checkVersion = () => {
-      fetch('/Zchess/version.json?t=' + Date.now(), { cache: 'no-store' })
+      const verUrl = (window.ZChess.getBasePath?.() || '') + '/version.json?t=' + Date.now();
+      fetch(verUrl, { cache: 'no-store' })
         .then(r => r.json())
         .then(data => {
           const newVer = data.build || data.version || '';

@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark" data-board-theme="classic">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
   <meta name="description" content="ZChess - Modern chess platform. Play against AI, compete online, level up your game.">
   <meta name="keywords" content="chess, online chess, chess AI, chess game, play chess">
   <meta name="author" content="ZChess">
@@ -22,7 +22,12 @@
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="assets/icon-192.png">
+  <link rel="icon" type="image/svg+xml" href="assets/icon.svg">
+  <link rel="apple-touch-icon" href="assets/icon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ZChess">
+  <meta name="mobile-web-app-capable" content="yes">
 
   <title>ZChess - Modern Chess Platform</title>
 
@@ -32,6 +37,7 @@
   <link rel="stylesheet" href="css/chess.css">
   <link rel="stylesheet" href="css/multiplayer.css">
   <link rel="stylesheet" href="css/training.css">
+  <link rel="stylesheet" href="css/mobile.css">
 </head>
 <body>
 
@@ -147,6 +153,9 @@
         <div class="hero-actions">
           <button class="btn btn-primary btn-lg" id="btn-hero-play" data-i18n="home.play_now">
             ▶ Play Now
+          </button>
+          <button class="btn btn-secondary btn-lg" id="pwa-hero-install" data-i18n="pwa.install_btn" style="display:none">
+            📲 Install App
           </button>
           <button class="btn btn-secondary btn-lg" id="btn-hero-how" data-i18n="home.how_to_play">
             How to Play
@@ -755,6 +764,15 @@
           </div>
         </div>
 
+        <!-- PWA / mobile app -->
+        <div class="settings-section" id="settings-pwa-section" style="display:none">
+          <div class="settings-section-header" data-i18n="pwa.settings_section">Application</div>
+          <div class="settings-section-body">
+            <p class="settings-pwa-hint" data-i18n="pwa.settings_hint">On your phone, install ZChess as an app for the best experience.</p>
+            <button type="button" class="btn btn-primary" id="pwa-settings-install" data-i18n="pwa.install_btn">Install App</button>
+          </div>
+        </div>
+
         <!-- Actions -->
         <div style="display:flex;gap:12px">
           <button class="btn btn-primary" id="btn-save-settings" data-i18n="settings.save">Save Settings</button>
@@ -1115,6 +1133,36 @@
   </div>
 </div>
 
+<!-- PWA install banner (mobile) -->
+<div class="pwa-install-banner" id="pwa-install-banner" aria-live="polite">
+  <button type="button" class="pwa-install-close" id="pwa-install-close" aria-label="Close">✕</button>
+  <div class="pwa-install-inner">
+    <img src="assets/icon.svg" alt="ZChess" class="pwa-install-icon" width="48" height="48">
+    <div class="pwa-install-body">
+      <div class="pwa-install-title" id="pwa-install-title">Install ZChess</div>
+      <p class="pwa-install-desc" id="pwa-install-desc">Add to your home screen for the best experience.</p>
+      <div class="pwa-install-ios-steps" id="pwa-ios-steps">
+        <div class="pwa-ios-step">
+          <span class="pwa-ios-step-num">1</span>
+          <span data-pwa-step="pwa.ios_step1">Tap Share in Safari</span>
+        </div>
+        <div class="pwa-ios-step">
+          <span class="pwa-ios-step-num">2</span>
+          <span data-pwa-step="pwa.ios_step2">Choose "Add to Home Screen"</span>
+        </div>
+        <div class="pwa-ios-step">
+          <span class="pwa-ios-step-num">3</span>
+          <span data-pwa-step="pwa.ios_step3">Open ZChess from your home screen</span>
+        </div>
+      </div>
+      <div class="pwa-install-actions">
+        <button type="button" class="btn btn-primary" id="pwa-btn-install">Install</button>
+        <button type="button" class="btn btn-secondary" id="pwa-btn-later">Later</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- In-game multiplayer HUD (shown during multiplayer) -->
 <div class="mp-status-bar" id="mp-status-bar" style="display:none">
   <div class="mp-hud-row">
@@ -1153,6 +1201,7 @@
 <script src="js/leaderboard.js"></script>
 <script src="js/multiplayer.js"></script>
 <script src="js/training.js"></script>
+<script src="js/pwa-install.js"></script>
 <script src="js/app.js"></script>
 
 </body>

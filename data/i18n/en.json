@@ -518,6 +518,21 @@
     "legend": "Legend",
     "immortal": "Immortal"
   },
+  "pwa": {
+    "title": "Install ZChess on your phone",
+    "install_btn": "Install App",
+    "later": "Later",
+    "installed": "ZChess added to your home screen!",
+    "ios_desc": "On iPhone and iPad, ZChess works best as a home screen app.",
+    "ios_step1": "Tap Share in Safari",
+    "ios_step2": "Choose Add to Home Screen",
+    "ios_step3": "Open ZChess from your home screen",
+    "android_desc": "Install the app for fullscreen play, quick launch, and a smoother experience.",
+    "android_manual": "In Chrome menu (⋮), tap Install app or Add to Home screen.",
+    "generic_desc": "Add ZChess to your home screen for the best mobile chess experience.",
+    "settings_section": "Application",
+    "settings_hint": "On your phone, install ZChess as an app for a stable board, timers, and online play."
+  },
   "common": {
     "loading": "Loading...",
     "error": "Error",
