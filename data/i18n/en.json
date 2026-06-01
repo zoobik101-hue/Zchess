@@ -621,14 +621,13 @@
   "online": {
     "title": "Online now",
     "subtitle": "Players on ZChess right now - tap an avatar to view their profile",
-    "empty": "No one online yet - sign in and be the first!",
+    "empty": "No one online yet - open the site to appear in the list!",
     "in_game": "In a game",
     "status_online": "Online",
     "status_playing": "Playing a game",
     "status_lobby": "Looking for a match",
     "nav_aria": "Online: {count}",
-    "guest_badge": "Guest",
-    "empty": "No one online yet - open the site to appear in the list!"
+    "guest_badge": "Guest"
   },
   "common": {
     "loading": "Loading...",
