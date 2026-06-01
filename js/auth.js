@@ -14,7 +14,7 @@ const Auth = {
   auth: null,
   db: null,
   listeners: [],
-  _guestSignInPending: false,
+  _LOGOUT_FLAG: 'zchess_explicit_logout',
 
   async init() {
     // Initialize Firebase if config is provided
@@ -61,12 +61,10 @@ const Auth = {
 
   async handleAuthChange(firebaseUser) {
     if (firebaseUser) {
-      if (firebaseUser.isAnonymous) {
-        this.currentUser = this._buildGuestUser(firebaseUser.uid);
-        this.notifyListeners();
-        this.updateNavUI();
-        return;
-      }
+      // Anonymous = only for online presence (Presence module), not a site login
+      if (firebaseUser.isAnonymous) return;
+
+      try { sessionStorage.removeItem(this._LOGOUT_FLAG); } catch (_) { /* ignore */ }
 
       // Load user profile from Firestore
       try {
@@ -115,13 +113,10 @@ const Auth = {
         };
       }
     } else {
-      await this.ensureGuestSession();
-      if (!this.auth?.currentUser) {
-        this.currentUser = null;
-        localStorage.removeItem(ZChess.STORAGE.USER_CACHE);
-        this.notifyListeners();
-        this.updateNavUI();
-      }
+      this.currentUser = null;
+      localStorage.removeItem(ZChess.STORAGE.USER_CACHE);
+      this.notifyListeners();
+      this.updateNavUI();
       return;
     }
 
@@ -132,38 +127,12 @@ const Auth = {
     this.updateNavUI();
   },
 
-  _buildGuestUser(uid) {
-    const suffix = (uid || '').slice(-4).toUpperCase() || String(1000 + Math.floor(Math.random() * 9000));
-    const guestLabel = typeof t === 'function' ? t('common.guest') : 'Guest';
-    return {
-      uid,
-      username: `${guestLabel} ${suffix}`,
-      isGuest: true,
-      email: '',
-      rating: ZChess.ELO.INITIAL_RATING,
-      xp: 0,
-      level: 1,
-      wins: 0,
-      losses: 0,
-      draws: 0,
-      gamesPlayed: 0,
-      avatar: null,
-      achievements: []
-    };
-  },
-
-  async ensureGuestSession() {
-    if (!this.auth || this._guestSignInPending) return;
-    if (this.auth.currentUser) return;
-
-    this._guestSignInPending = true;
+  async signOutAnonymousOnly() {
+    if (!this.auth?.currentUser?.isAnonymous) return;
     try {
-      await this.auth.signInAnonymously();
-      console.log('[Auth] Guest session started (anonymous)');
-    } catch (err) {
-      console.warn('[Auth] Anonymous sign-in failed. Enable Anonymous auth in Firebase Console.', err);
-    } finally {
-      this._guestSignInPending = false;
+      await this.auth.signOut();
+    } catch (e) {
+      console.warn('[Auth] signOut anonymous:', e);
     }
   },
 
@@ -203,6 +172,8 @@ const Auth = {
     }
 
     try {
+      await this.signOutAnonymousOnly();
+
       // Check username uniqueness
       const usernameCheck = await this.db.collection('users')
         .where('username', '==', username).limit(1).get();
@@ -263,6 +234,7 @@ const Auth = {
     }
 
     try {
+      await this.signOutAnonymousOnly();
       await this.auth.signInWithEmailAndPassword(email, password);
       ZChess.Notifications.success(t('notifications.login_success', { name: this.currentUser?.username || '' }));
       return { success: true };
@@ -300,6 +272,7 @@ const Auth = {
     }
 
     try {
+      await this.signOutAnonymousOnly();
       const provider = new firebase.auth.GoogleAuthProvider();
       await this.auth.signInWithPopup(provider);
       return { success: true };
@@ -310,6 +283,10 @@ const Auth = {
   },
 
   async logout() {
+    try { sessionStorage.setItem(this._LOGOUT_FLAG, '1'); } catch (_) { /* ignore */ }
+
+    if (ZChess.Presence?.stopAll) await ZChess.Presence.stopAll();
+
     if (this.auth) {
       await this.auth.signOut();
     } else {
@@ -614,11 +591,7 @@ const Auth = {
   },
 
   isLoggedIn() {
-    return !!this.currentUser && !this.currentUser.isGuest;
-  },
-
-  isGuestSession() {
-    return !!this.currentUser?.isGuest;
+    return !!this.currentUser;
   }
 };
 

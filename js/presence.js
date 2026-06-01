@@ -7,21 +7,28 @@
 
 window.ZChess = window.ZChess || {};
 
+const LOGOUT_FLAG = 'zchess_explicit_logout';
+
 const Presence = {
   HEARTBEAT_MS: 20000,
   ONLINE_MS: 50000,
   MAX_SHOW: 32,
 
   _heartbeat: null,
+  _guestHeartbeat: null,
   _unsub: null,
   _players: [],
   _boundUnload: null,
   _localUid: null,
+  _guestUid: null,
+  _guestUsername: null,
 
   init() {
     this._boundUnload = () => this._markOffline();
     document.addEventListener('visibilitychange', () => {
-      if (!document.hidden && ZChess.Auth?.currentUser?.uid) this.pulse();
+      if (document.hidden) return;
+      if (ZChess.Auth?.isLoggedIn()) this.pulse();
+      else if (this._guestUid) this._pulseGuest();
     });
     document.addEventListener('langchange', () => this.render());
 
@@ -38,12 +45,21 @@ const Presence = {
     }
 
     ZChess.Auth?.onAuthChange((user) => {
-      if (user) this.start();
-      else this.stop();
+      if (user) {
+        this.stopGuestPresence();
+        this.startRegistered();
+      } else {
+        this.stopRegistered();
+        this.maybeStartGuestPresence();
+      }
     });
 
-    if (ZChess.Auth?.currentUser) this.start();
-    else this.subscribe();
+    this.subscribe();
+    if (ZChess.Auth?.isLoggedIn()) {
+      this.startRegistered();
+    } else {
+      this.maybeStartGuestPresence();
+    }
   },
 
   _scrollToLounge() {
@@ -62,10 +78,96 @@ const Presence = {
     return 'online';
   },
 
+  _guestDisplayName(uid) {
+    const suffix = (uid || '').slice(-4).toUpperCase() || String(1000 + Math.floor(Math.random() * 9000));
+    const guestLabel = typeof t === 'function' ? t('common.guest') : 'Guest';
+    return `${guestLabel} ${suffix}`;
+  },
+
+  _wantsGuestPresence() {
+    try {
+      if (sessionStorage.getItem(LOGOUT_FLAG)) return false;
+    } catch (_) { /* ignore */ }
+    return !ZChess.Auth?.isLoggedIn();
+  },
+
+  async maybeStartGuestPresence() {
+    if (!this._wantsGuestPresence()) return;
+    await this.startGuestPresence();
+  },
+
+  async startGuestPresence() {
+    if (!this._wantsGuestPresence()) return;
+
+    const auth = ZChess.Auth?.auth;
+    const db = this.db();
+    if (!auth || !db) return;
+
+    try {
+      if (!auth.currentUser?.isAnonymous) {
+        await auth.signInAnonymously();
+      }
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
+
+      this._guestUid = uid;
+      this._guestUsername = this._guestDisplayName(uid);
+      this.stopGuestHeartbeat();
+      await this._pulseGuest();
+      this._guestHeartbeat = setInterval(() => this._pulseGuest(), this.HEARTBEAT_MS);
+      window.addEventListener('beforeunload', this._boundUnload);
+    } catch (e) {
+      console.warn('[Presence] guest session failed:', e);
+    }
+  },
+
+  async _pulseGuest() {
+    const db = this.db();
+    if (!db || !this._guestUid) return;
+
+    try {
+      await db.collection('presence').doc(this._guestUid).set({
+        uid: this._guestUid,
+        username: this._guestUsername || this._guestDisplayName(this._guestUid),
+        avatar: null,
+        rating: ZChess.ELO?.INITIAL_RATING ?? 1200,
+        level: 1,
+        isGuest: true,
+        lastSeen: Date.now(),
+        status: this._status()
+      }, { merge: true });
+    } catch (e) {
+      console.warn('[Presence] guest pulse failed:', e);
+    }
+  },
+
+  stopGuestHeartbeat() {
+    if (this._guestHeartbeat) {
+      clearInterval(this._guestHeartbeat);
+      this._guestHeartbeat = null;
+    }
+  },
+
+  async stopGuestPresence() {
+    this.stopGuestHeartbeat();
+    const db = this.db();
+    const uid = this._guestUid;
+    if (db && uid) {
+      await db.collection('presence').doc(uid).update({ lastSeen: 0, status: 'offline' }).catch(() => {});
+    }
+    this._guestUid = null;
+    this._guestUsername = null;
+
+    const auth = ZChess.Auth?.auth;
+    if (auth?.currentUser?.isAnonymous) {
+      try { await auth.signOut(); } catch (_) { /* ignore */ }
+    }
+  },
+
   async pulse() {
     const db = this.db();
     const user = ZChess.Auth?.currentUser;
-    if (!db || !user?.uid) return;
+    if (!db || !user?.uid || user.isGuest) return;
 
     const level = user.level || (ZChess.getLevelFromXP ? ZChess.getLevelFromXP(user.xp || 0) : 1);
 
@@ -76,7 +178,7 @@ const Presence = {
         avatar: user.avatar || null,
         rating: user.rating ?? ZChess.ELO?.INITIAL_RATING ?? 1200,
         level,
-        isGuest: !!user.isGuest,
+        isGuest: false,
         lastSeen: Date.now(),
         status: this._status()
       }, { merge: true });
@@ -87,18 +189,19 @@ const Presence = {
 
   _markOffline() {
     const db = this.db();
-    const uid = this._localUid || ZChess.Auth?.currentUser?.uid;
+    const uid = this._localUid || this._guestUid;
     if (!db || !uid) return;
     db.collection('presence').doc(uid).update({ lastSeen: 0, status: 'offline' }).catch(() => {});
   },
 
-  start() {
-    this._localUid = ZChess.Auth?.currentUser?.uid || null;
+  startRegistered() {
+    if (!ZChess.Auth?.isLoggedIn()) return;
+
+    this._localUid = ZChess.Auth.currentUser.uid;
     this.stopHeartbeat();
     this.pulse();
     this._heartbeat = setInterval(() => this.pulse(), this.HEARTBEAT_MS);
     window.addEventListener('beforeunload', this._boundUnload);
-    this.subscribe();
   },
 
   stopHeartbeat() {
@@ -106,13 +209,24 @@ const Presence = {
       clearInterval(this._heartbeat);
       this._heartbeat = null;
     }
-    window.removeEventListener('beforeunload', this._boundUnload);
+    if (!this._guestUid) {
+      window.removeEventListener('beforeunload', this._boundUnload);
+    }
   },
 
-  stop() {
+  stopRegistered() {
     this.stopHeartbeat();
-    this._markOffline();
+    const uid = this._localUid;
+    const db = this.db();
+    if (db && uid) {
+      db.collection('presence').doc(uid).update({ lastSeen: 0, status: 'offline' }).catch(() => {});
+    }
     this._localUid = null;
+  },
+
+  async stopAll() {
+    this.stopRegistered();
+    await this.stopGuestPresence();
   },
 
   unsubscribe() {
@@ -131,9 +245,8 @@ const Presence = {
       return;
     }
 
-    const cutoff = Date.now() - this.ONLINE_MS;
-
     const apply = (snap) => {
+      const cutoff = Date.now() - this.ONLINE_MS;
       this._players = snap.docs
         .map(d => d.data())
         .filter(p => p && p.uid && p.username && (p.lastSeen || 0) > cutoff);
@@ -157,6 +270,7 @@ const Presence = {
     };
 
     try {
+      const cutoff = Date.now() - this.ONLINE_MS;
       this._unsub = db.collection('presence')
         .where('lastSeen', '>', cutoff)
         .limit(60)
@@ -218,13 +332,12 @@ const Presence = {
 
     const show = list.slice(0, this.MAX_SHOW);
     const extra = list.length - show.length;
-
     const guestLbl = typeof t === 'function' ? t('online.guest_badge') : 'Guest';
 
     strip.innerHTML = show.map((p, i) => {
       const status = p.status || 'online';
       const statusClass = status === 'playing' ? 'is-playing' : status === 'lobby' ? 'is-lobby' : 'is-online';
-      const isGuest = !!(p.isGuest || /^guest\s/i.test(p.username || ''));
+      const isGuest = !!(p.isGuest || /^guest\s/i.test(p.username || '') || /^гость\s/i.test(p.username || ''));
       const meta = isGuest ? guestLbl : `Lvl ${p.level || 1}`;
       return `
         <button type="button" class="online-chip player-profile-link ${statusClass}${isGuest ? ' is-guest' : ''}"
