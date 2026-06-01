@@ -201,9 +201,9 @@ p { color: var(--text-secondary); }
   height: var(--nav-height);
   display: flex;
   align-items: center;
-  background: rgba(8, 8, 16, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(8, 8, 16, 0.96);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border-bottom: 1px solid var(--glass-border);
   transition: background var(--transition-normal), box-shadow var(--transition-normal);
 }
@@ -964,7 +964,7 @@ p { color: var(--text-secondary); }
 .hero-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
+  filter: blur(48px);
   opacity: 0.12;
 }
 
@@ -2213,4 +2213,38 @@ p { color: var(--text-secondary); }
   display: flex;
   gap: 16px;
   justify-content: center;
+}
+
+/* --- Performance: reduce GPU-heavy effects --- */
+html.perf-lite .hero-canvas,
+html[data-no-animations="true"] .hero-canvas {
+  display: none !important;
+}
+
+html.perf-lite .hero-bg-orbs,
+html.perf-lite .hero-piece {
+  display: none;
+}
+
+html.perf-lite .hero-orb,
+html.perf-lite .cta-card::before {
+  animation: none !important;
+}
+
+html.perf-lite .hero-badge-dot {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-canvas,
+  .hero-bg-orbs,
+  .hero-piece {
+    display: none !important;
+  }
+
+  .hero-orb,
+  .hero-badge-dot,
+  .cta-card::before {
+    animation: none !important;
+  }
 }

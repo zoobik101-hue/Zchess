@@ -12,6 +12,17 @@ const App = {
   currentPage: null,
   gameSetupOptions: {},
 
+  // --- Performance mode (weak devices / reduced motion) ---
+
+  _initPerfMode() {
+    const lowCpu = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
+    const lowMem = navigator.deviceMemory && navigator.deviceMemory <= 4;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (lowCpu || lowMem || reducedMotion) {
+      document.documentElement.classList.add('perf-lite');
+    }
+  },
+
   // --- Initialization ---
 
   async init() {
@@ -22,6 +33,8 @@ const App = {
     ZChess.Notifications.init();
     ZChess.Sound.init();
     ZChess.DailyTasks.init();
+
+    this._initPerfMode();
 
     // Init i18n (loads current language)
     await ZChess.I18n.init();
@@ -129,9 +142,16 @@ const App = {
       link.classList.toggle('active', link.dataset.page === page);
     });
 
-    // Stop particles when leaving home page to free CPU
-    if (page !== 'home' && ZChess.Particles) {
-      ZChess.Particles.stop();
+    // Free CPU: particles only on home
+    if (ZChess.Particles) {
+      if (page === 'home') {
+        if (!document.documentElement.classList.contains('perf-lite') &&
+            ZChess.Settings?.data?.animations !== false) {
+          ZChess.Particles.init('hero-canvas');
+        }
+      } else {
+        ZChess.Particles.destroy();
+      }
     }
 
     // Show/hide multiplayer HUD based on page
@@ -186,10 +206,12 @@ const App = {
   // --- Page Initializers ---
 
   initHomePage() {
-    // Start particles
-    ZChess.Particles.init('hero-canvas');
+    if (!document.documentElement.classList.contains('perf-lite') &&
+        ZChess.Settings?.data?.animations !== false &&
+        ZChess.Particles) {
+      ZChess.Particles.init('hero-canvas');
+    }
 
-    // Animate hero stat counters
     this.animateCounters();
   },
 
