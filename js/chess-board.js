@@ -810,7 +810,7 @@ const ChessBoard = {
     }
 
     this.isThinking = false;
-    this.showAIThinking(false);
+    this.updateTurnIndicator();
   },
 
   async _computeAIMove(state, difficulty) {
@@ -1233,25 +1233,23 @@ self.onmessage = function(e) {
 
     if (inCheck) {
       el.className = 'turn-indicator check-indicator';
-      el.innerHTML = `<div class="turn-dot"></div> ${t('board.check')}`;
+      el.innerHTML = `<span class="turn-dot"></span><span>${t('board.check')}</span>`;
     } else if (this.isThinking) {
-      el.className = 'turn-indicator opponent-turn';
-      el.innerHTML = `<div class="ai-thinking">
-        <div class="thinking-dots">
-          <div class="thinking-dot"></div>
-          <div class="thinking-dot"></div>
-          <div class="thinking-dot"></div>
-        </div>
-        ${t('board.ai_thinking')}
-      </div>`;
+      el.className = 'turn-indicator opponent-turn is-thinking';
+      el.innerHTML = `<span class="thinking-dots" aria-hidden="true">
+          <span class="thinking-dot"></span>
+          <span class="thinking-dot"></span>
+          <span class="thinking-dot"></span>
+        </span>
+        <span>${t('board.ai_thinking')}</span>`;
     } else {
       const isPlayerTurn = turn === this.playerColor;
       el.className = `turn-indicator ${isPlayerTurn ? 'your-turn' : 'opponent-turn'}`;
       let label = t('board.your_turn');
       if (!isPlayerTurn) {
-        label = this.isAIGame ? t('board.ai_thinking') : t('board.opponent_turn');
+        label = this.isAIGame ? t('board.opponent_turn') : t('board.opponent_turn');
       }
-      el.innerHTML = `<div class="turn-dot"></div> ${label}`;
+      el.innerHTML = `<span class="turn-dot"></span><span>${label}</span>`;
     }
     this.updateMatchInfoPanel();
   },
@@ -1324,11 +1322,6 @@ self.onmessage = function(e) {
     };
     upd('captured-by-white', capturedPieces.b);
     upd('captured-by-black', capturedPieces.w);
-  },
-
-  showAIThinking(show) {
-    const el = document.getElementById('ai-thinking-indicator');
-    if (el) el.style.display = show ? 'flex' : 'none';
   },
 
   updateCoordinates() {

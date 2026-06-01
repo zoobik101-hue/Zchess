@@ -60,6 +60,7 @@
   },
   "game": {
     "title": "Choose Your Game",
+    "setup_eyebrow": "Chess Arena",
     "vs_ai": "vs Computer",
     "vs_ai_desc": "Challenge our AI at 7 difficulty levels",
     "vs_player": "vs Player",

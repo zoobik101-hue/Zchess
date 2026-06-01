@@ -291,13 +291,19 @@
   <!-- ======================================
        PAGE: GAME SETUP
   ====================================== -->
-  <div id="page-game" class="page">
+  <div id="page-game" class="page page-game-arena">
+    <div class="game-setup-ambient" aria-hidden="true"></div>
     <div class="container game-setup-shell">
-      <div class="page-header game-setup-header">
-        <h1 class="page-header-title" data-i18n="game.title">Choose Your Game</h1>
-      </div>
+      <header class="game-setup-header">
+        <p class="game-setup-eyebrow" data-i18n="game.setup_eyebrow">Chess Arena</p>
+        <h1 class="game-setup-title" data-i18n="game.title">Choose Your Game</h1>
+      </header>
 
       <div class="game-setup-panel" id="game-setup-panel">
+        <span class="panel-corner panel-corner-tl" aria-hidden="true"></span>
+        <span class="panel-corner panel-corner-tr" aria-hidden="true"></span>
+        <span class="panel-corner panel-corner-bl" aria-hidden="true"></span>
+        <span class="panel-corner panel-corner-br" aria-hidden="true"></span>
       <!-- Mode Cards -->
       <div class="game-modes-grid">
         <div class="game-mode-card selected" data-mode="ai">
