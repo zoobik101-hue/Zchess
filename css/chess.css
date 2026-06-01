@@ -802,9 +802,100 @@
     "hero  stats"
     "hero  quality"
     "xprow quality"
-    "btns  quality";
+    "btns  quality"
+    "review review";
   gap: 0 28px;
   align-items: start;
+}
+
+.result-review {
+  grid-area: review;
+  width: 100%;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(201, 162, 77, 0.2);
+  text-align: left;
+}
+
+.result-review-title {
+  font-family: var(--font-display, 'Cinzel', serif);
+  font-size: 14px;
+  font-weight: 700;
+  color: #d4af55;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.review-loading,
+.review-empty {
+  font-size: 13px;
+  color: rgba(232, 224, 208, 0.55);
+  text-align: center;
+  padding: 8px;
+}
+
+.review-summary {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.review-sum-best { color: #fbbf24; }
+.review-sum-good { color: #4ade80; }
+.review-sum-inacc { color: #fbbf24; }
+.review-sum-blund { color: #f87171; }
+
+.review-moves-scroll {
+  max-height: 140px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-right: 4px;
+}
+
+.review-move-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.review-move-san {
+  font-weight: 700;
+  color: #e8e0d0;
+  min-width: 48px;
+}
+
+.review-move-badge {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.review-q-best .review-move-badge { color: #fbbf24; background: rgba(251, 191, 36, 0.15); }
+.review-q-good .review-move-badge { color: #4ade80; background: rgba(74, 222, 128, 0.12); }
+.review-q-inaccuracy .review-move-badge { color: #fbbf24; background: rgba(251, 191, 36, 0.1); }
+.review-q-blunder .review-move-badge { color: #f87171; background: rgba(248, 113, 113, 0.12); }
+
+.review-best-hint {
+  font-size: 11px;
+  color: rgba(232, 224, 208, 0.5);
+}
+
+.review-best-hint strong {
+  color: #d4af55;
 }
 
 @keyframes resultCardIn {

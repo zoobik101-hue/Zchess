@@ -287,6 +287,7 @@
     "wins": "W",
     "games": "Games",
     "win_rate": "Win %",
+    "league": "League",
     "tab_rating": "By Rating",
     "tab_wins": "Most Wins",
     "tab_month": "This Month",
@@ -536,6 +537,32 @@
     "generic_desc": "Add ZChess to your home screen for the best mobile chess experience.",
     "settings_section": "Application",
     "settings_hint": "On your phone, install ZChess as an app for a stable board, timers, and online play."
+  },
+  "league": {
+    "bronze": "Bronze",
+    "silver": "Silver",
+    "gold": "Gold",
+    "platinum": "Platinum",
+    "diamond": "Diamond"
+  },
+  "review": {
+    "title": "Game review",
+    "analyzing": "Analyzing moves...",
+    "no_moves": "Not enough moves to review",
+    "best_was": "Best move",
+    "best": "Best",
+    "good": "Good",
+    "inaccuracy": "Inaccuracy",
+    "blunder": "Blunder"
+  },
+  "multiplayer": {
+    "invite_link": "Invite link",
+    "copy_invite": "Copy invite link",
+    "link_copied": "Link copied!",
+    "code_copied": "Code copied",
+    "own_room": "This is your own room",
+    "room_not_found": "Room not found",
+    "join_error": "Could not join room"
   },
   "common": {
     "loading": "Loading...",

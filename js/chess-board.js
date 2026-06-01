@@ -1093,10 +1093,39 @@ self.onmessage = function(e) {
 
     overlay.classList.add('open');
 
+    this._renderGameReview();
+
     // Launch confetti for win
     if (outcome === 'win') {
       this._launchConfetti();
     }
+  },
+
+  _renderGameReview() {
+    const block = document.getElementById('result-review-block');
+    const body = document.getElementById('result-review-body');
+    if (!block || !body || !ZChess.GameReview) return;
+
+    const history = this.gameState?.history || [];
+    if (history.length < 2) {
+      block.style.display = 'none';
+      return;
+    }
+
+    block.style.display = '';
+    ZChess.GameReview.showLoading(body);
+
+    const playerColor = this.multiplayerMode && ZChess.Multiplayer?.localColor
+      ? ZChess.Multiplayer.localColor
+      : this.playerColor;
+
+    ZChess.GameReview.analyzeAsync(history, playerColor).then((analysis) => {
+      if (!analysis) {
+        block.style.display = 'none';
+        return;
+      }
+      ZChess.GameReview.render(body, analysis);
+    });
   },
 
   _fillStatEl(id, value) {

@@ -570,3 +570,109 @@ body::before {
     max-width: none;
   }
 }
+
+/* Rating leagues */
+.league-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--league-color, var(--arena-gold-bright));
+  background: rgba(212, 175, 85, 0.1);
+  border: 1px solid color-mix(in srgb, var(--league-color, #d4af55) 40%, transparent);
+}
+
+.league-badge-sm {
+  font-size: 11px;
+  padding: 3px 10px;
+}
+
+.profile-league-wrap {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.profile-league-badge {
+  font-size: 13px;
+}
+
+#user-rank-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Invite link field */
+.lobby-invite-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 8px 0 6px;
+}
+
+.lobby-invite-link-input {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--arena-ivory);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--arena-panel-border);
+  border-radius: 4px;
+  text-align: center;
+}
+
+/* Light theme - Chess Arena */
+html.theme-arena[data-theme="light"] {
+  --arena-bg: #f5f0e6;
+  --arena-ivory: #1a1408;
+  --arena-gold: #a67c2e;
+  --arena-gold-bright: #8b6914;
+  --arena-panel-border: rgba(166, 124, 46, 0.35);
+
+  --bg-primary: #f5f0e6;
+  --bg-secondary: #ebe4d4;
+  --bg-tertiary: #e0d6c4;
+  --bg-card: rgba(255, 252, 245, 0.95);
+  --bg-card-hover: #fffef9;
+
+  --text-primary: #1a1408;
+  --text-secondary: rgba(26, 20, 8, 0.65);
+  --text-muted: rgba(26, 20, 8, 0.42);
+
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(166, 124, 46, 0.2);
+  --border-color: rgba(166, 124, 46, 0.22);
+  --border-active: rgba(139, 105, 20, 0.5);
+
+  --shadow-card: 0 8px 28px rgba(26, 20, 8, 0.12);
+}
+
+html.theme-arena[data-theme="light"] body::before {
+  background:
+    radial-gradient(ellipse 70% 45% at 50% -5%, rgba(212, 175, 85, 0.15), transparent 55%),
+    radial-gradient(ellipse 40% 30% at 10% 90%, rgba(124, 58, 237, 0.04), transparent);
+}
+
+html.theme-arena[data-theme="light"] .navbar {
+  background: rgba(245, 240, 230, 0.97);
+  border-bottom-color: var(--arena-panel-border);
+}
+
+html.theme-arena[data-theme="light"] .page.active:not(#page-home):not(#page-play):not(#page-game):not(#page-profile) > .container {
+  background: linear-gradient(165deg, #fffef9 0%, #f5f0e6 100%);
+  box-shadow: 0 12px 32px rgba(26, 20, 8, 0.08);
+}
+
+html.theme-arena[data-theme="light"] .feature-card,
+html.theme-arena[data-theme="light"] .card,
+html.theme-arena[data-theme="light"] .news-card {
+  background: #fffef9;
+}

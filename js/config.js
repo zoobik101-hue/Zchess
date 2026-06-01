@@ -26,8 +26,30 @@ window.ZChess.firebaseConfig = {
 // ==========================================
 // APP CONSTANTS
 // ==========================================
-window.ZChess.VERSION = '1.0.9';
+window.ZChess.VERSION = '1.1.0';
 window.ZChess.APP_NAME = 'ZChess';
+window.ZChess.SITE_URL = 'https://zoobik101-hue.github.io/Zchess/';
+
+// Rating leagues (display only)
+window.ZChess.LEAGUES = [
+  { id: 'bronze',   min: 0,    max: 999,  icon: '🥉', nameKey: 'league.bronze',   color: '#cd7f32' },
+  { id: 'silver',   min: 1000, max: 1199, icon: '🥈', nameKey: 'league.silver',   color: '#b8c0cc' },
+  { id: 'gold',     min: 1200, max: 1399, icon: '🥇', nameKey: 'league.gold',     color: '#d4af55' },
+  { id: 'platinum', min: 1400, max: 1699, icon: '💎', nameKey: 'league.platinum', color: '#7dd3fc' },
+  { id: 'diamond',  min: 1700, max: 99999, icon: '👑', nameKey: 'league.diamond', color: '#c4b5fd' }
+];
+
+window.ZChess.getLeague = function(rating) {
+  const r = Math.max(0, Number(rating) || ZChess.ELO.INITIAL_RATING);
+  return ZChess.LEAGUES.find(l => r >= l.min && r <= l.max) || ZChess.LEAGUES[0];
+};
+
+window.ZChess.leagueBadgeHTML = function(rating, extraClass) {
+  const league = ZChess.getLeague(rating);
+  const name = typeof t === 'function' ? t(league.nameKey) : league.id;
+  const cls = 'league-badge' + (extraClass ? ' ' + extraClass : '');
+  return `<span class="${cls}" data-league="${league.id}" style="--league-color:${league.color}">${league.icon} ${name}</span>`;
+};
 
 // Elo system constants
 window.ZChess.ELO = {

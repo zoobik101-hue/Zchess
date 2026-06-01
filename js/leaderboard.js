@@ -17,7 +17,7 @@ const Leaderboard = {
     if (!el) return;
 
     el.innerHTML = `
-      <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted)">
+      <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted)">
         <div class="animate-spin" style="display:inline-block;font-size:24px;margin-bottom:8px">⏳</div><br>
         ${t('leaderboard.loading')}
       </td></tr>
@@ -80,7 +80,7 @@ const Leaderboard = {
     if (!el) return;
 
     if (!this.data.length) {
-      el.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted)">${t('leaderboard.no_data')}</td></tr>`;
+      el.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted)">${t('leaderboard.no_data')}</td></tr>`;
       return;
     }
 
@@ -94,6 +94,11 @@ const Leaderboard = {
       const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-other';
       const initial = (player.username || '?')[0].toUpperCase();
 
+      const rating = player.rating || 1200;
+      const leagueHtml = ZChess.leagueBadgeHTML
+        ? ZChess.leagueBadgeHTML(rating, 'league-badge-sm')
+        : '';
+
       return `
         <tr class="${isCurrentUser ? 'current-user' : ''}">
           <td><div class="rank-badge ${rankClass}">${rank}</div></td>
@@ -106,7 +111,8 @@ const Leaderboard = {
               </div>
             </div>
           </td>
-          <td style="font-weight:700;color:var(--text-primary)">${player.rating || 1200}</td>
+          <td>${leagueHtml}</td>
+          <td style="font-weight:700;color:var(--text-primary)">${rating}</td>
           <td style="color:var(--color-success)">${player.wins || 0}</td>
           <td>${player.gamesPlayed || 0}</td>
           <td style="color:var(--accent-secondary)">${winRate}%</td>
@@ -127,10 +133,12 @@ const Leaderboard = {
       p.uid === user.uid || p.username === user.username
     ) + 1;
 
+    const rating = user.rating || ZChess.ELO.INITIAL_RATING;
+    const league = ZChess.leagueBadgeHTML ? ZChess.leagueBadgeHTML(rating, 'league-badge-sm') : '';
     if (rank > 0) {
-      el.textContent = `Your Rank: #${rank}`;
+      el.innerHTML = `${league} <span>${t('leaderboard.your_rank') || 'Your rank'}: #${rank}</span>`;
     } else {
-      el.textContent = `Your Rating: ${user.rating || ZChess.ELO.INITIAL_RATING}`;
+      el.innerHTML = `${league} <span>${t('leaderboard.rating') || 'Rating'}: ${rating}</span>`;
     }
   },
 

@@ -97,11 +97,22 @@ const App = {
   // --- Routing ---
 
   handleRoute() {
-    const hash = window.location.hash.slice(1) || '';
-    const parts = hash.split('/').filter(Boolean);
-    const page = parts[0] || 'home';
+    const raw = window.location.hash.slice(1) || '';
+    const qIdx = raw.indexOf('?');
+    const pathStr = qIdx >= 0 ? raw.slice(0, qIdx) : raw;
+    const queryStr = qIdx >= 0 ? raw.slice(qIdx + 1) : '';
+    const parts = pathStr.split('/').filter(Boolean);
+    const page = (parts[0] || 'home').split('?')[0];
 
+    const qs = new URLSearchParams(queryStr);
+    const room = qs.get('room');
+    if (room) {
+      this._pendingRoomCode = room.toUpperCase().trim();
+    }
+
+    this._routeKeepHash = !!room;
     this.navigate(page, parts.slice(1));
+    this._routeKeepHash = false;
   },
 
   navigate(page, params = []) {
@@ -161,10 +172,12 @@ const App = {
     // Page-specific initialization
     this.onPageEnter(page, params);
 
-    // Update URL (without triggering hashchange)
-    const hash = params.length ? `#${page}/${params.join('/')}` : `#${page}`;
-    if (window.location.hash !== hash) {
-      history.pushState(null, '', hash);
+    // Update URL (without triggering hashchange); keep invite query on play
+    if (!this._routeKeepHash) {
+      const hash = params.length ? `#${page}/${params.join('/')}` : `#${page}`;
+      if (window.location.hash !== hash) {
+        history.pushState(null, '', hash);
+      }
     }
 
     // Scroll to top
@@ -180,7 +193,9 @@ const App = {
         this.initGameSetupPage();
         break;
       case 'play':
-        // Board was already set up before navigating
+        if (this._pendingRoomCode) {
+          this._joinRoomFromInviteLink(this._pendingRoomCode);
+        }
         break;
       case 'profile':
         this.initProfilePage();
@@ -908,6 +923,55 @@ const App = {
     });
   },
 
+  _buildInviteLink(code) {
+    const c = (code || '').trim().toUpperCase();
+    const base = ZChess.getBasePath?.() || '';
+    let root = window.location.origin;
+    if (base) root += base;
+    else if ((window.location.pathname || '').toLowerCase().includes('/zchess')) {
+      root += '/Zchess';
+    }
+    return `${root}/#play?room=${encodeURIComponent(c)}`;
+  },
+
+  _updateInviteLink(code) {
+    const inp = document.getElementById('lobby-invite-link');
+    if (inp) inp.value = this._buildInviteLink(code);
+  },
+
+  async _joinRoomFromInviteLink(code) {
+    const MP = ZChess.Multiplayer;
+    if (!MP || !code || code.length < 6) return;
+
+    const normalized = code.toUpperCase().trim();
+    this._pendingRoomCode = null;
+
+    if (!ZChess.Auth.isLoggedIn()) {
+      this._pendingRoomCode = normalized;
+      this.showAuthModal('login');
+      return;
+    }
+
+    document.getElementById('room-lobby-overlay')?.classList.add('open');
+    MP._showLobbyState('lobby-join-code');
+    const inp = document.getElementById('room-code-input');
+    if (inp) inp.value = normalized;
+    const errEl = document.getElementById('join-error');
+    if (errEl) errEl.style.display = 'none';
+
+    try {
+      await MP.joinByCode(normalized);
+    } catch (e) {
+      if (errEl) {
+        errEl.textContent = e.message === 'own_room' ? (t('multiplayer.own_room') || 'Это ваша комната') :
+          e.message === 'room_not_found' ? (t('multiplayer.room_not_found') || 'Комната не найдена') :
+          (t('multiplayer.join_error') || 'Ошибка входа');
+        errEl.style.display = '';
+      }
+      MP._showLobbyState('lobby-join-code');
+    }
+  },
+
   // =========================================
   // MULTIPLAYER LOBBY
   // =========================================
@@ -952,6 +1016,8 @@ const App = {
         if (btn) btn.style.opacity = '';
         const codeEl = document.getElementById('lobby-invite-code');
         if (codeEl) codeEl.textContent = res.code;
+        this._updateInviteLink(res.code);
+        document.getElementById('room-lobby-overlay')?.classList.add('open');
         showState('lobby-waiting');
       } catch (e) {
         if (btn) btn.style.opacity = '';
@@ -967,13 +1033,15 @@ const App = {
 
     // Copy invite link
     document.getElementById('btn-copy-invite')?.addEventListener('click', () => {
-      const code = document.getElementById('lobby-invite-code')?.textContent || '';
-      const link = `${window.location.origin}${window.location.pathname}#play?room=${code}`;
+      const link = this._buildInviteLink(
+        document.getElementById('lobby-invite-code')?.textContent || ''
+      );
       navigator.clipboard.writeText(link).then(() => {
-        ZChess.Notifications.success('Ссылка скопирована!');
+        ZChess.Notifications.success(t('multiplayer.link_copied') || 'Ссылка скопирована!');
       }).catch(() => {
+        const code = document.getElementById('lobby-invite-code')?.textContent || '';
         navigator.clipboard.writeText(code).then(() => {
-          ZChess.Notifications.success(`Код скопирован: ${code}`);
+          ZChess.Notifications.success(t('multiplayer.code_copied') || `Код: ${code}`);
         });
       });
     });
@@ -1017,20 +1085,15 @@ const App = {
     ZChess.Auth.onAuthChange(async (user) => {
       if (user && MP.status === 'idle') {
         const reconnected = await MP.tryReconnect();
-        if (reconnected) this.navigate('play');
+        if (reconnected) {
+          this.navigate('play');
+          return;
+        }
+        if (this._pendingRoomCode) {
+          this._joinRoomFromInviteLink(this._pendingRoomCode);
+        }
       }
     });
-
-    // Check for invite code in URL
-    const urlRoom = new URLSearchParams(window.location.hash.split('?')[1] || '').get('room');
-    if (urlRoom && urlRoom.length === 6) {
-      setTimeout(() => {
-        if (!requireLogin()) return;
-        MP.showLobby('lobby-join-code');
-        const inp = document.getElementById('room-code-input');
-        if (inp) inp.value = urlRoom.toUpperCase();
-      }, 1000);
-    }
   }
 };
 

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a090c"/>
+      <stop offset="100%" stop-color="#050506"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f0d78c"/>
+      <stop offset="50%" stop-color="#d4af55"/>
+      <stop offset="100%" stop-color="#a67c2e"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="40" y="40" width="1120" height="550" fill="none" stroke="#c9a24d" stroke-width="2" opacity="0.35"/>
+  <text x="600" y="260" text-anchor="middle" font-family="Georgia, serif" font-size="120" font-weight="700" fill="url(#gold)">ZChess</text>
+  <text x="600" y="340" text-anchor="middle" font-family="Arial, sans-serif" font-size="36" fill="#e8e0d0" opacity="0.9">(0E<0BK =0 =>2>< C@>2=5</text>
+  <text x="600" y="400" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#c9a24d" opacity="0.75"> · =;09= · 1CG5=85</text>
+  <text x="1050" y="560" font-size="140" fill="#d4af55" opacity="0.12">[</text>
+  <text x="120" y="180" font-size="90" fill="#d4af55" opacity="0.1">^</text>
+</svg>

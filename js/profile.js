@@ -34,6 +34,12 @@ const Profile = {
 
     setEl('profile-username', user.username || 'Player');
     setEl('profile-title', title);
+
+    const leagueEl = document.getElementById('profile-league-badge');
+    if (leagueEl && ZChess.leagueBadgeHTML) {
+      leagueEl.innerHTML = ZChess.leagueBadgeHTML(user.rating || ZChess.ELO.INITIAL_RATING, 'profile-league-badge');
+    }
+
     setEl('profile-avatar-text', (user.username || 'P')[0].toUpperCase());
     setEl('profile-level-text', `Lvl ${level}`);
     setEl('profile-rating-val', user.rating || ZChess.ELO.INITIAL_RATING);
