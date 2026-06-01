@@ -449,7 +449,8 @@ const ChessBoard = {
     this.legalMovesForSelected = [];
     this.multiplayerOpponent = {
       name:   options.opponentName   || 'Opponent',
-      rating: options.opponentRating || 1200
+      rating: options.opponentRating || 1200,
+      avatar: options.opponentAvatar || null
     };
 
     this._gameStats = {
@@ -1345,8 +1346,25 @@ self.onmessage = function(e) {
       const rating = isPlayer ? userRating : (this.multiplayerMode && !isPlayer ? (this.multiplayerOpponent?.rating || '') : '');
       const nameEl = bar.querySelector('.player-name-sm');
       const ratingEl = bar.querySelector('.player-rating-sm');
+      const avatarEl = bar.querySelector('.player-avatar-sm');
       if (nameEl) nameEl.textContent = name;
       if (ratingEl) ratingEl.textContent = rating;
+
+      if (avatarEl && ZChess.UserDisplay) {
+        if (isPlayer && user) {
+          ZChess.UserDisplay.renderAvatar(avatarEl, ZChess.UserDisplay.fromUser(user));
+        } else if (!isPlayer && this.multiplayerMode && this.multiplayerOpponent) {
+          ZChess.UserDisplay.renderAvatar(avatarEl, {
+            username: this.multiplayerOpponent.name,
+            avatar: this.multiplayerOpponent.avatar
+          });
+        } else if (this.isAIGame && !isPlayer) {
+          avatarEl.innerHTML = '🤖';
+          avatarEl.classList.remove('has-avatar-img');
+        } else {
+          ZChess.UserDisplay.renderAvatar(avatarEl, { username: name, avatar: null });
+        }
+      }
     };
 
     updateBar('player-bar-white', 'w');

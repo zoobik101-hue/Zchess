@@ -423,8 +423,119 @@ const Auth = {
     };
   },
 
+  validateUsername(name) {
+    const s = (name || '').trim();
+    if (s.length < 3 || s.length > 20) return { ok: false, code: 'length' };
+    if (!/^[a-zA-Z0-9_\u0400-\u04FF\u0500-\u052F]+$/.test(s)) return { ok: false, code: 'chars' };
+    return { ok: true, value: s };
+  },
+
+  async changeUsername(newUsername) {
+    if (!this.currentUser) throw { code: 'not-logged-in' };
+
+    const v = this.validateUsername(newUsername);
+    if (!v.ok) throw { code: 'invalid-username', reason: v.code };
+
+    if (v.value === this.currentUser.username) return { success: true };
+
+    if (this.db) {
+      const snap = await this.db.collection('users')
+        .where('username', '==', v.value)
+        .limit(1)
+        .get();
+      if (!snap.empty && snap.docs[0].id !== this.currentUser.uid) {
+        throw { code: 'username-taken' };
+      }
+    }
+
+    if (this.auth?.currentUser) {
+      try {
+        await this.auth.currentUser.updateProfile({ displayName: v.value });
+      } catch (e) {
+        console.warn('[Auth] Firebase displayName update:', e);
+      }
+    }
+
+    await this.updateProfile({ username: v.value });
+
+    if (ZChess.Multiplayer?.syncPublicProfile) {
+      await ZChess.Multiplayer.syncPublicProfile();
+    }
+
+    if (ZChess.UserDisplay) ZChess.UserDisplay.refreshAll();
+
+    return { success: true };
+  },
+
+  async resizeAvatarFile(file) {
+    const maxBytes = 280000;
+
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+
+      img.onload = () => {
+        const size = 128;
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        const min = Math.min(img.width, img.height);
+        const sx = (img.width - min) / 2;
+        const sy = (img.height - min) / 2;
+        ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
+
+        let quality = 0.88;
+        let dataUrl = canvas.toDataURL('image/jpeg', quality);
+        while (dataUrl.length > maxBytes && quality > 0.45) {
+          quality -= 0.07;
+          dataUrl = canvas.toDataURL('image/jpeg', quality);
+        }
+
+        URL.revokeObjectURL(url);
+
+        if (dataUrl.length > 900000) {
+          reject(new Error('too-large'));
+          return;
+        }
+        resolve(dataUrl);
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error('bad-image'));
+      };
+
+      img.src = url;
+    });
+  },
+
+  async setAvatarFromFile(file) {
+    if (!this.currentUser) throw { code: 'not-logged-in' };
+    if (!file || !file.type.startsWith('image/')) throw { code: 'not-image' };
+    if (file.size > 5 * 1024 * 1024) throw { code: 'file-too-big' };
+
+    const avatar = await this.resizeAvatarFile(file);
+    await this.updateProfile({ avatar });
+
+    if (ZChess.Multiplayer?.syncPublicProfile) {
+      await ZChess.Multiplayer.syncPublicProfile();
+    }
+
+    if (ZChess.UserDisplay) ZChess.UserDisplay.refreshAll();
+
+    return { success: true };
+  },
+
+  async removeAvatar() {
+    if (!this.currentUser) return;
+    await this.updateProfile({ avatar: null });
+    if (ZChess.UserDisplay) ZChess.UserDisplay.refreshAll();
+  },
+
   notifyListeners() {
     this.listeners.forEach(fn => fn(this.currentUser));
+    if (ZChess.UserDisplay) ZChess.UserDisplay.refreshAll();
   },
 
   updateNavUI() {
@@ -437,7 +548,11 @@ const Auth = {
       if (guestBtns) guestBtns.style.display = 'none';
       if (userMenu) userMenu.style.display = 'flex';
       if (userNameNav) userNameNav.textContent = this.currentUser.username || 'Player';
-      if (userAvatarNav) userAvatarNav.textContent = (this.currentUser.username || 'P')[0].toUpperCase();
+      if (ZChess.UserDisplay) {
+        ZChess.UserDisplay.renderAvatar(userAvatarNav, ZChess.UserDisplay.fromUser(this.currentUser));
+      } else if (userAvatarNav) {
+        userAvatarNav.textContent = (this.currentUser.username || 'P')[0].toUpperCase();
+      }
     } else {
       if (guestBtns) guestBtns.style.display = 'flex';
       if (userMenu) userMenu.style.display = 'none';

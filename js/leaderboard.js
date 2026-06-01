@@ -92,7 +92,7 @@ const Leaderboard = {
       const winRate = player.winRate ?? (player.gamesPlayed > 0 ? Math.round((player.wins / player.gamesPlayed) * 100) : 0);
 
       const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-other';
-      const initial = (player.username || '?')[0].toUpperCase();
+      const lbAvatarId = `lb-avatar-${player.uid || rank}`;
 
       const rating = player.rating || 1200;
       const leagueHtml = ZChess.leagueBadgeHTML
@@ -104,7 +104,7 @@ const Leaderboard = {
           <td><div class="rank-badge ${rankClass}">${rank}</div></td>
           <td>
             <div class="leaderboard-player">
-              <div class="lb-avatar">${initial}</div>
+              <div class="lb-avatar" id="${lbAvatarId}"></div>
               <div>
                 <div class="lb-name">${player.username || 'Unknown'}</div>
                 <div class="lb-title" style="font-size:11px;color:var(--text-muted)">Lvl ${player.level || 1}</div>
@@ -119,6 +119,19 @@ const Leaderboard = {
         </tr>
       `;
     }).join('');
+
+    if (ZChess.UserDisplay) {
+      this.data.forEach((player, i) => {
+        const rank = i + 1;
+        const el = document.getElementById(`lb-avatar-${player.uid || rank}`);
+        if (el) {
+          ZChess.UserDisplay.renderAvatar(el, {
+            username: player.username,
+            avatar: player.avatar || null
+          });
+        }
+      });
+    }
 
     // Update current user's rank
     this.updateUserRank();

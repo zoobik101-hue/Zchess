@@ -94,6 +94,7 @@ const Multiplayer = {
       white: {
         uid:       user.uid,
         username:  user.username || 'Player',
+        avatar:    user.avatar || null,
         rating:    user.rating   || 1200,
         connected: true,
         lastPing:  this._now()
@@ -131,6 +132,7 @@ const Multiplayer = {
     const blackData = {
       uid:       user.uid,
       username:  user.username || 'Player',
+      avatar:    user.avatar || null,
       rating:    user.rating   || 1200,
       connected: true,
       lastPing:  this._now()
@@ -166,6 +168,7 @@ const Multiplayer = {
       const blackData = {
         uid:       user.uid,
         username:  user.username || 'Player',
+        avatar:    user.avatar || null,
         rating:    user.rating   || 1200,
         connected: true,
         lastPing:  this._now()
@@ -241,10 +244,20 @@ const Multiplayer = {
       });
     }
 
-    // ④ Disconnect check - only if game is still active
+    // ④ Opponent profile + disconnect
     if (room.status === 'playing') {
       const opp = this.localColor === 'w' ? room.black : room.white;
-      if (opp) this._checkOpponentPing(opp.lastPing, opp.connected);
+      if (opp) {
+        this._checkOpponentPing(opp.lastPing, opp.connected);
+        if (ZChess.ChessBoard?.multiplayerMode) {
+          ZChess.ChessBoard.multiplayerOpponent = {
+            name: opp.username || ZChess.ChessBoard.multiplayerOpponent?.name,
+            rating: opp.rating || 1200,
+            avatar: opp.avatar || null
+          };
+          ZChess.ChessBoard.updatePlayerBars();
+        }
+      }
     }
   },
 
@@ -271,6 +284,7 @@ const Multiplayer = {
     const playerColor    = this.localColor;
     const opponentName   = opp.username || 'Соперник';
     const opponentRating = opp.rating   || 1200;
+    const opponentAvatar = opp.avatar   || null;
     let   n = 3;
     const el = document.getElementById('lobby-countdown');
 
@@ -282,7 +296,7 @@ const Multiplayer = {
         if (overlay) overlay.classList.remove('open');
 
         const launch = () => {
-          ZChess.ChessBoard.startMultiplayerGame({ playerColor, opponentName, opponentRating });
+          ZChess.ChessBoard.startMultiplayerGame({ playerColor, opponentName, opponentRating, opponentAvatar });
         };
 
         if (ZChess.App && ZChess.App.navigate) {
@@ -308,10 +322,45 @@ const Multiplayer = {
     const oppEl = document.getElementById('ready-opp-name');
     const myR   = document.getElementById('ready-my-rating');
     const oppR  = document.getElementById('ready-opp-rating');
-    if (myEl)  myEl.textContent  = user.username  || 'Вы';
-    if (oppEl) oppEl.textContent = opp.username   || 'Соперник';
+    if (myEl)  myEl.textContent  = user.username  || t('common.guest');
+    if (oppEl) oppEl.textContent = opp.username   || t('profile.opponent_player');
     if (myR)   myR.textContent   = user.rating    || 1200;
     if (oppR)  oppR.textContent  = opp.rating     || 1200;
+
+    if (ZChess.UserDisplay) {
+      ZChess.UserDisplay.renderAvatar(document.getElementById('ready-my-avatar'), ZChess.UserDisplay.fromUser(user));
+      ZChess.UserDisplay.renderAvatar(document.getElementById('ready-opp-avatar'), {
+        username: opp.username || '?',
+        avatar: opp.avatar || null
+      });
+    }
+  },
+
+  async syncPublicProfile() {
+    if (!this.roomId || !this.db || !ZChess.Auth?.currentUser) return;
+
+    const user = ZChess.Auth.currentUser;
+    const ref = this.db.collection('rooms').doc(this.roomId);
+
+    try {
+      const snap = await ref.get();
+      if (!snap.exists) return;
+      const room = snap.data();
+      const patch = {};
+
+      if (room.white?.uid === user.uid) {
+        patch['white.username'] = user.username || 'Player';
+        patch['white.avatar'] = user.avatar || null;
+      }
+      if (room.black?.uid === user.uid) {
+        patch['black.username'] = user.username || 'Player';
+        patch['black.avatar'] = user.avatar || null;
+      }
+
+      if (Object.keys(patch).length) await ref.update(patch);
+    } catch (e) {
+      console.warn('[MP] syncPublicProfile:', e);
+    }
   },
 
   /* ================================================
@@ -670,6 +719,7 @@ const Multiplayer = {
         playerColor:    this.localColor,
         opponentName:   opp?.username || 'Opponent',
         opponentRating: opp?.rating   || 1200,
+        opponentAvatar: opp?.avatar   || null,
         moves:          room.moves
       });
 

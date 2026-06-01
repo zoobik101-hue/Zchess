@@ -9,6 +9,7 @@ window.ZChess = window.ZChess || {};
 
 const Profile = {
   _recentGames: [],
+  _editBound: false,
 
   renderProfile(user) {
     if (!user) return;
@@ -31,12 +32,28 @@ const Profile = {
     setEl('profile-username', user.username || 'Player');
     setEl('profile-title', title);
 
+    if (ZChess.UserDisplay) {
+      ZChess.UserDisplay.renderAvatar(
+        document.getElementById('profile-avatar-large'),
+        ZChess.UserDisplay.fromUser(user)
+      );
+    } else {
+      setEl('profile-avatar-text', (user.username || 'P')[0].toUpperCase());
+    }
+
+    const usernameInput = document.getElementById('profile-username-input');
+    if (usernameInput) usernameInput.value = user.username || '';
+
+    const removeBtn = document.getElementById('btn-remove-avatar');
+    if (removeBtn) removeBtn.style.display = user.avatar ? '' : 'none';
+
+    this.bindProfileEdit();
+
     const leagueEl = document.getElementById('profile-league-badge');
     if (leagueEl && ZChess.leagueBadgeHTML) {
       leagueEl.innerHTML = ZChess.leagueBadgeHTML(user.rating || ZChess.ELO.INITIAL_RATING, 'profile-league-badge');
     }
 
-    setEl('profile-avatar-text', (user.username || 'P')[0].toUpperCase());
     setEl('profile-level-text', `Lvl ${level}`);
     setEl('profile-rating-val', user.rating || ZChess.ELO.INITIAL_RATING);
     setEl('profile-wins-val', user.wins || 0);
@@ -142,6 +159,79 @@ const Profile = {
         const game = this._recentGames[idx];
         if (game && ZChess.GameReplay) ZChess.GameReplay.open(game);
       });
+    });
+  },
+
+  bindProfileEdit() {
+    if (this._editBound) return;
+    this._editBound = true;
+
+    const avatarBtn = document.getElementById('profile-avatar-large');
+    const fileInput = document.getElementById('profile-avatar-file');
+    const saveBtn = document.getElementById('btn-save-username');
+    const removeBtn = document.getElementById('btn-remove-avatar');
+    const errEl = document.getElementById('profile-edit-error');
+
+    const showErr = (msg) => {
+      if (!errEl) return;
+      if (!msg) { errEl.style.display = 'none'; errEl.textContent = ''; return; }
+      errEl.textContent = msg;
+      errEl.style.display = 'block';
+    };
+
+    const openFile = () => fileInput?.click();
+
+    avatarBtn?.addEventListener('click', openFile);
+    avatarBtn?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFile(); }
+    });
+
+    fileInput?.addEventListener('change', async () => {
+      const file = fileInput.files?.[0];
+      fileInput.value = '';
+      if (!file) return;
+      showErr('');
+      try {
+        await ZChess.Auth.setAvatarFromFile(file);
+        ZChess.Notifications?.success(t('profile.avatar_saved'));
+        if (removeBtn) removeBtn.style.display = '';
+        if (ZChess.Auth.currentUser) this.renderProfile(ZChess.Auth.currentUser);
+      } catch (e) {
+        const msg = e.code === 'file-too-big' ? t('profile.avatar_too_big')
+          : e.code === 'not-image' ? t('profile.avatar_not_image')
+          : t('profile.avatar_error');
+        showErr(msg);
+      }
+    });
+
+    removeBtn?.addEventListener('click', async () => {
+      showErr('');
+      await ZChess.Auth.removeAvatar();
+      removeBtn.style.display = 'none';
+      ZChess.Notifications?.info(t('profile.avatar_removed'));
+      if (ZChess.Auth.currentUser) this.renderProfile(ZChess.Auth.currentUser);
+    });
+
+    saveBtn?.addEventListener('click', async () => {
+      const input = document.getElementById('profile-username-input');
+      const name = input?.value?.trim();
+      showErr('');
+      saveBtn.disabled = true;
+      try {
+        await ZChess.Auth.changeUsername(name);
+        ZChess.Notifications?.success(t('profile.username_saved'));
+        const unEl = document.getElementById('profile-username');
+        if (unEl) unEl.textContent = ZChess.Auth.currentUser?.username || name;
+        if (ZChess.Auth.currentUser) this.renderProfile(ZChess.Auth.currentUser);
+      } catch (e) {
+        const msg = e.code === 'username-taken' ? t('notifications.error_username_taken')
+          : e.code === 'invalid-username' && e.reason === 'length' ? t('profile.username_length')
+          : e.code === 'invalid-username' ? t('profile.username_chars')
+          : t('profile.username_error');
+        showErr(msg);
+      } finally {
+        saveBtn.disabled = false;
+      }
     });
   },
 

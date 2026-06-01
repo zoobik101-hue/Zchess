@@ -676,3 +676,106 @@ html.theme-arena[data-theme="light"] .card,
 html.theme-arena[data-theme="light"] .news-card {
   background: #fffef9;
 }
+
+/* Avatars (global) */
+.avatar-img,
+.user-avatar .avatar-img,
+.profile-avatar-large .avatar-img,
+.player-avatar-sm .avatar-img,
+.lb-avatar .avatar-img,
+.lpc-avatar .avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+.user-avatar.has-avatar-img,
+.profile-avatar-large.has-avatar-img,
+.player-avatar-sm.has-avatar-img,
+.lb-avatar.has-avatar-img,
+.lpc-avatar.has-avatar-img {
+  padding: 0;
+  overflow: hidden;
+  background: #1a1408;
+}
+
+.profile-avatar-clickable {
+  cursor: pointer;
+  position: relative;
+}
+
+.profile-avatar-clickable:hover {
+  box-shadow: 0 0 0 3px rgba(212, 175, 85, 0.45);
+}
+
+.profile-avatar-clickable::after {
+  content: '📷';
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.profile-avatar-clickable:hover::after {
+  opacity: 0.9;
+}
+
+.profile-edit-card {
+  margin-bottom: 28px;
+}
+
+.profile-edit-title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--arena-gold);
+  margin-bottom: 16px;
+  letter-spacing: 0.06em;
+}
+
+.profile-edit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.profile-username-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.profile-username-row .form-input {
+  flex: 1;
+  min-width: 160px;
+}
+
+.form-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+.profile-avatar-edit-hint p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.profile-edit-note {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--color-error);
+}
+
+@media (max-width: 640px) {
+  .profile-edit-grid {
+    grid-template-columns: 1fr;
+  }
+}

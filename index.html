@@ -425,7 +425,7 @@
 
         <!-- Black player bar (top) -->
         <div class="player-bar" id="player-bar-black">
-          <div class="player-avatar-sm" style="background:linear-gradient(135deg,#1a1a2e,#2d1b69)">♚</div>
+          <div class="player-avatar-sm" id="player-avatar-black"></div>
           <div class="player-info-text">
             <div class="player-name-sm">Black</div>
             <div class="player-rating-sm"></div>
@@ -462,7 +462,7 @@
 
         <!-- White player bar (bottom) -->
         <div class="player-bar" id="player-bar-white" style="order:1">
-          <div class="player-avatar-sm" style="background:linear-gradient(135deg,#c8a97b,#f0d9b5);color:#333">♔</div>
+          <div class="player-avatar-sm" id="player-avatar-white"></div>
           <div class="player-info-text">
             <div class="player-name-sm">White</div>
             <div class="player-rating-sm"></div>
@@ -559,10 +559,10 @@
     <div class="profile-hero">
       <div class="container">
         <div class="profile-hero-content">
-          <div class="profile-avatar-large" title="Click to change avatar">
-            <span id="profile-avatar-text">P</span>
+          <div class="profile-avatar-large profile-avatar-clickable" id="profile-avatar-large" role="button" tabindex="0" data-i18n-title="profile.change_avatar" title="Change avatar">
             <div class="profile-level-badge" id="profile-level-text">Lvl 1</div>
           </div>
+          <input type="file" id="profile-avatar-file" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
           <div class="profile-info">
             <div class="profile-username" id="profile-username">Player</div>
             <div class="profile-title-badge" id="profile-title">Newcomer</div>
@@ -585,6 +585,26 @@
     </div>
 
     <div class="container" style="padding-top:32px;padding-bottom:60px">
+
+      <!-- Profile edit -->
+      <div class="card card-body profile-edit-card" id="profile-edit-card">
+        <h3 class="profile-edit-title" data-i18n="profile.edit_profile">Edit profile</h3>
+        <div class="profile-edit-grid">
+          <div class="form-group">
+            <label class="form-label" for="profile-username-input" data-i18n="profile.username_label">Username</label>
+            <div class="profile-username-row">
+              <input type="text" class="form-input" id="profile-username-input" maxlength="20" autocomplete="username" spellcheck="false">
+              <button type="button" class="btn btn-primary btn-sm" id="btn-save-username" data-i18n="profile.save_username">Save</button>
+            </div>
+            <p class="form-hint" data-i18n="profile.username_hint">3-20 characters, letters, numbers, underscore</p>
+          </div>
+          <div class="profile-avatar-edit-hint">
+            <p data-i18n="profile.avatar_hint">Click your avatar above to upload a photo (JPG/PNG, up to 5 MB)</p>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-remove-avatar" data-i18n="profile.remove_avatar">Remove avatar</button>
+          </div>
+        </div>
+        <p class="profile-edit-note" id="profile-edit-error" style="display:none"></p>
+      </div>
 
       <!-- Stats Grid -->
       <div class="profile-stats-grid">
@@ -1271,6 +1291,7 @@
 <script src="js/notifications.js"></script>
 <script src="js/particles.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/user-display.js"></script>
 <script src="js/chess-engine.js"></script>
 <script src="js/ai-engine.js"></script>
 <script src="js/chess-board.js"></script>
