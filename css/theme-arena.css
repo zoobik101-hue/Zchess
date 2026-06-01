@@ -452,7 +452,11 @@ body::before {
   background: var(--accent-gradient);
 }
 
-/* News */
+/* News - wider panel for 4-column grid */
+#page-news > .container {
+  max-width: 1280px;
+}
+
 .news-thumbnail {
   background: linear-gradient(135deg, rgba(212, 175, 85, 0.25), rgba(124, 58, 237, 0.15));
 }
@@ -559,6 +563,10 @@ body::before {
     padding: 20px 16px 32px !important;
     margin-left: 12px;
     margin-right: 12px;
+    max-width: none;
+  }
+
+  #page-news > .container {
     max-width: none;
   }
 }
