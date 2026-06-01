@@ -750,7 +750,6 @@ const ChessBoard = {
   async triggerAIMove() {
     if (this.gameOver || this.isThinking) return;
     this.isThinking = true;
-    this.showAIThinking(true);
     this.updateTurnIndicator();
 
     // Snapshot generation - if it changes before worker responds, abort
@@ -762,7 +761,7 @@ const ChessBoard = {
       // If undo/newgame happened while we were waiting - discard this move
       if (myGen !== this._aiGen || !move || this.gameOver) {
         this.isThinking = false;
-        this.showAIThinking(false);
+        this.updateTurnIndicator();
         return;
       }
 

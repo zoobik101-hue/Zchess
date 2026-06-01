@@ -446,19 +446,11 @@
           <div class="player-captured" id="captured-by-white"></div>
         </div>
 
-        <!-- Turn Indicator -->
-        <div id="turn-indicator" class="turn-indicator your-turn" style="margin-top:4px;width:100%;max-width:520px">
-          <div class="turn-dot"></div> Your turn
-        </div>
-
-        <!-- AI thinking indicator -->
-        <div id="ai-thinking-indicator" class="ai-thinking" style="display:none">
-          <div class="thinking-dots">
-            <div class="thinking-dot"></div>
-            <div class="thinking-dot"></div>
-            <div class="thinking-dot"></div>
+        <!-- Turn Indicator (fixed height - no layout shift when AI thinks) -->
+        <div class="turn-indicator-wrap">
+          <div id="turn-indicator" class="turn-indicator your-turn">
+            <div class="turn-dot"></div> Your turn
           </div>
-          <span data-i18n="board.ai_thinking">AI is thinking...</span>
         </div>
       </div>
 

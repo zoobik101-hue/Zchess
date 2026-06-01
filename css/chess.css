@@ -438,17 +438,38 @@
    SIDE PANEL - Controls & History
    ========================================= */
 
-/* Turn indicator */
+/* Turn indicator - fixed slot prevents board jump */
+.turn-indicator-wrap {
+  width: 100%;
+  max-width: var(--board-size, 520px);
+  min-height: 42px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
 .turn-indicator {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
+  width: 100%;
+  min-height: 40px;
   padding: 8px 14px;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
-  transition: all 0.2s ease;
+  box-sizing: border-box;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   letter-spacing: 0.2px;
+}
+
+.turn-indicator.is-thinking .thinking-dots {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
 }
 
 .turn-indicator.your-turn {
