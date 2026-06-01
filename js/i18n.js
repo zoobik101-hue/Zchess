@@ -19,7 +19,8 @@ const I18n = {
     if (this.loaded[lang]) return this.translations[lang];
 
     try {
-      const response = await fetch(`data/i18n/${lang}.json?v=${ZChess.VERSION}`);
+      const cacheBust = ZChess.BUILD || ZChess.VERSION || Date.now();
+      const response = await fetch(`data/i18n/${lang}.json?v=${encodeURIComponent(cacheBust)}`, { cache: 'no-store' });
       if (!response.ok) throw new Error(`Failed to load ${lang}`);
       const data = await response.json();
       this.translations[lang] = data;
@@ -35,6 +36,20 @@ const I18n = {
   async init() {
     const saved = localStorage.getItem('zchess_lang') || 'en';
     await this.setLanguage(saved);
+  },
+
+  /** Drop cached translations (after deploy / build change) */
+  invalidate() {
+    this.loaded = {};
+    this.translations = {};
+  },
+
+  async reloadCurrent() {
+    const lang = this.currentLang || 'en';
+    this.invalidate();
+    await this.load(lang);
+    this.updateDOM();
+    document.dispatchEvent(new CustomEvent('langchange', { detail: { lang } }));
   },
 
   // Switch language

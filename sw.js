@@ -4,7 +4,7 @@
    Auto-reload when new version detected
    ============================================= */
 
-const CACHE_VERSION = 'zchess-v18';
+const CACHE_VERSION = 'zchess-166301562630179';
 const STATIC_CACHE = `zchess-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `zchess-dynamic-${CACHE_VERSION}`;
 
@@ -111,8 +111,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // version.json - always network, never cache
-  if (url.pathname.endsWith('version.json')) {
+  // version.json and i18n - always network, never cache
+  if (url.pathname.endsWith('version.json') || url.pathname.includes('/data/i18n/')) {
     event.respondWith(
       fetch(request, { cache: 'no-store' }).catch(() =>
         caches.match(request)

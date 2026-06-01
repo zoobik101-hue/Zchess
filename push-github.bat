@@ -112,14 +112,24 @@ if errorlevel 1 (
 )
 call :log_ok ".gitignore blocks github-token.txt"
 
-rem ---- [7.5] Generate version.json (triggers auto-reload on site) ----
-call :next_step "Generate version.json"
+rem ---- [7.5] Sync build id (version.json + sw.js + config.js) ----
+call :next_step "Sync build version for auto-update"
 set "VER_DATE=%date%"
 set "VER_TIME=%time%"
-set "VER_BUILD=%VER_DATE: =_%_%VER_TIME::=-%"
-set "VER_BUILD=%VER_BUILD:/=-%"
-echo {"version":"%VER_DATE% %VER_TIME%","build":"%RANDOM%%RANDOM%"} > version.json
-call :log_ok "version.json updated - build timestamp written"
+set "VER_LABEL=%VER_DATE% %VER_TIME%"
+set "BUILD_ID=%RANDOM%%RANDOM%%RANDOM%"
+where node >nul 2>&1
+if errorlevel 1 (
+    call :log_warning "Node.js not found - writing version.json only (run: node scripts\sync-build.js)"
+    echo {"version":"%VER_LABEL%","build":"%BUILD_ID%","cache":"zchess-%BUILD_ID%"}> version.json
+) else (
+    node scripts\sync-build.js %BUILD_ID% "%VER_LABEL%"
+    if errorlevel 1 (
+        call :log_error "sync-build.js failed."
+        goto END_FAIL
+    )
+)
+call :log_ok "Build %BUILD_ID% synced - clients will auto-update"
 
 rem ---- [8] Stage all files ----
 call :next_step "Stage all files (git add)"

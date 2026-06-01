@@ -11,6 +11,9 @@ window.ZChess = window.ZChess || {};
 const App = {
   currentPage: null,
   gameSetupOptions: {},
+  _swRegistration: null,
+  _pendingSiteUpdate: false,
+  _VERSION_KEY: 'zchess_build',
 
   // --- Performance mode (weak devices / reduced motion) ---
 
@@ -799,19 +802,91 @@ const App = {
     });
   },
 
-  // --- Service Worker ---
+  // --- Service Worker & deploy auto-update ---
+
+  async fetchBuildMeta() {
+    const verUrl = (window.ZChess.getBasePath?.() || '') + '/version.json?t=' + Date.now();
+    try {
+      const r = await fetch(verUrl, { cache: 'no-store' });
+      if (!r.ok) return null;
+      return await r.json();
+    } catch {
+      return null;
+    }
+  },
+
+  _isActiveMultiplayerGame() {
+    const MP = ZChess.Multiplayer;
+    return !!(MP && MP.status === 'playing' && !ZChess.ChessBoard?.gameOver);
+  },
+
+  checkPendingUpdate() {
+    if (this._pendingSiteUpdate) this.applySiteUpdate('pending');
+  },
+
+  async applySiteUpdate(reason) {
+    if (this._isActiveMultiplayerGame()) {
+      this._pendingSiteUpdate = true;
+      const msg = typeof t === 'function' ? t('update.after_game') : 'Update will apply after the game';
+      ZChess.Notifications?.info(msg);
+      console.log('[ZChess] Update deferred (active game):', reason);
+      return;
+    }
+
+    this._pendingSiteUpdate = false;
+    console.log('[ZChess] Applying site update:', reason);
+
+    if (ZChess.I18n?.invalidate) ZChess.I18n.invalidate();
+
+    try {
+      if (this._swRegistration) await this._swRegistration.update();
+    } catch (e) {
+      console.warn('[ZChess] SW update check failed:', e);
+    }
+
+    const clearAndReload = () => {
+      window.location.reload();
+    };
+
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+    clearAndReload();
+  },
 
   registerSW() {
-    if (!('serviceWorker' in navigator)) return;
+    if (!('serviceWorker' in navigator)) {
+      this.startVersionCheck();
+      return;
+    }
 
     const base = window.ZChess.getBasePath ? window.ZChess.getBasePath() : '';
     const swPath = (base || '') + '/sw.js';
+    const scope = base ? base + '/' : '/';
 
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register(swPath, { scope: base ? base + '/' : '/' }).then(reg => {
-        console.log('[ZChess] Service Worker registered');
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      if (event.data?.type === 'SW_UPDATED') {
+        console.log('[ZChess] Service worker updated:', event.data.version);
+        this.applySiteUpdate('sw');
+      }
+    });
 
-        // When a new SW is waiting, activate it immediately
+    const register = async () => {
+      const meta = await this.fetchBuildMeta();
+      const build = meta?.build || ZChess.BUILD || '';
+      if (build) {
+        localStorage.setItem(this._VERSION_KEY, build);
+        if (meta?.build) ZChess.BUILD = meta.build;
+      }
+
+      const swUrl = build ? `${swPath}?v=${encodeURIComponent(build)}` : swPath;
+
+      try {
+        const reg = await navigator.serviceWorker.register(swUrl, { scope });
+        this._swRegistration = reg;
+        console.log('[ZChess] Service Worker registered', swUrl);
+
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
           if (!newWorker) return;
@@ -822,63 +897,55 @@ const App = {
           });
         });
 
-      }).catch(err => {
+        await reg.update();
+      } catch (err) {
         console.warn('[ZChess] SW registration failed:', err);
-      });
+      }
+    };
 
-      // When SW sends SW_UPDATED - reload the page
-      navigator.serviceWorker.addEventListener('message', (event) => {
-        if (event.data?.type === 'SW_UPDATED') {
-          console.log('[ZChess] New version detected - reloading...');
-          window.location.reload();
-        }
-      });
-    });
+    if (document.readyState === 'complete') register();
+    else window.addEventListener('load', register);
 
-    // Auto-check version.json every 30 seconds
     this.startVersionCheck();
   },
 
   startVersionCheck() {
-    const VERSION_KEY = 'zchess_version';
-    const CHECK_INTERVAL = 120000;
+    const CHECK_INTERVAL = 60000;
 
-    const checkVersion = () => {
-      if (document.hidden) return;
-      const verUrl = (window.ZChess.getBasePath?.() || '') + '/version.json?t=' + Date.now();
-      fetch(verUrl, { cache: 'no-store' })
-        .then(r => r.json())
-        .then(data => {
-          const newVer = data.build || data.version || '';
-          if (!newVer) return;
+    const checkVersion = async () => {
+      const meta = await this.fetchBuildMeta();
+      if (!meta) return;
 
-          const savedVer = localStorage.getItem(VERSION_KEY);
+      const newBuild = meta.build || meta.version || '';
+      if (!newBuild) return;
 
-          if (savedVer && savedVer !== newVer) {
-            console.log('[ZChess] New version detected:', newVer, '(was:', savedVer, ')');
-            localStorage.setItem(VERSION_KEY, newVer);
+      let savedBuild = localStorage.getItem(this._VERSION_KEY);
+      if (!savedBuild) {
+        const legacy = localStorage.getItem('zchess_version');
+        if (legacy) savedBuild = legacy;
+      }
 
-            // Clear all SW caches before reload
-            if ('caches' in window) {
-              caches.keys().then(keys => {
-                Promise.all(keys.map(k => caches.delete(k))).then(() => {
-                  window.location.reload();
-                });
-              });
-            } else {
-              window.location.reload();
-            }
-          } else {
-            localStorage.setItem(VERSION_KEY, newVer);
-          }
-        })
-        .catch(() => {});
+      if (savedBuild && savedBuild !== newBuild) {
+        console.log('[ZChess] New build on server:', newBuild, '(was:', savedBuild, ')');
+        localStorage.setItem(this._VERSION_KEY, newBuild);
+        ZChess.BUILD = newBuild;
+        await this.applySiteUpdate('version.json');
+        return;
+      }
+
+      localStorage.setItem(this._VERSION_KEY, newBuild);
+      if (meta.build) ZChess.BUILD = meta.build;
+
+      try {
+        await this._swRegistration?.update();
+      } catch (_) { /* ignore */ }
     };
 
-    // First check after 5 seconds (let page load first)
-    setTimeout(checkVersion, 5000);
-    // Then every 30 seconds
+    setTimeout(checkVersion, 3000);
     setInterval(checkVersion, CHECK_INTERVAL);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) checkVersion();
+    });
   },
 
   // =========================================

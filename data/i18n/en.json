@@ -614,6 +614,9 @@
     "room_not_found": "Room not found",
     "join_error": "Could not join room"
   },
+  "update": {
+    "after_game": "Site update available - will apply after your game"
+  },
   "common": {
     "loading": "Loading...",
     "error": "Error",

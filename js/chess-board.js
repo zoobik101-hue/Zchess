@@ -1066,6 +1066,9 @@ self.onmessage = function(e) {
   },
 
   showGameResultModal(heading, reason, outcome, xpGain, ratingChange, stats) {
+    if (ZChess.App?.checkPendingUpdate) {
+      setTimeout(() => ZChess.App.checkPendingUpdate(), 800);
+    }
     const overlay = document.getElementById('game-result-overlay');
     const screen  = document.getElementById('game-result-modal');
     if (!overlay || !screen) return;
