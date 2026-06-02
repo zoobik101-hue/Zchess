@@ -18,11 +18,20 @@ const App = {
   // --- Performance mode (weak devices / reduced motion) ---
 
   _initPerfMode() {
+    const root = document.documentElement;
     const lowCpu = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2;
     const lowMem = navigator.deviceMemory && navigator.deviceMemory <= 2;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (lowCpu || lowMem || reducedMotion) {
-      document.documentElement.classList.add('perf-lite');
+    const coarsePointer = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    const narrowViewport = window.matchMedia('(max-width: 768px)').matches;
+    const saveData = navigator.connection && navigator.connection.saveData;
+
+    if (lowCpu || lowMem || reducedMotion || saveData) {
+      root.classList.add('perf-lite');
+    }
+    if (coarsePointer || narrowViewport) {
+      root.classList.add('perf-touch');
+      root.classList.add('perf-lite');
     }
   },
 
@@ -247,6 +256,7 @@ const App = {
   },
 
   animateCounters() {
+    if (document.documentElement.classList.contains('perf-lite')) return;
     document.querySelectorAll('[data-counter]').forEach(el => {
       const target = parseInt(el.dataset.counter);
       const duration = 2000;

@@ -2312,6 +2312,19 @@ html.perf-lite .hero-badge-dot {
   animation: none !important;
 }
 
+html.perf-lite .features-section::before,
+html.perf-lite .features-section::after,
+html.perf-touch .features-section::before,
+html.perf-touch .features-section::after {
+  animation: none !important;
+}
+
+html.perf-lite #page-play .mp-status-bar,
+html.perf-touch #page-play .mp-status-bar {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-canvas {
     display: none !important;

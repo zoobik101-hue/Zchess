@@ -260,8 +260,10 @@ const Presence = {
         return (b.lastSeen || 0) - (a.lastSeen || 0);
       });
 
-      this.render();
       this._updateNavPill();
+      if (ZChess.App?.currentPage === 'home') {
+        this.render();
+      }
     };
 
     const onErr = (err) => {

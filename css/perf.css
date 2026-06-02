@@ -1,0 +1,142 @@
+/* ZChess - performance overrides (perf-lite / perf-touch) */
+
+html.perf-lite body::before,
+html.perf-touch body::before {
+  background: none;
+}
+
+/* Play page: strip expensive compositing */
+html.perf-lite #page-play .chess-board-container::before,
+html.perf-lite #page-play .chess-board-container::after,
+html.perf-touch #page-play .chess-board-container::before,
+html.perf-touch #page-play .chess-board-container::after {
+  display: none;
+}
+
+html.perf-lite #page-play .chess-board,
+html.perf-touch #page-play .chess-board {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  contain: strict;
+}
+
+html.perf-lite .chess-square,
+html.perf-touch .chess-square {
+  transition: none;
+}
+
+html.perf-lite .chess-square:hover::after,
+html.perf-touch .chess-square:hover::after {
+  display: none;
+}
+
+html.perf-lite .chess-piece .piece-img,
+html.perf-touch .chess-piece .piece-img {
+  filter: none;
+}
+
+html.perf-lite .chess-piece,
+html.perf-touch .chess-piece {
+  transition: none;
+}
+
+html.perf-lite .chess-piece.selected-piece,
+html.perf-touch .chess-piece.selected-piece {
+  filter: none;
+  transform: none;
+}
+
+html.perf-lite .chess-square.king-check::before,
+html.perf-touch .chess-square.king-check::before {
+  animation: none;
+  box-shadow: inset 0 0 0 3px rgba(239, 68, 68, 0.85);
+}
+
+html.perf-lite .move-dot,
+html.perf-touch .move-dot {
+  animation: none;
+  filter: none;
+}
+
+html.perf-lite .chess-piece.moving,
+html.perf-lite .chess-piece.capturing,
+html.perf-touch .chess-piece.moving,
+html.perf-touch .chess-piece.capturing {
+  animation: none !important;
+}
+
+html.perf-lite .turn-indicator .turn-dot,
+html.perf-lite .thinking-dot,
+html.perf-touch .turn-indicator .turn-dot,
+html.perf-touch .thinking-dot {
+  animation: none;
+}
+
+html.perf-lite .promotion-modal,
+html.perf-touch .promotion-modal {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+html.perf-lite .player-bar.active,
+html.perf-touch .player-bar.active {
+  box-shadow: inset 0 0 0 1px rgba(124, 58, 237, 0.35);
+}
+
+/* Unicode pieces on touch / lite */
+html.perf-lite .chess-piece.piece-unicode,
+html.perf-touch .chess-piece.piece-unicode {
+  font-size: clamp(28px, 11vw, 52px);
+  line-height: 1;
+  user-select: none;
+}
+
+html.perf-lite .chess-piece.piece-unicode.white-piece,
+html.perf-touch .chess-piece.piece-unicode.white-piece {
+  color: #f8f4ec;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+html.perf-lite .chess-piece.piece-unicode.black-piece,
+html.perf-touch .chess-piece.piece-unicode.black-piece {
+  color: #1a1028;
+  text-shadow: 0 0 1px rgba(255, 255, 255, 0.25);
+}
+
+html.perf-lite .captured-pieces-row .captured-symbol,
+html.perf-touch .captured-pieces-row .captured-symbol {
+  font-size: 14px;
+  line-height: 1;
+  opacity: 0.85;
+}
+
+html.perf-lite #page-play .navbar,
+html.perf-touch #page-play .navbar,
+html.perf-lite #page-play .move-history-panel,
+html.perf-touch #page-play .move-history-panel {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+html.perf-lite #page-play .move-history-panel,
+html.perf-touch #page-play .move-history-panel {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 140px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chess-board-container::before,
+  .chess-board-container::after {
+    display: none;
+  }
+
+  .chess-piece .piece-img {
+    filter: none;
+  }
+
+  .chess-square.king-check::before,
+  .move-dot,
+  .chess-piece.moving,
+  .chess-piece.capturing {
+    animation: none !important;
+  }
+}

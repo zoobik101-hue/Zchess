@@ -40,6 +40,11 @@ const ChessBoard = {
   // Track previous board to only update changed squares
   _prevPieces: null,
   _trainingHint: null,
+  _lastHistoryLen: -1,
+  _lastCapturedKey: '',
+  _dragDelegated: false,
+  _piecesPreloaded: false,
+  _isCoarsePointer: false,
 
   SYMBOLS: {
     wK:'♔', wQ:'♕', wR:'♖', wB:'♗', wN:'♘', wP:'♙',
@@ -53,10 +58,64 @@ const ChessBoard = {
   // BOARD INITIALIZATION - runs once
   // =========================================
 
+  _useLitePieces() {
+    const root = document.documentElement;
+    return root.classList.contains('perf-lite') || root.classList.contains('perf-touch');
+  },
+
+  _pieceSymbol(piece) {
+    const key = piece.color + piece.type.toUpperCase();
+    return this.SYMBOLS[key] || '?';
+  },
+
+  _preloadPieceImages() {
+    if (this._piecesPreloaded || this._useLitePieces()) return;
+    this._piecesPreloaded = true;
+    const types = ['K', 'Q', 'R', 'B', 'N', 'P'];
+    for (const color of ['w', 'b']) {
+      for (const type of types) {
+        const img = new Image();
+        img.src = `${this._piecesBase}/${color}${type}.svg`;
+      }
+    }
+  },
+
+  _bindDragDelegation(boardEl) {
+    if (this._dragDelegated || this._isCoarsePointer) return;
+    this._dragDelegated = true;
+
+    boardEl.addEventListener('dragstart', (e) => {
+      const pieceEl = e.target.closest('.chess-piece');
+      if (!pieceEl) return;
+      const row = +pieceEl.dataset.row;
+      const col = +pieceEl.dataset.col;
+      const { board, turn } = this.gameState;
+      const p = board[row][col];
+      const notOurPiece = (this.isAIGame || this.multiplayerMode || this.trainingPuzzle) && p?.color !== this.playerColor;
+      const notOurTurn = (this.multiplayerMode || this.trainingPuzzle) && turn !== this.playerColor;
+      if (!p || notOurPiece || notOurTurn) {
+        e.preventDefault();
+        return;
+      }
+      this.dragSource = { row, col };
+      this.selectPiece(row, col);
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', `${row},${col}`);
+      requestAnimationFrame(() => pieceEl.classList.add('dragging'));
+    });
+
+    boardEl.addEventListener('dragend', (e) => {
+      const pieceEl = e.target.closest('.chess-piece');
+      if (pieceEl) pieceEl.classList.remove('dragging');
+      this.dragSource = null;
+    });
+  },
+
   initBoard() {
     const boardEl = document.getElementById('chess-board');
     if (!boardEl || this._squares) return;
 
+    this._isCoarsePointer = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
     this._squares = Array.from({ length: 8 }, () => new Array(8));
     this._prevPieces = Array.from({ length: 8 }, () => new Array(8).fill(null));
 
@@ -100,6 +159,8 @@ const ChessBoard = {
       }
       this.dragSource = null;
     });
+
+    this._bindDragDelegation(boardEl);
   },
 
   // =========================================
@@ -107,11 +168,23 @@ const ChessBoard = {
   // Only updates what actually changed
   // =========================================
 
-  render() {
+  render(opts = {}) {
     if (!this._squares) {
       this.initBoard();
     }
 
+    const selectionOnly = !!opts.selectionOnly;
+    const historyLen = this.gameState.history.length;
+    if (historyLen !== this._lastHistoryLen) {
+      this._lastHistoryLen = historyLen;
+      this.updateMoveHistory();
+    }
+    this._syncCapturedPieces();
+
+    this._paintSquareStates(selectionOnly);
+  },
+
+  _paintSquareStates(selectionOnly) {
     const { board } = this.gameState;
     const engine = ZChess.Engine;
     const inCheck = engine.isInCheck(board, this.gameState.turn);
@@ -120,7 +193,6 @@ const ChessBoard = {
       ? this.gameState.history[this.gameState.history.length - 1]
       : null;
 
-    // Build legal move set for O(1) lookup
     const legalSet = new Set();
     const captureSet = new Set();
     for (const m of this.legalMovesForSelected) {
@@ -137,7 +209,6 @@ const ChessBoard = {
         const piece = board[r][c];
         const key = `${r},${c}`;
 
-        // --- Class names (no DOM creation, just string compare) ---
         const isLight = (r + c) % 2 === 1;
         let cls = `chess-square ${isLight ? 'light' : 'dark'}`;
 
@@ -157,7 +228,6 @@ const ChessBoard = {
 
         if (el.className !== cls) el.className = cls;
 
-        // --- Move dot ---
         const hasDot = el.querySelector('.move-dot');
         const needsDot = legalSet.has(key);
         if (needsDot && !hasDot) {
@@ -168,22 +238,29 @@ const ChessBoard = {
           hasDot.remove();
         }
 
-        // --- Piece update (only if changed) ---
+        if (selectionOnly) {
+          if (piece) {
+            const pEl = el.querySelector('.chess-piece');
+            if (pEl) {
+              const shouldBeSelected = sel && sel.row === r && sel.col === c;
+              pEl.classList.toggle('selected-piece', shouldBeSelected);
+            }
+          }
+          continue;
+        }
+
         const pieceKey = piece ? piece.color + piece.type : '';
         const prevKey = this._prevPieces[r][c];
 
         if (pieceKey !== prevKey) {
           this._prevPieces[r][c] = pieceKey;
-          // Remove old piece element
           const oldPiece = el.querySelector('.chess-piece');
           if (oldPiece) oldPiece.remove();
 
           if (piece) {
-            const pEl = this._createPieceEl(piece, r, c);
-            el.appendChild(pEl);
+            el.appendChild(this._createPieceEl(piece, r, c));
           }
         } else if (piece) {
-          // Update selected state on existing piece element
           const pEl = el.querySelector('.chess-piece');
           if (pEl) {
             const shouldBeSelected = sel && sel.row === r && sel.col === c;
@@ -192,47 +269,32 @@ const ChessBoard = {
         }
       }
     }
-
-    this.updateMoveHistory();
-    this.updateCapturedPieces();
   },
 
   _createPieceEl(piece, row, col) {
+    const colorCls = piece.color === 'w' ? 'white-piece' : 'black-piece';
     const el = document.createElement('div');
-    el.className = `chess-piece ${piece.color === 'w' ? 'white-piece' : 'black-piece'}`;
+    el.className = `chess-piece ${colorCls}`;
     el.dataset.row = row;
     el.dataset.col = col;
-    el.setAttribute('draggable', 'true');
 
-    // SVG image piece
-    const img = document.createElement('img');
-    img.src = `${this._piecesBase}/${piece.color}${piece.type.toUpperCase()}.svg`;
-    img.alt = piece.color + piece.type;
-    img.className = 'piece-img';
-    img.draggable = false;
-    el.appendChild(img);
-
-    el.addEventListener('dragstart', (e) => {
-      const { board, turn } = this.gameState;
-      const p = board[row][col];
-      // Block dragging opponent's pieces in AI or multiplayer
-      const notOurPiece = (this.isAIGame || this.multiplayerMode || this.trainingPuzzle) && p?.color !== this.playerColor;
-      const notOurTurn  = (this.multiplayerMode || this.trainingPuzzle) && turn !== this.playerColor;
-      if (!p || notOurPiece || notOurTurn) {
-        e.preventDefault();
-        return;
+    if (this._useLitePieces()) {
+      el.classList.add('piece-unicode');
+      el.textContent = this._pieceSymbol(piece);
+      el.setAttribute('draggable', 'false');
+    } else {
+      const img = document.createElement('img');
+      img.src = `${this._piecesBase}/${piece.color}${piece.type.toUpperCase()}.svg`;
+      img.alt = piece.color + piece.type;
+      img.className = 'piece-img';
+      img.draggable = false;
+      img.decoding = 'async';
+      img.loading = 'eager';
+      el.appendChild(img);
+      if (!this._isCoarsePointer) {
+        el.setAttribute('draggable', 'true');
       }
-      this.dragSource = { row, col };
-      this.selectPiece(row, col);
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', `${row},${col}`);
-      requestAnimationFrame(() => el.classList.add('dragging'));
-    });
-
-    el.addEventListener('dragend', () => {
-      el.classList.remove('dragging');
-      this.dragSource = null;
-    });
+    }
 
     return el;
   },
@@ -345,7 +407,14 @@ const ChessBoard = {
   // GAME LIFECYCLE
   // =========================================
 
+  _resetRenderCaches() {
+    this._lastHistoryLen = -1;
+    this._lastCapturedKey = '';
+  },
+
   startGame(options = {}) {
+    this._preloadPieceImages();
+    this._resetRenderCaches();
     const isCoach = options.mode === 'training' && options.trainingMode === 'coach';
     this.trainingMode = isCoach;
     this.trainingPuzzle = false;
@@ -403,6 +472,7 @@ const ChessBoard = {
   },
 
   startTrainingLesson(lesson) {
+    this._resetRenderCaches();
     this.trainingMode = true;
     this.trainingPuzzle = true;
     this.isAIGame = false;
@@ -437,6 +507,8 @@ const ChessBoard = {
   // =========================================
 
   startMultiplayerGame(options = {}) {
+    this._preloadPieceImages();
+    this._resetRenderCaches();
     this.isAIGame        = false;
     this.trainingMode    = false;
     this.trainingPuzzle  = false;
@@ -630,25 +702,25 @@ const ChessBoard = {
 
   clearTrainingHint() {
     this._trainingHint = null;
-    if (this._squares) this.render();
+    if (this._squares) this.render({ selectionOnly: true });
   },
 
   showTrainingHint(fr, fc, tr, tc) {
     this._trainingHint = { fr, fc, tr, tc };
-    if (this._squares) this.render();
+    if (this._squares) this.render({ selectionOnly: true });
   },
 
   selectPiece(row, col) {
     this.selectedSquare = { row, col };
     this.legalMovesForSelected = ZChess.Engine.getLegalMovesForPiece(this.gameState, row, col);
-    this.render();
+    this.render({ selectionOnly: true });
     if (ZChess.Sound) ZChess.Sound.playClick();
   },
 
   deselectPiece() {
     this.selectedSquare = null;
     this.legalMovesForSelected = [];
-    this.render();
+    this.render({ selectionOnly: true });
   },
 
   // =========================================
@@ -1415,20 +1487,45 @@ self.onmessage = function(e) {
     if (panel) panel.scrollTop = panel.scrollHeight;
   },
 
+  _capturedKey(capturedPieces) {
+    const w = (capturedPieces.w || []).join('');
+    const b = (capturedPieces.b || []).join('');
+    return `${w}|${b}`;
+  },
+
+  _syncCapturedPieces() {
+    const key = this._capturedKey(this.gameState.capturedPieces);
+    if (key === this._lastCapturedKey) return;
+    this._lastCapturedKey = key;
+    this.updateCapturedPieces();
+  },
+
   updateCapturedPieces() {
     const { capturedPieces } = this.gameState;
-    const ORDER = ['Q','R','B','N','P'];
-    const upd = (id, pieces) => {
+    const ORDER = ['Q', 'R', 'B', 'N', 'P'];
+    const lite = this._useLitePieces();
+    const upd = (id, pieces, invertColor) => {
       const el = document.getElementById(id);
       if (!el) return;
+      const sorted = [...pieces].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
+      if (lite) {
+        el.textContent = '';
+        sorted.forEach(t => {
+          const span = document.createElement('span');
+          span.className = 'captured-symbol';
+          const color = invertColor ? 'b' : 'w';
+          span.textContent = this.SYMBOLS[color + t] || t;
+          el.appendChild(span);
+        });
+        return;
+      }
       const base = this._piecesBase;
-      el.innerHTML = [...pieces]
-        .sort((a,b) => ORDER.indexOf(a) - ORDER.indexOf(b))
-        .map(t => `<img src="${base}/b${t}.svg" alt="${t}" class="captured-piece-img" draggable="false">`)
+      el.innerHTML = sorted
+        .map(t => `<img src="${base}/b${t}.svg" alt="${t}" class="captured-piece-img" draggable="false" decoding="async">`)
         .join('');
     };
-    upd('captured-by-white', capturedPieces.b);
-    upd('captured-by-black', capturedPieces.w);
+    upd('captured-by-white', capturedPieces.b, true);
+    upd('captured-by-black', capturedPieces.w, false);
   },
 
   updateCoordinates() {
