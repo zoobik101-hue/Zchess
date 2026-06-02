@@ -12,6 +12,12 @@
   --arena-chamfer: 18px;
   --arena-glass: rgba(11, 11, 15, 0.42);
   --arena-glass-strong: rgba(5, 5, 5, 0.58);
+  --arena-glass-bg: linear-gradient(
+    155deg,
+    rgba(255, 213, 106, 0.06) 0%,
+    rgba(11, 11, 15, 0.22) 45%,
+    rgba(5, 5, 5, 0.26) 100%
+  );
   position: relative;
   box-sizing: border-box;
   padding-top: var(--nav-height);
@@ -181,12 +187,7 @@ body.arena-page-lock {
 .arena-window-stats { grid-area: stats; }
 
 .glass-panel {
-  background: linear-gradient(
-    155deg,
-    rgba(255, 213, 106, 0.07) 0%,
-    rgba(11, 11, 15, 0.55) 42%,
-    rgba(5, 5, 5, 0.62) 100%
-  );
+  background: var(--arena-glass-bg);
   backdrop-filter: blur(22px) saturate(1.35);
   -webkit-backdrop-filter: blur(22px) saturate(1.35);
   border: 1px solid rgba(255, 213, 106, 0.22);
@@ -612,6 +613,7 @@ body.arena-page-lock {
 
 #page-game .arena-window-main.glass-panel {
   border-color: rgba(201, 162, 77, 0.5);
+  background: var(--arena-glass-bg);
 }
 
 #page-game .game-setup-panel::before {
@@ -647,6 +649,12 @@ body.arena-page-lock {
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  background: transparent;
+}
+
+#page-game .game-setup-row,
+#page-game .game-setup-footer {
+  background: transparent;
 }
 
 #page-game .game-setup-footer {
@@ -669,6 +677,7 @@ body.arena-page-lock {
   border-bottom: 1px solid rgba(255, 213, 106, 0.12);
   box-sizing: border-box;
   flex-shrink: 0;
+  background: transparent;
 }
 
 #page-game .game-mode-card {
@@ -681,7 +690,7 @@ body.arena-page-lock {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: rgba(11, 11, 15, 0.45);
+  background: rgba(11, 11, 15, 0.28);
   backdrop-filter: blur(18px) saturate(1.25);
   -webkit-backdrop-filter: blur(18px) saturate(1.25);
   border: 1px solid rgba(255, 213, 106, 0.18);
@@ -981,12 +990,7 @@ html.perf-touch #page-game .glass-panel,
 html[data-no-animations="true"] #page-game .glass-panel {
   backdrop-filter: blur(16px) saturate(1.15);
   -webkit-backdrop-filter: blur(16px) saturate(1.15);
-  background: linear-gradient(
-    155deg,
-    rgba(22, 18, 28, 0.35) 0%,
-    rgba(10, 8, 14, 0.42) 50%,
-    rgba(6, 5, 10, 0.5) 100%
-  );
+  background: var(--arena-glass-bg);
 }
 
 html.perf-lite #page-game .game-mode-card,
@@ -1078,15 +1082,6 @@ html.perf-touch #page-game .arena-panel-chamfer-premium {
 
 #page-game .arena-panel-chamfer {
   position: relative;
-}
-
-#page-game .arena-window-main.glass-panel {
-  background: linear-gradient(
-    155deg,
-    rgba(22, 18, 28, 0.32) 0%,
-    rgba(10, 8, 14, 0.38) 55%,
-    rgba(6, 5, 10, 0.45) 100%
-  );
 }
 
 html.perf-lite #page-game .game-mode-card:hover,
