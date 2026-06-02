@@ -8,7 +8,7 @@
   --arena-gold-bright: #f0d78c;
   --arena-ivory: #e8e0d0;
   --arena-sq-light: rgba(232, 224, 208, 0.06);
-  --arena-chamfer: 22px;
+  --arena-chamfer: 32px;
   --arena-glass: rgba(10, 8, 14, 0.38);
   --arena-glass-strong: rgba(6, 5, 10, 0.52);
   position: relative;
@@ -140,7 +140,7 @@
   column-gap: 16px;
   row-gap: 12px;
   justify-content: center;
-  align-items: stretch;
+  align-items: start;
 }
 
 /* Skewed bottom corners (mockup "chamfer" panels) */
@@ -225,9 +225,9 @@
 .glass-panel {
   background: linear-gradient(
     155deg,
-    rgba(22, 18, 28, 0.42) 0%,
-    var(--arena-glass) 42%,
-    var(--arena-glass-strong) 100%
+    rgba(22, 18, 28, 0.3) 0%,
+    rgba(10, 8, 14, 0.36) 45%,
+    rgba(6, 5, 10, 0.44) 100%
   );
   backdrop-filter: blur(20px) saturate(1.2);
   -webkit-backdrop-filter: blur(20px) saturate(1.2);
@@ -248,15 +248,16 @@
 
 .arena-window-tasks,
 .arena-window-stats {
-  padding: 16px 16px calc(16px + var(--arena-chamfer));
-  align-self: stretch;
+  padding: 14px 14px calc(14px + var(--arena-chamfer));
+  align-self: start;
+  height: auto;
 }
 
 .arena-window-main {
   padding: 0;
   padding-bottom: var(--arena-chamfer);
   overflow: hidden;
-  align-self: stretch;
+  align-self: start;
 }
 
 .arena-window-title {
@@ -274,14 +275,12 @@
 .arena-window-body {
   display: flex;
   flex-direction: column;
-  flex: 1 1 auto;
-  min-height: 0;
 }
 
 .arena-window-link {
   display: block;
-  margin-top: auto;
-  padding-top: 12px;
+  margin-top: 10px;
+  padding-top: 0;
   text-align: center;
   font-size: 10px;
   font-weight: 700;
@@ -478,10 +477,9 @@
 .arena-stat-draw .arena-stat-num { color: rgba(232, 224, 208, 0.88); }
 
 .arena-streak-block {
-  margin-top: auto;
+  margin-top: 12px;
   text-align: center;
-  padding-top: 10px;
-  flex-shrink: 0;
+  padding-top: 0;
 }
 
 .arena-streak-lbl {
@@ -702,7 +700,7 @@
   align-items: center;
   justify-content: flex-start;
   gap: 12px;
-  background: rgba(8, 6, 12, 0.28);
+  background: rgba(8, 6, 12, 0.22);
   backdrop-filter: blur(14px) saturate(1.1);
   -webkit-backdrop-filter: blur(14px) saturate(1.1);
   border: 1px solid rgba(201, 162, 77, 0.28);
@@ -778,13 +776,22 @@
 }
 
 #page-game .game-mode-desc {
-  font-size: 10px;
-  line-height: 1.45;
-  color: rgba(232, 224, 208, 0.52);
-  text-align: center;
-  max-width: 118px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+  max-width: 168px;
   margin: 0 auto;
-  min-height: 2.9em;
+}
+
+#page-game .game-mode-desc-line {
+  display: block;
+  font-size: 10px;
+  line-height: 1.35;
+  color: rgba(232, 224, 208, 0.55);
+  text-align: center;
+  white-space: nowrap;
 }
 
 /* Full-width symmetric chip grids */
@@ -1024,31 +1031,118 @@ html[data-no-animations="true"] #page-game .game-setup-panel::before {
   display: none;
 }
 
-html.perf-lite .glass-panel,
-html.perf-touch .glass-panel,
-html[data-no-animations="true"] .glass-panel {
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  background: linear-gradient(165deg, rgba(20, 16, 12, 0.88) 0%, rgba(8, 6, 10, 0.94) 100%);
+/* perf-lite must NOT flatten the play lobby (was hiding all visual changes) */
+html.perf-lite #page-game .glass-panel,
+html.perf-touch #page-game .glass-panel,
+html[data-no-animations="true"] #page-game .glass-panel {
+  backdrop-filter: blur(16px) saturate(1.15);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  background: linear-gradient(
+    155deg,
+    rgba(22, 18, 28, 0.35) 0%,
+    rgba(10, 8, 14, 0.42) 50%,
+    rgba(6, 5, 10, 0.5) 100%
+  );
 }
 
 html.perf-lite #page-game .game-mode-card,
 html.perf-touch #page-game .game-mode-card {
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  background: rgba(12, 10, 16, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(8, 6, 12, 0.32);
 }
 
-html.perf-lite .arena-panel-chamfer,
-html.perf-touch .arena-panel-chamfer {
-  clip-path: none;
-  border-radius: 10px;
+html.perf-lite #page-game .arena-panel-chamfer,
+html.perf-touch #page-game .arena-panel-chamfer {
+  border-radius: 0;
 }
 
-html.perf-lite .arena-panel-chamfer-premium,
-html.perf-touch .arena-panel-chamfer-premium {
-  clip-path: none;
-  border-radius: 8px;
+html.perf-lite #page-game .arena-panel-chamfer-tasks,
+html.perf-touch #page-game .arena-panel-chamfer-tasks {
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--arena-chamfer)),
+    calc(100% - var(--arena-chamfer)) 100%,
+    0 100%
+  );
+}
+
+html.perf-lite #page-game .arena-panel-chamfer-stats,
+html.perf-touch #page-game .arena-panel-chamfer-stats {
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 100%,
+    var(--arena-chamfer) 100%,
+    0 calc(100% - var(--arena-chamfer))
+  );
+}
+
+html.perf-lite #page-game .arena-panel-chamfer-main,
+html.perf-touch #page-game .arena-panel-chamfer-main {
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--arena-chamfer)),
+    calc(100% - var(--arena-chamfer)) 100%,
+    var(--arena-chamfer) 100%,
+    0 calc(100% - var(--arena-chamfer))
+  );
+}
+
+html.perf-lite #page-game .arena-panel-chamfer-premium,
+html.perf-touch #page-game .arena-panel-chamfer-premium {
+  clip-path: polygon(
+    var(--arena-chamfer) 0,
+    100% 0,
+    100% 100%,
+    0 100%,
+    0 var(--arena-chamfer)
+  );
+  border-radius: 0;
+}
+
+/* Visible bevel accent (works even if clip-path is ignored) */
+#page-game .arena-panel-chamfer-tasks::before,
+#page-game .arena-panel-chamfer-stats::before,
+#page-game .arena-panel-chamfer-main::before {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0.85;
+}
+
+#page-game .arena-panel-chamfer-tasks::before {
+  right: -1px;
+  bottom: -1px;
+  width: calc(var(--arena-chamfer) + 4px);
+  height: calc(var(--arena-chamfer) + 4px);
+  background: linear-gradient(135deg, transparent 46%, rgba(201, 162, 77, 0.55) 47%, rgba(201, 162, 77, 0.2) 100%);
+  clip-path: polygon(100% 0, 0 100%, 100% 100%);
+}
+
+#page-game .arena-panel-chamfer-stats::before {
+  left: -1px;
+  bottom: -1px;
+  width: calc(var(--arena-chamfer) + 4px);
+  height: calc(var(--arena-chamfer) + 4px);
+  background: linear-gradient(225deg, transparent 46%, rgba(201, 162, 77, 0.55) 47%, rgba(201, 162, 77, 0.2) 100%);
+  clip-path: polygon(0 0, 0 100%, 100% 100%);
+}
+
+#page-game .arena-panel-chamfer {
+  position: relative;
+}
+
+#page-game .arena-window-main.glass-panel {
+  background: linear-gradient(
+    155deg,
+    rgba(22, 18, 28, 0.32) 0%,
+    rgba(10, 8, 14, 0.38) 55%,
+    rgba(6, 5, 10, 0.45) 100%
+  );
 }
 
 html.perf-lite #page-game .game-mode-card:hover,

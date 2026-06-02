@@ -75,10 +75,14 @@
     "setup_eyebrow": "Chess Arena",
     "vs_ai": "vs Computer",
     "vs_ai_desc": "Challenge our AI<br>at 7 difficulty levels",
+    "vs_ai_desc_l1": "Challenge our AI",
+    "vs_ai_desc_l2": "at 7 difficulty levels",
     "vs_player": "vs Player",
     "vs_player_desc": "Play against real opponents online",
     "quick_game": "Quick Match",
     "quick_game_desc": "Instant matchmaking<br>with players online",
+    "quick_game_desc_l1": "Instant matchmaking",
+    "quick_game_desc_l2": "with players online",
     "private_game": "Private Room",
     "private_game_desc": "Create a room and invite a friend",
     "difficulty": "Difficulty",
@@ -114,7 +118,9 @@
     "copy_code": "Copy Code",
     "waiting_opponent": "Waiting for opponent...",
     "training": "Training",
-    "training_desc": "Lessons, tactics, and training<br>with game review"
+    "training_desc": "Lessons, tactics, and training<br>with game review",
+    "training_desc_l1": "Lessons, tactics, and training",
+    "training_desc_l2": "with game review"
   },
   "training": {
     "catalog_title": "ZChess Academy",
