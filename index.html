@@ -45,7 +45,8 @@
   <link rel="stylesheet" href="css/chess.css">
   <link rel="stylesheet" href="css/multiplayer.css">
   <link rel="stylesheet" href="css/training.css">
-  <link rel="stylesheet" href="css/game-setup.css?v=arena2">
+  <link rel="stylesheet" href="css/game-setup.css?v=arena3">
+  <link rel="stylesheet" href="css/arena-premium.css?v=arena3">
   <link rel="stylesheet" href="css/chess-decor.css">
   <link rel="stylesheet" href="css/theme-arena.css">
   <link rel="stylesheet" href="css/game-replay.css">
@@ -339,7 +340,13 @@
   <div id="page-game" class="page page-game-arena">
     <div class="game-setup-ambient" aria-hidden="true">
       <div class="game-setup-bg-photo"></div>
+      <div class="arena-bg-atmosphere"></div>
+      <div class="arena-light-rays"></div>
+      <div class="arena-fog arena-fog-1"></div>
+      <div class="arena-fog arena-fog-2"></div>
+      <div class="arena-vignette"></div>
       <div class="game-setup-bg-scrim"></div>
+      <div class="arena-particles" id="arena-particles"></div>
       <span class="arena-deco arena-deco-1">♛</span>
       <span class="arena-deco arena-deco-2">♞</span>
       <span class="arena-deco arena-deco-3">♜</span>
@@ -350,12 +357,12 @@
     <div class="container game-setup-shell">
 
       <div class="arena-grid">
-        <header class="arena-head">
+        <header class="arena-head arena-zone-hero">
           <p class="arena-head-eyebrow" data-i18n="game.setup_eyebrow">Chess Arena</p>
           <h1 class="arena-head-title" data-i18n="game.mode_title">Choose mode</h1>
         </header>
 
-        <aside class="arena-window arena-window-tasks glass-panel arena-panel-chamfer arena-panel-chamfer-tasks" aria-label="Daily tasks">
+        <aside class="arena-window arena-window-tasks glass-panel epic-card epic-card--sidebar epic-card--dim arena-panel-chamfer arena-panel-chamfer-tasks" aria-label="Daily tasks">
           <h2 class="arena-window-title" data-i18n="game.sidebar_daily">Daily tasks</h2>
           <div class="arena-window-body">
             <div class="arena-task-list" id="arena-daily-tasks"></div>
@@ -363,10 +370,10 @@
           </div>
         </aside>
 
-        <div class="arena-window arena-window-main glass-panel arena-panel-chamfer arena-panel-chamfer-main" id="game-setup-panel">
+        <div class="arena-window arena-window-main glass-panel epic-card epic-card--main arena-panel-chamfer arena-panel-chamfer-main" id="game-setup-panel">
       <!-- Mode Cards -->
       <div class="game-modes-grid">
-        <div class="game-mode-card selected" data-mode="ai">
+        <div class="game-mode-card epic-card selected" data-mode="ai">
           <div class="game-mode-icon-ring"><span class="game-mode-icon" aria-hidden="true">🛡️</span></div>
           <div class="game-mode-body">
             <div class="game-mode-title" data-i18n="game.vs_ai">vs Computer</div>
@@ -376,7 +383,7 @@
             </div>
           </div>
         </div>
-        <div class="game-mode-card" data-mode="quick">
+        <div class="game-mode-card epic-card" data-mode="quick">
           <div class="game-mode-icon-ring"><span class="game-mode-icon" aria-hidden="true">⚔️</span></div>
           <div class="game-mode-body">
             <div class="game-mode-title" data-i18n="game.quick_game">Quick Match</div>
@@ -386,7 +393,7 @@
             </div>
           </div>
         </div>
-        <div class="game-mode-card" data-mode="training">
+        <div class="game-mode-card epic-card" data-mode="training">
           <div class="game-mode-icon-ring"><span class="game-mode-icon" aria-hidden="true">📖</span></div>
           <div class="game-mode-body">
             <div class="game-mode-title" data-i18n="game.training">Training</div>
@@ -405,36 +412,36 @@
         <div id="training-catalog"></div>
       </div>
 
-      <div class="game-setup-options" id="game-setup-options">
+      <div class="game-setup-options arena-zone-secondary" id="game-setup-options">
       <!-- Difficulty (AI only) -->
       <div id="difficulty-section" class="game-setup-row">
         <h3 class="game-setup-label" data-i18n="game.choose_difficulty">Choose difficulty</h3>
         <div class="difficulty-selector">
-          <div class="diff-btn" data-diff="beginner">
+          <div class="diff-btn epic-chip" data-diff="beginner">
             <span class="diff-emoji">🌱</span>
             <span class="diff-name" data-i18n="game.difficulty_beginner">Beginner</span>
           </div>
-          <div class="diff-btn" data-diff="easy">
+          <div class="diff-btn epic-chip" data-diff="easy">
             <span class="diff-emoji">😊</span>
             <span class="diff-name" data-i18n="game.difficulty_easy">Easy</span>
           </div>
-          <div class="diff-btn selected" data-diff="medium">
+          <div class="diff-btn epic-chip selected" data-diff="medium">
             <span class="diff-emoji">🤔</span>
             <span class="diff-name" data-i18n="game.difficulty_medium">Medium</span>
           </div>
-          <div class="diff-btn" data-diff="advanced">
+          <div class="diff-btn epic-chip" data-diff="advanced">
             <span class="diff-emoji">💪</span>
             <span class="diff-name" data-i18n="game.difficulty_advanced">Advanced</span>
           </div>
-          <div class="diff-btn" data-diff="expert">
+          <div class="diff-btn epic-chip" data-diff="expert">
             <span class="diff-emoji">🔥</span>
             <span class="diff-name" data-i18n="game.difficulty_expert">Expert</span>
           </div>
-          <div class="diff-btn" data-diff="grandmaster">
+          <div class="diff-btn epic-chip" data-diff="grandmaster">
             <span class="diff-emoji">🏆</span>
             <span class="diff-name" data-i18n="game.difficulty_grandmaster">GM</span>
           </div>
-          <div class="diff-btn" data-diff="impossible">
+          <div class="diff-btn epic-chip" data-diff="impossible">
             <span class="diff-emoji">👾</span>
             <span class="diff-name" data-i18n="game.difficulty_impossible">Max</span>
           </div>
@@ -445,15 +452,15 @@
       <div class="game-setup-row game-setup-play-as">
         <h3 class="game-setup-label" data-i18n="game.play_as">Play As</h3>
         <div class="play-as-selector">
-          <div class="play-as-btn selected" data-color="w">
+          <div class="play-as-btn epic-chip selected" data-color="w">
             <span class="play-as-piece">♔</span>
             <span class="play-as-label" data-i18n="game.white">White</span>
           </div>
-          <div class="play-as-btn" data-color="b">
+          <div class="play-as-btn epic-chip" data-color="b">
             <span class="play-as-piece">♚</span>
             <span class="play-as-label" data-i18n="game.black">Black</span>
           </div>
-          <div class="play-as-btn" data-color="r">
+          <div class="play-as-btn epic-chip" data-color="r">
             <span class="play-as-piece">🎲</span>
             <span class="play-as-label" data-i18n="game.random">Random</span>
           </div>
@@ -463,13 +470,13 @@
 
       <!-- Start Button -->
       <div class="game-setup-footer">
-        <button type="button" class="game-setup-start" id="btn-start-game" data-i18n="game.start_game">
+        <button type="button" class="game-setup-start epic-button" id="btn-start-game" data-i18n="game.start_game">
           Start Game
         </button>
       </div>
         </div>
 
-        <aside class="arena-window arena-window-stats glass-panel arena-panel-chamfer arena-panel-chamfer-stats" aria-label="Your stats">
+        <aside class="arena-window arena-window-stats glass-panel epic-card epic-card--sidebar epic-card--dim arena-panel-chamfer arena-panel-chamfer-stats" aria-label="Your stats">
           <h2 class="arena-window-title" data-i18n="game.sidebar_stats">Your statistics</h2>
           <div class="arena-window-body arena-stats-body">
             <p class="arena-stats-guest" id="arena-stats-guest" data-i18n="game.stats_login_hint">Sign in to track stats</p>

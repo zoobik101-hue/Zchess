@@ -1,0 +1,403 @@
+/* ZChess - Arena premium layers (AAA depth: fog, rays, epic cards) */
+
+/* --- Atmospheric stack (behind UI) --- */
+#page-game.page-game-arena.active {
+  background:
+    radial-gradient(circle at 50% 12%, rgba(255, 190, 80, 0.11) 0%, transparent 42%),
+    radial-gradient(circle at 18% 48%, rgba(255, 190, 80, 0.07) 0%, transparent 48%),
+    radial-gradient(circle at 82% 52%, rgba(255, 190, 80, 0.06) 0%, transparent 45%),
+    #050505;
+}
+
+#page-game .game-setup-bg-photo {
+  background-size: 135% auto;
+  background-position: 12% 40%;
+  filter: blur(0.5px) saturate(1.08) brightness(0.92);
+  transform: translate(
+    calc(var(--arena-px, 0px) * 1.2),
+    calc(var(--arena-py, 0px) * 0.8)
+  );
+  transition: transform 0.12s ease-out;
+  will-change: transform;
+}
+
+#page-game .arena-bg-atmosphere {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -5%, rgba(255, 200, 100, 0.14) 0%, transparent 55%),
+    radial-gradient(ellipse 45% 70% at 0% 60%, rgba(255, 180, 60, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse 45% 70% at 100% 55%, rgba(255, 180, 60, 0.07) 0%, transparent 50%);
+  mix-blend-mode: screen;
+  opacity: 0.9;
+}
+
+#page-game .arena-light-rays {
+  position: absolute;
+  inset: -20% 0 0;
+  background: conic-gradient(
+    from 200deg at 50% 0%,
+    transparent 0deg,
+    rgba(255, 210, 120, 0.07) 18deg,
+    transparent 36deg,
+    rgba(255, 210, 120, 0.05) 52deg,
+    transparent 70deg,
+    rgba(255, 210, 120, 0.04) 88deg,
+    transparent 120deg
+  );
+  opacity: 0.65;
+  animation: arena-rays-drift 18s ease-in-out infinite alternate;
+  transform: translate(calc(var(--arena-px, 0px) * 0.4), calc(var(--arena-py, 0px) * 0.3));
+}
+
+@keyframes arena-rays-drift {
+  from { opacity: 0.5; transform: translate(0, 0) scale(1); }
+  to { opacity: 0.75; transform: translate(0, 8px) scale(1.02); }
+}
+
+#page-game .arena-fog {
+  position: absolute;
+  inset: auto;
+  border-radius: 50%;
+  filter: blur(48px);
+  pointer-events: none;
+  animation: arena-fog-float 14s ease-in-out infinite alternate;
+}
+
+#page-game .arena-fog-1 {
+  width: 55vw;
+  height: 28vh;
+  left: -8%;
+  bottom: 8%;
+  background: rgba(20, 16, 28, 0.55);
+}
+
+#page-game .arena-fog-2 {
+  width: 48vw;
+  height: 24vh;
+  right: -6%;
+  bottom: 12%;
+  background: rgba(12, 10, 18, 0.5);
+  animation-delay: -6s;
+}
+
+@keyframes arena-fog-float {
+  from { transform: translate(0, 0); opacity: 0.65; }
+  to { transform: translate(12px, -8px); opacity: 0.85; }
+}
+
+#page-game .arena-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 75% 65% at 50% 45%, transparent 35%, rgba(5, 5, 6, 0.55) 100%),
+    linear-gradient(180deg, rgba(5, 5, 6, 0.35) 0%, transparent 22%, transparent 78%, rgba(5, 5, 6, 0.75) 100%);
+}
+
+#page-game .game-setup-bg-scrim {
+  background:
+    linear-gradient(90deg, rgba(5, 5, 6, 0.55) 0%, rgba(5, 5, 6, 0.02) 22%, rgba(5, 5, 6, 0.02) 78%, rgba(5, 5, 6, 0.55) 100%),
+    linear-gradient(180deg, rgba(5, 5, 6, 0.25) 0%, transparent 28%, transparent 72%, rgba(5, 5, 6, 0.55) 100%);
+}
+
+#page-game .arena-particles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 1;
+}
+
+#page-game .arena-particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 230, 160, 0.95) 0%, rgba(255, 200, 80, 0.4) 55%, transparent 70%);
+  box-shadow: 0 0 8px rgba(255, 200, 80, 0.55);
+  opacity: 0;
+  animation: arena-particle-rise linear infinite;
+}
+
+@keyframes arena-particle-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.6);
+  }
+  12% { opacity: 0.85; }
+  88% { opacity: 0.5; }
+  100% {
+    opacity: 0;
+    transform: translateY(-120px) scale(1);
+  }
+}
+
+/* --- Visual hierarchy (focus: title + modes + start) --- */
+#page-game .arena-zone-hero .arena-head-title {
+  text-shadow:
+    0 0 48px rgba(255, 200, 80, 0.35),
+    0 2px 24px rgba(0, 0, 0, 0.9);
+}
+
+#page-game .arena-zone-secondary {
+  opacity: 0.78;
+  filter: saturate(0.88) brightness(0.94);
+  transition: opacity 0.35s ease, filter 0.35s ease;
+}
+
+#page-game .arena-zone-secondary:hover,
+#page-game .arena-zone-secondary:focus-within {
+  opacity: 1;
+  filter: none;
+}
+
+#page-game .arena-window-tasks.epic-card--dim,
+#page-game .arena-window-stats.epic-card--dim {
+  opacity: 0.82;
+  filter: saturate(0.9) brightness(0.95);
+}
+
+#page-game .arena-window-tasks.epic-card--dim:hover,
+#page-game .arena-window-stats.epic-card--dim:hover {
+  opacity: 0.95;
+  filter: none;
+}
+
+#page-game .arena-footer {
+  opacity: 0.88;
+}
+
+/* --- Epic card system --- */
+#page-game .epic-card {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 215, 120, 0.09) 0%,
+    rgba(0, 0, 0, 0.42) 55%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+  border: 1px solid rgba(255, 215, 120, 0.18);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+  box-shadow:
+    0 0 40px rgba(255, 180, 50, 0.08),
+    0 16px 48px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+#page-game .epic-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 220, 130, 0.75) 0%,
+    transparent 28%,
+    transparent 72%,
+    rgba(255, 220, 130, 0.65) 100%
+  );
+  opacity: 0.14;
+  pointer-events: none;
+  z-index: 0;
+}
+
+#page-game .epic-card::after {
+  content: '';
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(255, 200, 100, 0.18) 0%, transparent 70%);
+  top: -140px;
+  right: -140px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+#page-game .epic-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+#page-game .epic-card--sidebar::after {
+  top: auto;
+  bottom: -120px;
+  left: -120px;
+  right: auto;
+  opacity: 0.7;
+}
+
+#page-game .epic-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  border-color: rgba(255, 215, 120, 0.32);
+  box-shadow:
+    0 0 50px rgba(255, 190, 60, 0.18),
+    0 20px 56px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+#page-game .epic-card--dim:hover {
+  transform: translateY(-2px);
+}
+
+/* Mode cards */
+#page-game .game-mode-card.epic-card {
+  border-radius: 16px;
+  min-height: 172px;
+}
+
+#page-game .game-mode-card.epic-card.selected {
+  transform: translateY(-6px) scale(1.02);
+  border-color: rgba(255, 220, 140, 0.55);
+  background: linear-gradient(
+    145deg,
+    rgba(255, 215, 120, 0.16) 0%,
+    rgba(40, 28, 8, 0.45) 50%,
+    rgba(0, 0, 0, 0.5) 100%
+  );
+  box-shadow:
+    0 0 60px rgba(255, 190, 60, 0.28),
+    0 0 100px rgba(255, 190, 60, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+#page-game .game-mode-card.epic-card.selected::before {
+  opacity: 0.28;
+}
+
+#page-game .game-mode-card.epic-card:not(.selected):hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow:
+    0 0 45px rgba(255, 190, 60, 0.2),
+    0 0 80px rgba(255, 190, 60, 0.1);
+}
+
+/* Main panel glow */
+#page-game .arena-window-main.epic-card--main {
+  box-shadow:
+    0 0 56px rgba(255, 180, 50, 0.12),
+    0 24px 64px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+#page-game .arena-window-main.epic-card--main::after {
+  width: 420px;
+  height: 420px;
+  top: -200px;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  background: radial-gradient(circle, rgba(255, 200, 100, 0.12) 0%, transparent 68%);
+}
+
+/* Secondary chips */
+#page-game .diff-btn.epic-chip,
+#page-game .play-as-btn.epic-chip {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(145deg, rgba(255, 215, 120, 0.06), rgba(0, 0, 0, 0.38));
+  border: 1px solid rgba(255, 215, 120, 0.14);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+#page-game .diff-btn.epic-chip.selected,
+#page-game .play-as-btn.epic-chip.selected {
+  border-color: rgba(255, 220, 140, 0.5);
+  box-shadow:
+    0 0 24px rgba(255, 190, 60, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+#page-game .diff-btn.epic-chip:hover,
+#page-game .play-as-btn.epic-chip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(255, 190, 60, 0.15);
+}
+
+/* Epic start button */
+#page-game .game-setup-start.epic-button {
+  position: relative;
+  z-index: 2;
+  max-width: 520px;
+  width: 100%;
+  padding: 20px 40px;
+  font-size: 16px;
+  letter-spacing: 0.18em;
+  border-radius: 14px;
+  border: none;
+  color: #1a1206;
+  background: linear-gradient(180deg, #ffe082 0%, #ffd56a 35%, #d4a843 70%, #b98a2c 100%);
+  box-shadow:
+    0 0 36px rgba(255, 200, 80, 0.45),
+    0 0 80px rgba(255, 200, 80, 0.2),
+    0 6px 0 #6b4f18,
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
+}
+
+#page-game .game-setup-footer {
+  padding-top: 28px;
+  padding-bottom: 32px;
+}
+
+#page-game .game-setup-start.epic-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    transparent 42%
+  );
+  pointer-events: none;
+}
+
+#page-game .game-setup-start.epic-button:hover {
+  transform: translateY(-4px);
+  filter: brightness(1.05);
+  box-shadow:
+    0 0 55px rgba(255, 200, 80, 0.75),
+    0 0 110px rgba(255, 200, 80, 0.35),
+    0 8px 0 #6b4f18,
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+#page-game .game-modes-grid {
+  position: relative;
+  z-index: 2;
+}
+
+/* Reduced motion / touch perf */
+html.perf-touch #page-game .arena-light-rays,
+html.perf-touch #page-game .arena-fog,
+html.perf-lite #page-game .arena-light-rays,
+html.perf-lite #page-game .arena-fog {
+  animation: none;
+}
+
+html.perf-touch #page-game .arena-particles,
+html.perf-lite #page-game .arena-particles {
+  display: none;
+}
+
+html.perf-touch #page-game .game-mode-card.epic-card:hover,
+html.perf-lite #page-game .game-mode-card.epic-card:hover {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #page-game .arena-light-rays,
+  #page-game .arena-fog,
+  #page-game .arena-particle {
+    animation: none !important;
+  }
+
+  #page-game .game-setup-bg-photo {
+    transform: none !important;
+  }
+}
