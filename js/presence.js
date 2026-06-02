@@ -85,6 +85,7 @@ const Presence = {
   },
 
   _wantsGuestPresence() {
+    if (ZChess.Auth?._authBusy) return false;
     try {
       if (sessionStorage.getItem(LOGOUT_FLAG)) return false;
     } catch (_) { /* ignore */ }

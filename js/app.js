@@ -720,17 +720,20 @@ const App = {
     const password = document.getElementById('register-password')?.value;
 
     if (!username || !email || !password) {
-      ZChess.Notifications.error('Please fill in all fields.');
+      ZChess.Notifications.error(t('notifications.error_fill_all'));
       return;
     }
 
-    if (username.length < 3) {
-      ZChess.Notifications.error('Username must be at least 3 characters.');
+    const v = ZChess.Auth.validateUsername(username);
+    if (!v.ok) {
+      ZChess.Notifications.error(
+        v.code === 'length' ? t('profile.username_length') : t('profile.username_chars')
+      );
       return;
     }
 
     if (password.length < 6) {
-      ZChess.Notifications.error('Password must be at least 6 characters.');
+      ZChess.Notifications.error(t('notifications.error_weak_password'));
       return;
     }
 

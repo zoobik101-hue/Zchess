@@ -15,6 +15,8 @@ const Auth = {
   db: null,
   listeners: [],
   _LOGOUT_FLAG: 'zchess_explicit_logout',
+  _authBusy: false,
+  _registerInProgress: false,
 
   async init() {
     // Initialize Firebase if config is provided
@@ -63,6 +65,8 @@ const Auth = {
     if (firebaseUser) {
       // Anonymous = only for online presence (Presence module), not a site login
       if (firebaseUser.isAnonymous) return;
+
+      if (this._registerInProgress) return;
 
       try { sessionStorage.removeItem(this._LOGOUT_FLAG); } catch (_) { /* ignore */ }
 
@@ -136,10 +140,75 @@ const Auth = {
     }
   },
 
-  async createUserProfile(firebaseUser) {
+  _setAuthBusy(busy) {
+    this._authBusy = !!busy;
+  },
+
+  async _prepareCleanAuthForSignup() {
+    if (ZChess.Presence?.stopAll) await ZChess.Presence.stopAll();
+    await this.signOutAnonymousOnly();
+
+    for (let i = 0; i < 25; i++) {
+      const u = this.auth?.currentUser;
+      if (!u) return;
+      if (u.isAnonymous) {
+        try { await this.auth.signOut(); } catch (_) { /* ignore */ }
+      }
+      await new Promise(r => setTimeout(r, 80));
+    }
+  },
+
+  async _isUsernameAvailable(username, exceptUid = null) {
+    if (!this.db) return true;
+
+    const key = username.toLowerCase();
+    try {
+      const byName = await this.db.collection('usernames').doc(key).get();
+      if (byName.exists && byName.data()?.uid !== exceptUid) return false;
+    } catch (_) { /* usernames collection optional until first deploy */ }
+
+    try {
+      const snap = await this.db.collection('users')
+        .where('username', '==', username)
+        .limit(1)
+        .get();
+      if (!snap.empty && snap.docs[0].id !== exceptUid) return false;
+    } catch (e) {
+      console.warn('[Auth] username check:', e);
+      throw e;
+    }
+
+    return true;
+  },
+
+  async _reserveUsername(username, uid) {
+    if (!this.db) return;
+    const key = username.toLowerCase();
+    await this.db.collection('usernames').doc(key).set({ uid, username });
+  },
+
+  _mapRegisterError(err) {
+    const code = err?.code || '';
+    console.error('[Auth] register failed:', err);
+
+    if (code === 'username-taken') return t('notifications.error_username_taken');
+    if (code === 'auth/email-already-in-use') return t('notifications.error_email_taken');
+    if (code === 'auth/weak-password') return t('notifications.error_weak_password');
+    if (code === 'auth/invalid-email') return t('notifications.error_invalid_email');
+    if (code === 'auth/operation-not-allowed') return t('notifications.error_email_disabled');
+    if (code === 'permission-denied') return t('notifications.error_firestore');
+    if (code === 'failed-precondition') return t('notifications.error_firestore');
+    if (code === 'unavailable' || code === 'auth/network-request-failed') {
+      return t('notifications.error_network');
+    }
+
+    return t('notifications.error_generic');
+  },
+
+  async createUserProfile(firebaseUser, overrides = {}) {
     const profile = {
       uid: firebaseUser.uid,
-      username: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Player',
+      username: overrides.username || firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Player',
       email: firebaseUser.email || '',
       rating: ZChess.ELO.INITIAL_RATING,
       xp: 0,
@@ -167,41 +236,71 @@ const Auth = {
 
   async register(email, password, username) {
     if (!this.auth) {
-      // Offline mode - create local user
       return this.registerOffline(email, password, username);
     }
 
+    const v = this.validateUsername(username);
+    if (!v.ok) {
+      const msg = v.code === 'length' ? t('profile.username_length') : t('profile.username_chars');
+      ZChess.Notifications.error(msg);
+      return { success: false };
+    }
+    username = v.value;
+    email = (email || '').trim().toLowerCase();
+
+    if (!email || !password) {
+      ZChess.Notifications.error(t('notifications.error_fill_all'));
+      return { success: false };
+    }
+
+    if (password.length < 6) {
+      ZChess.Notifications.error(t('notifications.error_weak_password'));
+      return { success: false };
+    }
+
+    this._registerInProgress = true;
+    this._setAuthBusy(true);
+
     try {
-      await this.signOutAnonymousOnly();
+      await this._prepareCleanAuthForSignup();
 
-      // Check username uniqueness
-      const usernameCheck = await this.db.collection('users')
-        .where('username', '==', username).limit(1).get();
-
-      if (!usernameCheck.empty) {
+      if (!(await this._isUsernameAvailable(username))) {
         throw { code: 'username-taken' };
       }
 
-      const credential = await this.auth.createUserWithEmailAndPassword(email, password);
-      await credential.user.updateProfile({ displayName: username });
+      if (this.auth.currentUser && !this.auth.currentUser.isAnonymous) {
+        throw { code: 'auth/already-signed-in' };
+      }
 
-      // Create Firestore profile
+      const credential = await this.auth.createUserWithEmailAndPassword(email, password);
+      const fbUser = credential.user;
+
+      await fbUser.updateProfile({ displayName: username });
+
       const profile = await this.createUserProfile({
-        uid: credential.user.uid,
-        email,
+        uid: fbUser.uid,
+        email: fbUser.email,
         displayName: username
-      });
+      }, { username });
+
+      await this._reserveUsername(username, fbUser.uid);
+
+      this.currentUser = { ...profile, isGuest: false, email: fbUser.email || email };
+      localStorage.setItem(ZChess.STORAGE.USER_CACHE, JSON.stringify(this.currentUser));
+      try { sessionStorage.removeItem(this._LOGOUT_FLAG); } catch (_) { /* ignore */ }
+
+      this.notifyListeners();
+      this.updateNavUI();
 
       ZChess.Notifications.success(t('notifications.register_success', { name: username }));
       return { success: true, user: profile };
 
     } catch (err) {
-      let msg = t('notifications.error_generic');
-      if (err.code === 'auth/email-already-in-use') msg = t('notifications.error_email_taken');
-      if (err.code === 'username-taken') msg = t('notifications.error_username_taken');
-      if (err.code === 'auth/weak-password') msg = 'Password must be at least 6 characters.';
-      ZChess.Notifications.error(msg);
+      ZChess.Notifications.error(this._mapRegisterError(err));
       return { success: false, error: err };
+    } finally {
+      this._registerInProgress = false;
+      this._setAuthBusy(false);
     }
   },
 
@@ -233,15 +332,18 @@ const Auth = {
       return this.loginOffline(email, password);
     }
 
+    this._setAuthBusy(true);
     try {
-      await this.signOutAnonymousOnly();
-      await this.auth.signInWithEmailAndPassword(email, password);
+      await this._prepareCleanAuthForSignup();
+      await this.auth.signInWithEmailAndPassword(email.trim().toLowerCase(), password);
       ZChess.Notifications.success(t('notifications.login_success', { name: this.currentUser?.username || '' }));
       return { success: true };
     } catch (err) {
       let msg = t('notifications.error_auth');
       ZChess.Notifications.error(msg);
       return { success: false, error: err };
+    } finally {
+      this._setAuthBusy(false);
     }
   },
 
@@ -271,14 +373,17 @@ const Auth = {
       return { success: false };
     }
 
+    this._setAuthBusy(true);
     try {
-      await this.signOutAnonymousOnly();
+      await this._prepareCleanAuthForSignup();
       const provider = new firebase.auth.GoogleAuthProvider();
       await this.auth.signInWithPopup(provider);
       return { success: true };
     } catch (err) {
-      ZChess.Notifications.error(t('notifications.error_generic'));
+      ZChess.Notifications.error(this._mapRegisterError(err));
       return { success: false, error: err };
+    } finally {
+      this._setAuthBusy(false);
     }
   },
 
