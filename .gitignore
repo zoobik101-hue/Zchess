@@ -1,13 +1,28 @@
 # ==========================================
-# ZChess - Git Ignore
+# ZChess - Git Ignore (GitHub = static site only)
 # ==========================================
 
-# Token - NEVER commit
+# Secrets - NEVER commit
 github-token.txt
 *.token
 .env
 .env.*
 secrets.txt
+
+# Local deploy tool (stays on your PC only)
+push-github.bat
+
+# Cursor / IDE (not part of the site)
+.cursor/
+
+# Dev scripts (run locally before push, not served)
+scripts/
+
+# Firebase rules (publish in Firebase Console, not GitHub Pages)
+firestore.rules
+
+# Unused duplicate worker (logic is inlined in chess-board.js)
+js/ai-worker.js
 
 # OS files
 .DS_Store
