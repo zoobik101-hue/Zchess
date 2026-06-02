@@ -1237,10 +1237,32 @@
 }
 
 /* =========================================
-   RESULT SCREEN - MOBILE (single column)
+   RESULT SCREEN - MOBILE (scroll + fixed actions)
    ========================================= */
 
 @media (max-width: 680px) {
+  .game-result-overlay.modal-overlay {
+    align-items: stretch;
+    justify-content: flex-start;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding:
+      max(8px, env(safe-area-inset-top))
+      max(8px, env(safe-area-inset-right))
+      max(8px, env(safe-area-inset-bottom))
+      max(8px, env(safe-area-inset-left));
+  }
+
+  .game-result-screen {
+    width: 100%;
+    min-height: 0;
+    height: auto;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 4px 0 0;
+  }
+
   .result-content {
     grid-template-columns: 1fr;
     grid-template-areas:
@@ -1248,39 +1270,210 @@
       "stats"
       "quality"
       "xprow"
+      "review"
       "btns";
-    width: 94vw;
-    padding: 22px 18px 18px;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 14px 14px calc(88px + env(safe-area-inset-bottom, 0px));
     gap: 0;
+    border-radius: 16px;
+    animation: resultFadeUp 0.35s ease both;
   }
 
   .result-hero {
     border-right: none;
     border-bottom: 1px solid rgba(255,255,255,0.07);
     margin-right: 0;
-    padding-bottom: 12px;
-    margin-bottom: 12px;
+    padding: 4px 0 10px;
+    margin-bottom: 10px;
+  }
+
+  .result-emblem {
+    font-size: 44px;
+    margin-bottom: 4px;
+  }
+
+  .result-outcome-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    margin-bottom: 4px;
+  }
+
+  .result-heading {
+    font-size: 20px;
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+
+  .result-reason {
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .result-reason:empty {
+    display: none;
+  }
+
+  .rs-detail {
+    margin-bottom: 10px;
+  }
+
+  .rs-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+  }
+
+  .rs-item {
+    padding: 5px 3px;
+    border-radius: 6px;
+  }
+
+  .rs-val {
+    font-size: 13px;
+  }
+
+  .rs-label {
+    font-size: 8px;
+    line-height: 1.2;
+  }
+
+  .rs-icon {
+    font-size: 11px;
+  }
+
+  .rs-quality-row {
+    margin-bottom: 8px;
+    padding-top: 0;
+  }
+
+  .rs-quality-items {
+    gap: 5px;
+  }
+
+  .rs-quality-item {
+    padding: 6px 4px;
+    border-radius: 6px;
+  }
+
+  .rs-q-val {
+    font-size: 15px;
+  }
+
+  .rs-q-label {
+    font-size: 8px;
+  }
+
+  .rs-extra-row {
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    margin-top: 6px;
+  }
+
+  .rs-extra-item {
+    font-size: 10px;
   }
 
   .result-stats-row {
     border-right: none;
-    border-top: none;
+    border-top: 1px solid rgba(255,255,255,0.07);
     margin-right: 0;
     margin-top: 0;
-    padding-top: 0;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
+    padding-top: 10px;
+  }
+
+  .result-stat-card {
+    padding: 4px 12px;
+  }
+
+  .result-stat-val {
+    font-size: 18px;
+  }
+
+  .result-review {
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+
+  .review-moves-scroll {
+    max-height: 100px;
   }
 
   .result-btn-row {
-    border-right: none;
-    border-top: 1px solid rgba(255,255,255,0.07);
-    margin-right: 0;
-    margin-top: 12px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    display: flex;
+    gap: 8px;
+    margin: 0;
+    padding:
+      10px 12px
+      calc(10px + env(safe-area-inset-bottom, 0px));
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    background: rgba(6, 2, 16, 0.96);
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.55);
+    animation: none;
   }
 
-  .rs-quality-row {
-    margin-bottom: 0;
+  .result-btn {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 10px;
+    font-size: 12px;
+    border-radius: 10px;
   }
+
+  .result-btn:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 680px) and (max-height: 740px) {
+  .result-emblem {
+    font-size: 36px;
+  }
+
+  .result-heading {
+    font-size: 18px;
+  }
+
+  .rs-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .result-content {
+    padding-top: 10px;
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (max-width: 380px) {
+  .result-btn-row {
+    flex-direction: column;
+  }
+
+  .result-btn {
+    width: 100%;
+  }
+}
+
+html.perf-touch .game-result-screen,
+html.perf-lite .game-result-screen {
+  animation: none;
+}
+
+html.perf-touch .result-content,
+html.perf-lite .result-content {
+  animation: resultFadeUp 0.25s ease both;
+}
+
+html.perf-touch .result-emblem,
+html.perf-lite .result-emblem {
+  animation: none;
 }
 
 /* =========================================

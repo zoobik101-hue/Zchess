@@ -1126,14 +1126,14 @@ self.onmessage = function(e) {
       }
     } else {
       outcome = 'draw';
-      heading = t('board.draw');
       const reasonMap = {
         stalemate: t('board.stalemate_reason'),
         insufficient: t('board.insufficient_reason'),
         'fifty-move': t('board.fifty_reason'),
         repetition: t('board.repetition_reason')
       };
-      reason = reasonMap[status.reason] || t('board.draw');
+      heading = reasonMap[status.reason] || t('board.draw');
+      reason = '';
       if (ZChess.Sound) ZChess.Sound.playDraw();
     }
 
