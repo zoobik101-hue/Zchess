@@ -40,7 +40,7 @@ const GameSetupPage = {
         <div class="arena-task ${state.completed ? 'is-done' : ''}">
           <div class="arena-task-top">
             <span class="arena-task-name">${this._esc(name)}</span>
-            <span class="arena-task-coin">+${coin}</span>
+            <span class="arena-task-coin"><span class="arena-coin-icon" aria-hidden="true">🪙</span>+${coin}</span>
           </div>
           <div class="arena-task-bar">
             <div class="arena-task-bar-fill" style="width:${pct}%"></div>
