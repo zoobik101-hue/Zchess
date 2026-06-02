@@ -173,6 +173,7 @@ const App = {
 
     this.currentPage = page;
     pageEl.classList.add('active');
+    document.body.classList.toggle('arena-page-lock', page === 'game');
 
     document.getElementById('mobile-nav')?.classList.remove('open');
 

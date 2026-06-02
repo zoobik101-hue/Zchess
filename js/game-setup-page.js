@@ -13,11 +13,20 @@ const GameSetupPage = {
     this.initAtmosphere();
     this.renderDailySidebar();
     this.renderStatsSidebar();
+    this.refreshFooter();
   },
 
   refresh() {
     this.renderDailySidebar();
     this.renderStatsSidebar();
+    this.refreshFooter();
+  },
+
+  refreshFooter() {
+    const el = document.getElementById('arena-footer-online-count');
+    if (!el) return;
+    const n = ZChess.Presence?._players?.length ?? 0;
+    el.textContent = String(n);
   },
 
   initAtmosphere() {
@@ -32,7 +41,7 @@ const GameSetupPage = {
     if (root.classList.contains('perf-lite') || root.classList.contains('perf-touch')) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    const count = 28;
+    const count = 36;
     let html = '';
     for (let i = 0; i < count; i++) {
       const left = Math.random() * 100;

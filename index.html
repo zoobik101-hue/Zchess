@@ -45,8 +45,8 @@
   <link rel="stylesheet" href="css/chess.css">
   <link rel="stylesheet" href="css/multiplayer.css">
   <link rel="stylesheet" href="css/training.css">
-  <link rel="stylesheet" href="css/game-setup.css?v=arena5">
-  <link rel="stylesheet" href="css/arena-premium.css?v=arena5">
+  <link rel="stylesheet" href="css/game-setup.css?v=arena7">
+  <link rel="stylesheet" href="css/arena-premium.css?v=arena7">
   <link rel="stylesheet" href="css/chess-decor.css">
   <link rel="stylesheet" href="css/theme-arena.css">
   <link rel="stylesheet" href="css/game-replay.css">
@@ -346,16 +346,13 @@
       <div class="arena-fog arena-fog-2"></div>
       <div class="arena-vignette"></div>
       <div class="game-setup-bg-scrim"></div>
+      <div class="arena-piece arena-piece-knight"></div>
+      <div class="arena-piece arena-piece-king"></div>
       <div class="arena-particles" id="arena-particles"></div>
-      <span class="arena-deco arena-deco-1">♛</span>
-      <span class="arena-deco arena-deco-2">♞</span>
-      <span class="arena-deco arena-deco-3">♜</span>
-      <span class="arena-deco arena-deco-4">♝</span>
-      <span class="arena-deco arena-deco-5">♔</span>
-      <span class="arena-deco arena-deco-6">♟</span>
     </div>
     <div class="container game-setup-shell">
 
+      <div class="arena-stage">
       <div class="arena-grid">
         <header class="arena-head arena-zone-hero">
           <p class="arena-head-eyebrow" data-i18n="game.setup_eyebrow">Chess Arena</p>
@@ -509,6 +506,27 @@
             </div>
           </div>
         </aside>
+      </div>
+
+      <footer class="arena-footer glass-panel epic-card arena-panel-chamfer-premium" aria-label="Arena footer">
+        <div class="arena-footer-online">
+          <span class="arena-footer-dot" aria-hidden="true"></span>
+          <span data-i18n="online.title">Online now</span>
+          <span class="arena-footer-dash" aria-hidden="true">-</span>
+          <strong id="arena-footer-online-count">0</strong>
+        </div>
+        <div class="arena-footer-social" aria-label="Social links">
+          <a class="arena-social-btn" href="#" aria-label="Discord" onclick="return false">DC</a>
+          <a class="arena-social-btn" href="#" aria-label="VK" onclick="return false">VK</a>
+          <a class="arena-social-btn" href="#" aria-label="Telegram" onclick="return false">TG</a>
+          <a class="arena-social-btn" href="#" aria-label="YouTube" onclick="return false">YT</a>
+        </div>
+        <div class="arena-footer-premium">
+          <span class="arena-premium-icon" aria-hidden="true">👑</span>
+          <span class="arena-premium-text" data-i18n="game.premium_title">Premium subscription</span>
+          <button type="button" class="arena-premium-btn" data-i18n="game.premium_cta">Details</button>
+        </div>
+      </footer>
       </div>
 
     </div>
