@@ -787,12 +787,22 @@ body.arena-page-lock {
   background: transparent;
 }
 
+/* CTA block: play-as + start game stay together at bottom */
+#page-game .game-setup-cta {
+  margin-top: auto;
+  flex-shrink: 0;
+  width: 100%;
+  padding: 0 22px 10px;
+  box-sizing: border-box;
+}
+
 #page-game .game-setup-play-as {
-  padding: 4px 22px 0;
+  padding: 0;
+  margin: 0 0 6px;
 }
 
 #page-game .game-setup-play-as .game-setup-label {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   font-size: 9px;
   letter-spacing: 0.28em;
   color: rgba(255, 213, 106, 0.72);
@@ -898,13 +908,13 @@ body.arena-page-lock {
 }
 
 #page-game .game-setup-footer {
-  padding: 16px 24px 14px;
+  padding: 0;
   border-top: none;
   text-align: center;
   width: 100%;
   box-sizing: border-box;
   flex-shrink: 0;
-  margin-top: auto;
+  margin-top: 0;
 }
 
 #page-game .game-setup-start-wrap {
@@ -912,20 +922,20 @@ body.arena-page-lock {
   width: 100%;
   max-width: 520px;
   margin: 0 auto;
-  padding: 6px 0 2px;
+  padding: 0;
 }
 
 #page-game .game-setup-start-wrap::before {
   content: '';
   position: absolute;
-  left: 4%;
-  right: 4%;
-  top: -6px;
-  bottom: -10px;
+  left: 2%;
+  right: 2%;
+  top: -4px;
+  bottom: -8px;
   background:
-    radial-gradient(ellipse 55% 45% at 50% 0%, rgba(255, 213, 106, 0.42) 0%, transparent 72%),
-    radial-gradient(ellipse 70% 50% at 50% 100%, rgba(255, 213, 106, 0.28) 0%, transparent 68%);
-  filter: blur(14px);
+    radial-gradient(ellipse 50% 40% at 50% 0%, rgba(255, 213, 106, 0.55) 0%, transparent 70%),
+    radial-gradient(ellipse 55% 45% at 50% 100%, rgba(255, 160, 50, 0.45) 0%, transparent 68%);
+  filter: blur(10px);
   pointer-events: none;
   z-index: 0;
   animation: arena-start-aura 3.2s ease-in-out infinite alternate;

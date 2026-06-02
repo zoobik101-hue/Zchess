@@ -159,7 +159,7 @@
   transition: transform 0.3s ease, filter 0.3s ease;
 }
 
-/* Main panel - no outer frame (reference: only individual cards have borders) */
+/* Main panel - no outer frame */
 #page-game .arena-window-main .arena-window-glass.epic-card--main,
 #page-game .arena-window-main .arena-window-glass {
   background: transparent;
@@ -174,7 +174,7 @@
   display: none;
 }
 
-/* Chips - difficulty only; play-as has dedicated styles in game-setup.css */
+/* Difficulty chips */
 #page-game .diff-btn.epic-chip {
   position: relative;
   overflow: hidden;
@@ -192,29 +192,32 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-/* Start button - hero CTA (reference: wide gold pill + smoky aura) */
+/* Start button - transparent glass + gold/fire (reference) */
 #page-game .game-setup-start.epic-button {
   position: relative;
   z-index: 1;
   display: block;
   width: 100%;
   max-width: none;
-  padding: 17px 28px;
+  padding: 16px 28px;
+  font-family: 'Cinzel', Georgia, serif;
   font-size: clamp(13px, 1.45vw, 15px);
   font-weight: 800;
-  letter-spacing: 0.16em;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 232, 163, 0.55);
-  color: #1a0e02;
-  background: linear-gradient(180deg, #fff0c4 0%, #ffd56a 28%, #e8b84a 62%, #c49a38 100%);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 213, 106, 0.55);
+  color: #ffe8a3;
+  text-shadow: 0 0 20px rgba(255, 213, 106, 0.65), 0 1px 2px rgba(0, 0, 0, 0.8);
+  background: rgba(8, 6, 4, 0.22);
+  backdrop-filter: blur(10px) saturate(1.5);
+  -webkit-backdrop-filter: blur(10px) saturate(1.5);
   box-shadow:
-    0 0 0 1px rgba(255, 213, 106, 0.35),
-    0 0 36px rgba(255, 213, 106, 0.55),
-    0 0 72px rgba(255, 213, 106, 0.22),
-    0 10px 28px rgba(0, 0, 0, 0.42),
-    inset 0 1px 0 rgba(255, 255, 255, 0.58),
-    inset 0 -3px 12px rgba(140, 100, 20, 0.25);
-  transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
+    0 0 28px rgba(255, 213, 106, 0.35),
+    0 0 56px rgba(255, 140, 40, 0.12),
+    inset 0 1px 0 rgba(255, 213, 106, 0.45),
+    inset 0 -1px 0 rgba(255, 160, 50, 0.35);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   overflow: hidden;
   animation: arena-btn-glow 3s ease-in-out infinite;
 }
@@ -222,21 +225,19 @@
 @keyframes arena-btn-glow {
   0%, 100% {
     box-shadow:
-      0 0 0 1px rgba(255, 213, 106, 0.32),
-      0 0 32px rgba(255, 213, 106, 0.48),
-      0 0 64px rgba(255, 213, 106, 0.18),
-      0 10px 28px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.52),
-      inset 0 -3px 12px rgba(140, 100, 20, 0.22);
+      0 0 24px rgba(255, 213, 106, 0.32),
+      0 0 48px rgba(255, 140, 40, 0.1),
+      inset 0 1px 0 rgba(255, 213, 106, 0.4),
+      inset 0 -1px 0 rgba(255, 160, 50, 0.3);
+    border-color: rgba(255, 213, 106, 0.5);
   }
   50% {
     box-shadow:
-      0 0 0 1px rgba(255, 213, 106, 0.45),
-      0 0 48px rgba(255, 213, 106, 0.68),
-      0 0 96px rgba(255, 213, 106, 0.28),
-      0 12px 32px rgba(0, 0, 0, 0.45),
-      inset 0 1px 0 rgba(255, 255, 255, 0.6),
-      inset 0 -3px 14px rgba(140, 100, 20, 0.28);
+      0 0 36px rgba(255, 213, 106, 0.52),
+      0 0 72px rgba(255, 140, 40, 0.18),
+      inset 0 1px 0 rgba(255, 213, 106, 0.55),
+      inset 0 -1px 0 rgba(255, 160, 50, 0.42);
+    border-color: rgba(255, 213, 106, 0.72);
   }
 }
 
@@ -244,48 +245,56 @@
   content: '';
   position: absolute;
   inset: 0;
+  z-index: 0;
   border-radius: inherit;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, transparent 38%),
-    radial-gradient(ellipse 90% 40% at 50% 100%, rgba(255, 200, 80, 0.25) 0%, transparent 70%);
+    radial-gradient(ellipse 90% 55% at 15% 85%, rgba(255, 160, 40, 0.38) 0%, transparent 58%),
+    radial-gradient(ellipse 70% 45% at 85% 25%, rgba(255, 213, 106, 0.28) 0%, transparent 52%),
+    radial-gradient(ellipse 100% 35% at 50% 0%, rgba(255, 213, 106, 0.22) 0%, transparent 62%),
+    radial-gradient(ellipse 80% 40% at 50% 100%, rgba(255, 120, 30, 0.2) 0%, transparent 55%),
+    linear-gradient(180deg, rgba(255, 213, 106, 0.06) 0%, transparent 45%, rgba(255, 140, 40, 0.08) 100%);
+  opacity: 0.85;
+  mix-blend-mode: screen;
   pointer-events: none;
+  animation: arena-btn-fire 5s ease-in-out infinite alternate;
+}
+
+@keyframes arena-btn-fire {
+  from { opacity: 0.7; transform: scale(1); }
+  to { opacity: 0.95; transform: scale(1.03); }
 }
 
 #page-game .game-setup-start.epic-button::after {
   content: '';
   position: absolute;
+  z-index: 0;
   top: 0;
   left: -120%;
-  width: 55%;
+  width: 50%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.38), transparent);
-  transform: skewX(-20deg);
-  animation: arena-light-sweep 4.5s ease-in-out infinite;
+  background: linear-gradient(90deg, transparent, rgba(255, 230, 160, 0.28), transparent);
+  transform: skewX(-18deg);
+  animation: arena-light-sweep 5s ease-in-out infinite;
   pointer-events: none;
+  mix-blend-mode: screen;
 }
 
 @keyframes arena-light-sweep {
-  0%, 70% { left: -120%; opacity: 0; }
-  78% { opacity: 1; }
+  0%, 72% { left: -120%; opacity: 0; }
+  80% { opacity: 1; }
   100% { left: 180%; opacity: 0; }
 }
 
 #page-game .game-setup-start.epic-button:hover {
-  transform: translateY(-2px) scale(1.015);
-  filter: brightness(1.05);
+  transform: translateY(-2px);
   animation: none;
+  color: #fff0c4;
+  border-color: rgba(255, 213, 106, 0.85);
   box-shadow:
-    0 0 0 1px rgba(255, 213, 106, 0.5),
-    0 0 56px rgba(255, 213, 106, 0.75),
-    0 0 110px rgba(255, 213, 106, 0.32),
-    0 14px 36px rgba(0, 0, 0, 0.48),
-    inset 0 1px 0 rgba(255, 255, 255, 0.62),
-    inset 0 -3px 14px rgba(140, 100, 20, 0.3);
-}
-
-#page-game .game-setup-footer {
-  padding-top: 14px;
-  padding-bottom: 10px;
+    0 0 40px rgba(255, 213, 106, 0.55),
+    0 0 80px rgba(255, 140, 40, 0.22),
+    inset 0 1px 0 rgba(255, 213, 106, 0.6),
+    inset 0 -1px 0 rgba(255, 160, 50, 0.45);
 }
 
 /* Footer bar */
@@ -320,13 +329,16 @@ html.perf-lite #page-game .game-setup-start.epic-button {
 }
 
 html.perf-touch #page-game .game-setup-start.epic-button::after,
-html.perf-lite #page-game .game-setup-start.epic-button::after {
-  display: none;
+html.perf-lite #page-game .game-setup-start.epic-button::after,
+html.perf-touch #page-game .game-setup-start.epic-button::before,
+html.perf-lite #page-game .game-setup-start.epic-button::before {
+  animation: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
   #page-game .game-mode-card.epic-card.selected,
   #page-game .game-setup-start.epic-button,
+  #page-game .game-setup-start.epic-button::before,
   #page-game .epic-card::before {
     animation: none !important;
   }
