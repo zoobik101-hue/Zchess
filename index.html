@@ -347,13 +347,21 @@
       <span class="arena-deco arena-deco-5">♔</span>
       <span class="arena-deco arena-deco-6">♟</span>
     </div>
-    <div class="container game-setup-shell">
+    <div class="container game-setup-shell arena-layout">
+
+      <aside class="arena-sidebar arena-sidebar-left glass-panel" aria-label="Daily tasks">
+        <h2 class="arena-sidebar-title" data-i18n="game.sidebar_daily">Daily tasks</h2>
+        <div class="arena-daily-list" id="arena-daily-tasks"></div>
+        <a class="arena-sidebar-link" href="#profile" data-i18n="game.see_all_tasks">See all</a>
+      </aside>
+
+      <div class="arena-main">
       <header class="game-setup-header">
         <p class="game-setup-eyebrow" data-i18n="game.setup_eyebrow">Chess Arena</p>
-        <h1 class="game-setup-title" data-i18n="game.title">Choose Your Game</h1>
+        <h1 class="game-setup-title" data-i18n="game.mode_title">Choose mode</h1>
       </header>
 
-      <div class="game-setup-panel" id="game-setup-panel">
+      <div class="game-setup-panel glass-panel" id="game-setup-panel">
         <span class="panel-corner panel-corner-tl" aria-hidden="true"></span>
         <span class="panel-corner panel-corner-tr" aria-hidden="true"></span>
         <span class="panel-corner panel-corner-bl" aria-hidden="true"></span>
@@ -361,19 +369,25 @@
       <!-- Mode Cards -->
       <div class="game-modes-grid">
         <div class="game-mode-card selected" data-mode="ai">
-          <div class="game-mode-icon">🤖</div>
-          <div class="game-mode-title" data-i18n="game.vs_ai">vs Computer</div>
-          <div class="game-mode-desc" data-i18n="game.vs_ai_desc">Challenge our AI at 7 difficulty levels</div>
+          <div class="game-mode-icon-ring"><span class="game-mode-icon" aria-hidden="true">🛡️</span></div>
+          <div class="game-mode-body">
+            <div class="game-mode-title" data-i18n="game.vs_ai">vs Computer</div>
+            <div class="game-mode-desc" data-i18n="game.vs_ai_desc">Challenge our AI at 7 difficulty levels</div>
+          </div>
         </div>
         <div class="game-mode-card" data-mode="quick">
-          <div class="game-mode-icon">⚡</div>
-          <div class="game-mode-title" data-i18n="game.quick_game">Quick Match</div>
-          <div class="game-mode-desc" data-i18n="game.quick_game_desc">Get matched instantly with an opponent</div>
+          <div class="game-mode-icon-ring"><span class="game-mode-icon" aria-hidden="true">⚔️</span></div>
+          <div class="game-mode-body">
+            <div class="game-mode-title" data-i18n="game.quick_game">Quick Match</div>
+            <div class="game-mode-desc" data-i18n="game.quick_game_desc">Get matched instantly with an opponent</div>
+          </div>
         </div>
         <div class="game-mode-card" data-mode="training">
-          <div class="game-mode-icon">🎓</div>
-          <div class="game-mode-title" data-i18n="game.training">Training</div>
-          <div class="game-mode-desc" data-i18n="game.training_desc">Lessons, tactics, coach mode with move analysis</div>
+          <div class="game-mode-icon-ring"><span class="game-mode-icon" aria-hidden="true">📖</span></div>
+          <div class="game-mode-body">
+            <div class="game-mode-title" data-i18n="game.training">Training</div>
+            <div class="game-mode-desc" data-i18n="game.training_desc">Lessons, tactics, coach mode with move analysis</div>
+          </div>
         </div>
       </div>
 
@@ -387,7 +401,7 @@
       <div class="game-setup-options" id="game-setup-options">
       <!-- Difficulty (AI only) -->
       <div id="difficulty-section" class="game-setup-row">
-        <h3 class="game-setup-label" data-i18n="game.difficulty">Difficulty</h3>
+        <h3 class="game-setup-label" data-i18n="game.choose_difficulty">Choose difficulty</h3>
         <div class="difficulty-selector">
           <div class="diff-btn" data-diff="beginner">
             <span class="diff-emoji">🌱</span>
@@ -442,11 +456,62 @@
 
       <!-- Start Button -->
       <div class="game-setup-footer">
-        <button class="btn btn-primary btn-lg game-setup-start" id="btn-start-game" data-i18n="game.start_game">
-          ▶ Start Game
+        <button type="button" class="game-setup-start" id="btn-start-game" data-i18n="game.start_game">
+          Start Game
         </button>
       </div>
       </div>
+      </div>
+
+      <aside class="arena-sidebar arena-sidebar-right glass-panel" aria-label="Your stats">
+        <h2 class="arena-sidebar-title" data-i18n="game.sidebar_stats">Your statistics</h2>
+        <p class="arena-stats-guest" id="arena-stats-guest" data-i18n="game.stats_login_hint">Sign in to track stats</p>
+        <div class="arena-stat-rating-block">
+          <div class="arena-stat-rating-val" id="arena-stat-rating">1200</div>
+          <div class="arena-rating-chart" id="arena-rating-chart" aria-hidden="true"></div>
+        </div>
+        <div class="arena-stat-trio">
+          <div class="arena-stat-box arena-stat-win">
+            <span class="arena-stat-lbl" data-i18n="profile.wins">Wins</span>
+            <span class="arena-stat-num" id="arena-stat-wins">0</span>
+          </div>
+          <div class="arena-stat-box arena-stat-loss">
+            <span class="arena-stat-lbl" data-i18n="profile.losses">Losses</span>
+            <span class="arena-stat-num" id="arena-stat-losses">0</span>
+          </div>
+          <div class="arena-stat-box arena-stat-draw">
+            <span class="arena-stat-lbl" data-i18n="profile.draws">Draws</span>
+            <span class="arena-stat-num" id="arena-stat-draws">0</span>
+          </div>
+        </div>
+        <div class="arena-streak-row">
+          <span class="arena-streak-icon" aria-hidden="true">🔥</span>
+          <span class="arena-streak-text">
+            <strong id="arena-stat-streak">0</strong>
+            <span data-i18n="game.best_streak_suffix">win streak</span>
+          </span>
+        </div>
+      </aside>
+
+      <footer class="arena-footer-bar glass-panel">
+        <div class="arena-footer-online">
+          <span class="arena-footer-dot" aria-hidden="true"></span>
+          <span data-i18n="game.online_players">Online</span>
+          <strong id="arena-online-count">0</strong>
+        </div>
+        <div class="arena-footer-social" aria-label="Social">
+          <a href="#" class="arena-social-btn" title="Discord" aria-label="Discord">DC</a>
+          <a href="#" class="arena-social-btn" title="VK" aria-label="VK">VK</a>
+          <a href="#" class="arena-social-btn" title="Telegram" aria-label="Telegram">TG</a>
+          <a href="#" class="arena-social-btn" title="YouTube" aria-label="YouTube">YT</a>
+        </div>
+        <div class="arena-footer-premium">
+          <span class="arena-premium-icon" aria-hidden="true">👑</span>
+          <span class="arena-premium-text" data-i18n="game.premium_title">Premium</span>
+          <button type="button" class="arena-premium-btn" id="arena-premium-btn" data-i18n="game.premium_cta">Details</button>
+        </div>
+      </footer>
+
     </div>
   </div>
 
@@ -1344,6 +1409,7 @@
 <script src="js/game-replay.js"></script>
 <script src="js/achievements.js"></script>
 <script src="js/daily-tasks.js"></script>
+<script src="js/game-setup-page.js"></script>
 <script src="js/profile.js"></script>
 <script src="js/leaderboard.js"></script>
 <script src="js/multiplayer.js"></script>

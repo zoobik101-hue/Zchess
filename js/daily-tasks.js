@@ -120,6 +120,7 @@ const DailyTasks = {
     if (changed) {
       this.save();
       this.renderTasks();
+      if (ZChess.GameSetupPage) ZChess.GameSetupPage.renderDailySidebar();
     }
   },
 
@@ -147,6 +148,7 @@ const DailyTasks = {
     if (ZChess.Sound) ZChess.Sound.playLevelUp();
 
     this.renderTasks();
+    if (ZChess.GameSetupPage) ZChess.GameSetupPage.renderDailySidebar();
   },
 
   getTimeUntilReset() {

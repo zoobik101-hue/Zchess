@@ -67,6 +67,7 @@ const App = {
     document.addEventListener('langchange', () => {
       if (this.currentPage === 'news') this.initNewsPage();
       if (this.currentPage === 'faq') this.initFAQPage();
+      if (this.currentPage === 'game' && ZChess.GameSetupPage) ZChess.GameSetupPage.refresh();
       if (this.currentPage === 'home' && ZChess.Presence) ZChess.Presence.render();
       if (this.currentPage === 'profile' && ZChess.Auth.currentUser) {
         ZChess.Profile.renderProfile(ZChess.Auth.currentUser);
@@ -92,6 +93,9 @@ const App = {
     // Listen for auth changes to update UI
     ZChess.Auth.onAuthChange((user) => {
       this.updateAuthDependentUI();
+      if (this.currentPage === 'game' && ZChess.GameSetupPage) {
+        ZChess.GameSetupPage.refresh();
+      }
       // Auto-close auth modal when user successfully signs in
       if (user) {
         const authModal = document.getElementById('auth-modal-overlay');
@@ -292,7 +296,22 @@ const App = {
       timeControl: 'unlimited'
     };
 
+    if (ZChess.GameSetupPage) ZChess.GameSetupPage.init();
     this.renderGameSetup();
+    this._bindArenaPremiumBtn();
+  },
+
+  _bindArenaPremiumBtn() {
+    const btn = document.getElementById('arena-premium-btn');
+    if (!btn || btn._bound) return;
+    btn._bound = true;
+    btn.addEventListener('click', () => {
+      if (ZChess.Auth?.isLoggedIn()) {
+        this.navigate('settings');
+      } else {
+        this.openModal('auth-modal-overlay');
+      }
+    });
   },
 
   renderGameSetup() {

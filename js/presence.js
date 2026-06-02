@@ -264,6 +264,9 @@ const Presence = {
       if (ZChess.App?.currentPage === 'home') {
         this.render();
       }
+      if (ZChess.App?.currentPage === 'game' && ZChess.GameSetupPage) {
+        ZChess.GameSetupPage.refreshFooter();
+      }
     };
 
     const onErr = (err) => {
