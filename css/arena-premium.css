@@ -159,24 +159,20 @@
   transition: transform 0.3s ease, filter 0.3s ease;
 }
 
-/* Main panel - same glass as sidebars */
-#page-game .arena-window-main.epic-card--main {
+/* Main panel glass - inner layer without clip-path so backdrop-filter works */
+#page-game .arena-window-main .arena-window-glass.epic-card--main {
   background: var(--arena-glass-bg);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
   box-shadow:
-    0 0 64px rgba(255, 213, 106, 0.1),
-    0 22px 68px rgba(0, 0, 0, 0.48),
+    0 0 64px rgba(255, 213, 106, 0.08),
+    0 22px 68px rgba(0, 0, 0, 0.35),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
-#page-game .arena-window-main.epic-card--main::after {
-  width: 380px;
-  height: 380px;
-  top: -180px;
-  left: 50%;
-  right: auto;
-  transform: translateX(-50%);
-  background: radial-gradient(circle, rgba(255, 213, 106, 0.08) 0%, transparent 65%);
-  opacity: 0.6;
+#page-game .arena-window-main .arena-window-glass.epic-card--main::before,
+#page-game .arena-window-main .arena-window-glass.epic-card--main::after {
+  display: none;
 }
 
 /* Chips */
