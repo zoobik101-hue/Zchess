@@ -1,113 +1,7 @@
-/* ZChess - Arena premium layers (AAA cinematic launcher) */
+/* ZChess - Arena premium UI (cards, buttons - background stays in game-setup.css) */
 
 #page-game.page-game-arena.active {
-  background:
-    radial-gradient(circle at 50% 8%, rgba(255, 213, 106, 0.14) 0%, transparent 38%),
-    radial-gradient(circle at 12% 55%, rgba(255, 213, 106, 0.06) 0%, transparent 42%),
-    radial-gradient(circle at 88% 48%, rgba(255, 213, 106, 0.08) 0%, transparent 40%),
-    #050505;
-}
-
-#page-game .game-setup-bg-photo {
-  background-size: 120% auto;
-  background-position: center 42%;
-  filter: blur(1px) saturate(0.85) brightness(0.55) contrast(1.1);
-  opacity: 0.65;
-  transform: translate(
-    calc(var(--arena-px, 0px) * 1.4),
-    calc(var(--arena-py, 0px) * 0.9)
-  );
-  transition: transform 0.12s ease-out;
-  will-change: transform;
-}
-
-#page-game .arena-bg-atmosphere {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 85% 50% at 50% -8%, rgba(255, 213, 106, 0.18) 0%, transparent 52%),
-    radial-gradient(ellipse 40% 65% at 0% 55%, rgba(255, 213, 106, 0.05) 0%, transparent 48%),
-    radial-gradient(ellipse 40% 65% at 100% 50%, rgba(255, 213, 106, 0.07) 0%, transparent 48%);
-  mix-blend-mode: screen;
-  opacity: 0.95;
-}
-
-#page-game .arena-light-rays {
-  position: absolute;
-  inset: -25% 0 0;
-  background: conic-gradient(
-    from 195deg at 50% 0%,
-    transparent 0deg,
-    rgba(255, 213, 106, 0.09) 14deg,
-    transparent 28deg,
-    rgba(255, 213, 106, 0.06) 48deg,
-    transparent 62deg,
-    rgba(255, 213, 106, 0.05) 78deg,
-    transparent 110deg
-  );
-  opacity: 0.7;
-  animation: arena-rays-drift 20s ease-in-out infinite alternate;
-  transform: translate(calc(var(--arena-px, 0px) * 0.35), calc(var(--arena-py, 0px) * 0.25));
-}
-
-@keyframes arena-rays-drift {
-  from { opacity: 0.55; transform: translate(0, 0) scale(1); }
-  to { opacity: 0.82; transform: translate(0, 10px) scale(1.03); }
-}
-
-#page-game .arena-fog {
-  position: absolute;
-  inset: auto;
-  border-radius: 50%;
-  filter: blur(56px);
-  pointer-events: none;
-  animation: arena-fog-float 16s ease-in-out infinite alternate;
-}
-
-#page-game .arena-fog-1 {
-  width: 50vw;
-  height: 26vh;
-  left: -10%;
-  bottom: 6%;
-  background: rgba(11, 11, 15, 0.65);
-}
-
-#page-game .arena-fog-2 {
-  width: 44vw;
-  height: 22vh;
-  right: -8%;
-  bottom: 10%;
-  background: rgba(5, 5, 5, 0.55);
-  animation-delay: -7s;
-}
-
-@keyframes arena-fog-float {
-  from { transform: translate(0, 0); opacity: 0.6; }
-  to { transform: translate(14px, -10px); opacity: 0.82; }
-}
-
-#page-game .arena-vignette {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 70% 60% at 50% 42%, transparent 30%, rgba(5, 5, 5, 0.62) 100%),
-    linear-gradient(180deg, rgba(5, 5, 5, 0.45) 0%, transparent 20%, transparent 78%, rgba(5, 5, 5, 0.78) 100%);
-}
-
-#page-game .arena-particle {
-  position: absolute;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 230, 160, 0.95) 0%, rgba(255, 213, 106, 0.35) 55%, transparent 72%);
-  box-shadow: 0 0 10px rgba(255, 213, 106, 0.55);
-  opacity: 0;
-  animation: arena-particle-rise linear infinite;
-}
-
-@keyframes arena-particle-rise {
-  0% { opacity: 0; transform: translateY(16px) scale(0.5); }
-  15% { opacity: 0.9; }
-  85% { opacity: 0.45; }
-  100% { opacity: 0; transform: translateY(-140px) scale(1.1); }
+  background: #050505;
 }
 
 /* Visual hierarchy */
@@ -403,41 +297,6 @@
   opacity: 0.08;
 }
 
-/* Giant pieces - hide on narrow / perf */
-@media (max-width: 900px) {
-  #page-game .arena-piece-knight {
-    width: clamp(160px, 38vw, 260px);
-    height: clamp(220px, 42vh, 360px);
-    left: -12%;
-    opacity: 0.55;
-  }
-
-  #page-game .arena-piece-king {
-    width: clamp(170px, 40vw, 280px);
-    height: clamp(240px, 44vh, 380px);
-    right: -14%;
-    opacity: 0.6;
-  }
-}
-
-html.perf-touch #page-game .arena-light-rays,
-html.perf-touch #page-game .arena-fog,
-html.perf-lite #page-game .arena-light-rays,
-html.perf-lite #page-game .arena-fog {
-  animation: none;
-}
-
-html.perf-touch #page-game .arena-particles,
-html.perf-lite #page-game .arena-particles {
-  display: none;
-}
-
-html.perf-touch #page-game .arena-piece,
-html.perf-lite #page-game .arena-piece {
-  opacity: 0.45;
-  filter: none;
-}
-
 html.perf-touch #page-game .game-mode-card.epic-card:hover,
 html.perf-lite #page-game .game-mode-card.epic-card:hover,
 html.perf-touch #page-game .game-mode-card.epic-card.selected,
@@ -457,17 +316,9 @@ html.perf-lite #page-game .game-setup-start.epic-button::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #page-game .arena-light-rays,
-  #page-game .arena-fog,
-  #page-game .arena-particle,
   #page-game .game-mode-card.epic-card.selected,
   #page-game .game-setup-start.epic-button,
   #page-game .epic-card::before {
     animation: none !important;
-  }
-
-  #page-game .game-setup-bg-photo,
-  #page-game .arena-piece {
-    transform: none !important;
   }
 }

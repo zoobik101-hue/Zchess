@@ -10,7 +10,6 @@ window.ZChess = window.ZChess || {};
 const GameSetupPage = {
 
   init() {
-    this.initAtmosphere();
     this.renderDailySidebar();
     this.renderStatsSidebar();
     this.refreshFooter();
@@ -27,63 +26,6 @@ const GameSetupPage = {
     if (!el) return;
     const n = ZChess.Presence?._players?.length ?? 0;
     el.textContent = String(n);
-  },
-
-  initAtmosphere() {
-    this._spawnParticles();
-    this._bindParallax();
-  },
-
-  _spawnParticles() {
-    const host = document.getElementById('arena-particles');
-    if (!host || host.dataset.ready === '1') return;
-    const root = document.documentElement;
-    if (root.classList.contains('perf-lite') || root.classList.contains('perf-touch')) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    const count = 36;
-    let html = '';
-    for (let i = 0; i < count; i++) {
-      const left = Math.random() * 100;
-      const delay = (Math.random() * 12).toFixed(2);
-      const dur = (8 + Math.random() * 10).toFixed(2);
-      const size = 2 + Math.random() * 3;
-      html += `<span class="arena-particle" style="left:${left}%;bottom:${Math.random() * 30}%;width:${size}px;height:${size}px;animation-duration:${dur}s;animation-delay:${delay}s"></span>`;
-    }
-    host.innerHTML = html;
-    host.dataset.ready = '1';
-  },
-
-  _bindParallax() {
-    const page = document.getElementById('page-game');
-    if (!page || page.dataset.parallax === '1') return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) return;
-
-    page.dataset.parallax = '1';
-    let raf = 0;
-    let tx = 0;
-    let ty = 0;
-
-    const apply = () => {
-      raf = 0;
-      page.style.setProperty('--arena-px', `${tx}px`);
-      page.style.setProperty('--arena-py', `${ty}px`);
-    };
-
-    page.addEventListener('mousemove', (e) => {
-      const nx = ((e.clientX / window.innerWidth) - 0.5) * 18;
-      const ny = ((e.clientY / window.innerHeight) - 0.5) * 12;
-      tx = nx;
-      ty = ny;
-      if (!raf) raf = requestAnimationFrame(apply);
-    });
-
-    page.addEventListener('mouseleave', () => {
-      tx = 0;
-      ty = 0;
-      if (!raf) raf = requestAnimationFrame(apply);
-    });
   },
 
   renderDailySidebar() {
