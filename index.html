@@ -347,21 +347,23 @@
       <span class="arena-deco arena-deco-5">♔</span>
       <span class="arena-deco arena-deco-6">♟</span>
     </div>
-    <div class="container game-setup-shell arena-layout">
+    <div class="container game-setup-shell">
 
-      <aside class="arena-sidebar arena-sidebar-left glass-panel" aria-label="Daily tasks">
-        <h2 class="arena-sidebar-title" data-i18n="game.sidebar_daily">Daily tasks</h2>
-        <div class="arena-daily-list" id="arena-daily-tasks"></div>
-        <a class="arena-sidebar-link" href="#profile" data-i18n="game.see_all_tasks">See all →</a>
-      </aside>
+      <div class="arena-grid">
+        <header class="arena-head">
+          <p class="arena-head-eyebrow" data-i18n="game.setup_eyebrow">Chess Arena</p>
+          <h1 class="arena-head-title" data-i18n="game.mode_title">Choose mode</h1>
+        </header>
 
-      <div class="arena-main">
-      <header class="game-setup-header">
-        <p class="game-setup-eyebrow" data-i18n="game.setup_eyebrow">Chess Arena</p>
-        <h1 class="game-setup-title" data-i18n="game.mode_title">Choose mode</h1>
-      </header>
+        <aside class="arena-window arena-window-tasks glass-panel" aria-label="Daily tasks">
+          <h2 class="arena-window-title" data-i18n="game.sidebar_daily">Daily tasks</h2>
+          <div class="arena-window-body">
+            <div class="arena-task-list" id="arena-daily-tasks"></div>
+            <a class="arena-window-link" href="#profile" data-i18n="game.see_all_tasks">See all →</a>
+          </div>
+        </aside>
 
-      <div class="game-setup-panel glass-panel" id="game-setup-panel">
+        <div class="arena-window arena-window-main glass-panel" id="game-setup-panel">
       <!-- Mode Cards -->
       <div class="game-modes-grid">
         <div class="game-mode-card selected" data-mode="ai">
@@ -456,40 +458,44 @@
           Start Game
         </button>
       </div>
-      </div>
+        </div>
+
+        <aside class="arena-window arena-window-stats glass-panel" aria-label="Your stats">
+          <h2 class="arena-window-title" data-i18n="game.sidebar_stats">Your statistics</h2>
+          <div class="arena-window-body arena-stats-body">
+            <p class="arena-stats-guest" id="arena-stats-guest" data-i18n="game.stats_login_hint">Sign in to track stats</p>
+            <div class="arena-rating-block">
+              <span class="arena-rating-label" data-i18n="game.rating_label">Rating</span>
+              <div class="arena-rating-value" id="arena-stat-rating">1200</div>
+              <div class="arena-rating-chart" id="arena-rating-chart" aria-hidden="true"></div>
+            </div>
+            <div class="arena-stat-trio">
+              <div class="arena-stat-cell arena-stat-win">
+                <span class="arena-stat-lbl" data-i18n="profile.wins">Wins</span>
+                <span class="arena-stat-num" id="arena-stat-wins">0</span>
+              </div>
+              <div class="arena-stat-cell arena-stat-loss">
+                <span class="arena-stat-lbl" data-i18n="profile.losses">Losses</span>
+                <span class="arena-stat-num" id="arena-stat-losses">0</span>
+              </div>
+              <div class="arena-stat-cell arena-stat-draw">
+                <span class="arena-stat-lbl" data-i18n="profile.draws">Draws</span>
+                <span class="arena-stat-num" id="arena-stat-draws">0</span>
+              </div>
+            </div>
+            <div class="arena-streak-block">
+              <span class="arena-streak-lbl" data-i18n="game.best_streak_label">Best streak</span>
+              <p class="arena-streak-val">
+                <span class="arena-streak-icon" aria-hidden="true">🔥</span>
+                <strong id="arena-stat-streak">0</strong>
+                <span data-i18n="game.best_streak_suffix">wins</span>
+              </p>
+            </div>
+          </div>
+        </aside>
       </div>
 
-      <aside class="arena-sidebar arena-sidebar-right glass-panel" aria-label="Your stats">
-        <h2 class="arena-sidebar-title" data-i18n="game.sidebar_stats">Your statistics</h2>
-        <p class="arena-stats-guest" id="arena-stats-guest" data-i18n="game.stats_login_hint">Sign in to track stats</p>
-        <div class="arena-stat-rating-block">
-          <div class="arena-stat-rating-val" id="arena-stat-rating">1200</div>
-          <div class="arena-rating-chart" id="arena-rating-chart" aria-hidden="true"></div>
-        </div>
-        <div class="arena-stat-trio">
-          <div class="arena-stat-box arena-stat-win">
-            <span class="arena-stat-lbl" data-i18n="profile.wins">Wins</span>
-            <span class="arena-stat-num" id="arena-stat-wins">0</span>
-          </div>
-          <div class="arena-stat-box arena-stat-loss">
-            <span class="arena-stat-lbl" data-i18n="profile.losses">Losses</span>
-            <span class="arena-stat-num" id="arena-stat-losses">0</span>
-          </div>
-          <div class="arena-stat-box arena-stat-draw">
-            <span class="arena-stat-lbl" data-i18n="profile.draws">Draws</span>
-            <span class="arena-stat-num" id="arena-stat-draws">0</span>
-          </div>
-        </div>
-        <div class="arena-streak-row">
-          <span class="arena-streak-icon" aria-hidden="true">🔥</span>
-          <span class="arena-streak-text">
-            <strong id="arena-stat-streak">0</strong>
-            <span data-i18n="game.best_streak_suffix">win streak</span>
-          </span>
-        </div>
-      </aside>
-
-      <footer class="arena-footer-bar glass-panel">
+      <footer class="arena-footer glass-panel">
         <div class="arena-footer-online">
           <span class="arena-footer-dot" aria-hidden="true"></span>
           <span data-i18n="game.online_players">Players online</span>

@@ -35,17 +35,23 @@ const GameSetupPage = {
       const pct = Math.min(100, Math.round((state.progress / def.target) * 100));
       const name = t(`daily_tasks.tasks.${def.id}_name`);
       const coin = def.xp;
+      const done = state.completed || state.claimed;
+      const reward = done
+        ? '<span class="arena-task-reward arena-task-done" aria-label="Done">✓</span>'
+        : `<span class="arena-task-reward"><span class="arena-coin-icon" aria-hidden="true">🪙</span>+${coin}</span>`;
 
       return `
-        <div class="arena-task ${state.completed ? 'is-done' : ''}">
-          <div class="arena-task-top">
+        <div class="arena-task ${done ? 'is-done' : ''}">
+          <div class="arena-task-row-top">
             <span class="arena-task-name">${this._esc(name)}</span>
-            <span class="arena-task-coin"><span class="arena-coin-icon" aria-hidden="true">🪙</span>+${coin}</span>
+            ${reward}
           </div>
-          <div class="arena-task-bar">
-            <div class="arena-task-bar-fill" style="width:${pct}%"></div>
+          <div class="arena-task-progress-row">
+            <div class="arena-task-bar">
+              <div class="arena-task-bar-fill" style="width:${pct}%"></div>
+            </div>
+            <span class="arena-task-count">${state.progress}/${def.target}</span>
           </div>
-          <div class="arena-task-meta">${state.progress}/${def.target}</div>
         </div>
       `;
     }).join('');
