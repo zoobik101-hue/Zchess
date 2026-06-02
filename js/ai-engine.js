@@ -174,7 +174,7 @@ const ChessAI = {
     const ordered = this.orderMoves(moves);
 
     for (const move of ordered) {
-      const newState = engine.applyMove(state, move);
+      const newState = engine.applyMoveSearch(state, move);
       const score = this.quiescence(newState, alpha, beta, !isMaximizing, depth + 1);
 
       if (isMaximizing) {
@@ -195,7 +195,8 @@ const ChessAI = {
     const status = engine.getGameStatus(state);
 
     if (status.status === 'checkmate') {
-      return isMaximizing ? -100000 + state.history.length : 100000 - state.history.length;
+      const ply = state.searchPly || 0;
+      return isMaximizing ? -100000 + ply : 100000 - ply;
     }
     if (status.status === 'draw') {
       return 0;
@@ -213,7 +214,7 @@ const ChessAI = {
     if (isMaximizing) {
       let maxVal = -Infinity;
       for (const move of ordered) {
-        const ns = engine.applyMove(state, move);
+        const ns = engine.applyMoveSearch(state, move);
         const val = this.minimax(ns, depth - 1, alpha, beta, false);
         maxVal = Math.max(maxVal, val);
         alpha = Math.max(alpha, val);
@@ -223,7 +224,7 @@ const ChessAI = {
     } else {
       let minVal = Infinity;
       for (const move of ordered) {
-        const ns = engine.applyMove(state, move);
+        const ns = engine.applyMoveSearch(state, move);
         const val = this.minimax(ns, depth - 1, alpha, beta, true);
         minVal = Math.min(minVal, val);
         beta = Math.min(beta, val);
@@ -246,7 +247,14 @@ const ChessAI = {
       grandmaster: 5,
       impossible:  5
     };
-    return depths[difficulty] || 3;
+    let depth = depths[difficulty] || 3;
+    if (typeof document !== 'undefined') {
+      const root = document.documentElement;
+      if (root.classList.contains('perf-touch') || root.classList.contains('perf-lite')) {
+        depth = Math.max(1, depth - 1);
+      }
+    }
+    return depth;
   },
 
   // Get the best move for the current position
@@ -284,7 +292,7 @@ const ChessAI = {
     const ordered = this.orderMoves([...moves]);
 
     for (const move of ordered) {
-      const ns = engine.applyMove(state, move);
+      const ns = engine.applyMoveSearch(state, move);
       const value = this.minimax(ns, depth - 1, -Infinity, Infinity, !isMaximizing);
 
       if (isMaximizing ? value > bestValue : value < bestValue) {

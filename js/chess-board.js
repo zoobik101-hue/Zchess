@@ -45,6 +45,11 @@ const ChessBoard = {
   _dragDelegated: false,
   _piecesPreloaded: false,
   _isCoarsePointer: false,
+  _saveStateTimer: null,
+  _aiWorker: null,
+  _aiWorkerReady: false,
+  _aiWorkerJob: null,
+  _undoCap: 24,
 
   SYMBOLS: {
     wK:'♔', wQ:'♕', wR:'♖', wB:'♗', wN:'♘', wP:'♙',
@@ -410,6 +415,11 @@ const ChessBoard = {
   _resetRenderCaches() {
     this._lastHistoryLen = -1;
     this._lastCapturedKey = '';
+    this._disposeAIWorker();
+    if (this._saveStateTimer) {
+      clearTimeout(this._saveStateTimer);
+      this._saveStateTimer = null;
+    }
   },
 
   startGame(options = {}) {
@@ -646,9 +656,26 @@ const ChessBoard = {
   },
 
   saveGameState() {
+    if (this._saveStateTimer) clearTimeout(this._saveStateTimer);
+    this._saveStateTimer = setTimeout(() => this._flushGameState(), 500);
+  },
+
+  _flushGameState() {
+    this._saveStateTimer = null;
     try {
+      const gs = this.gameState;
       localStorage.setItem(ZChess.STORAGE.GAME_STATE, JSON.stringify({
-        gameState: this.gameState,
+        gameState: {
+          board: gs.board,
+          turn: gs.turn,
+          castling: gs.castling,
+          enPassant: gs.enPassant,
+          halfMoveClock: gs.halfMoveClock,
+          fullMoveNumber: gs.fullMoveNumber,
+          history: gs.history,
+          capturedPieces: gs.capturedPieces,
+          positionHistory: (gs.positionHistory || []).slice(-12)
+        },
         isAIGame: this.isAIGame,
         aiDifficulty: this.aiDifficulty,
         playerColor: this.playerColor,
@@ -745,6 +772,9 @@ const ChessBoard = {
 
     if (this.isAIGame) {
       this.undoHistory.push(engine.cloneState(this.gameState));
+      if (this.undoHistory.length > this._undoCap) {
+        this.undoHistory.shift();
+      }
     }
 
     // --- Track player stats ---
@@ -865,7 +895,7 @@ const ChessBoard = {
 
       this.render();
       this.updateTurnIndicator();
-      this.updatePlayerBars();
+      this._updateActivePlayerBars();
       this.saveGameState();
 
       const status = engine.getGameStatus(this.gameState);
@@ -885,6 +915,14 @@ const ChessBoard = {
 
     this.isThinking = false;
     this.updateTurnIndicator();
+  },
+
+  _updateActivePlayerBars() {
+    const w = document.getElementById('player-bar-white');
+    const b = document.getElementById('player-bar-black');
+    const turn = this.gameState?.turn;
+    if (w) w.classList.toggle('active', turn === 'w');
+    if (b) b.classList.toggle('active', turn === 'b');
   },
 
   async _computeAIMove(state, difficulty) {
@@ -910,8 +948,9 @@ const ChessBoard = {
       }
     }
 
-    // Sync fallback
-    const move = ZChess.AI.getBestMove(state, difficulty);
+    // Sync fallback (compact state - no growing history in search)
+    const compact = ZChess.Engine.compactStateForAI(state);
+    const move = ZChess.AI.getBestMove(compact, difficulty);
     return wait(move);
   },
 
@@ -947,31 +986,83 @@ self.onmessage = function(e) {
     return this._workerBlobUrl;
   },
 
-  _runWorker(blobUrl, state, difficulty) {
+  async _runWorker(blobUrl, state, difficulty) {
+    const compact = ZChess.Engine.compactStateForAI(state);
+    const worker = await this._ensureAIWorker(blobUrl);
+    const mobile = document.documentElement.classList.contains('perf-touch');
+    const timeoutMs = mobile ? 6000 : 10000;
+
     return new Promise((resolve, reject) => {
       let done = false;
-      const worker = new Worker(blobUrl);
 
       const finish = (move) => {
         if (done) return;
         done = true;
-        worker.terminate();
+        if (this._aiWorkerJob === job) this._aiWorkerJob = null;
         resolve(move);
       };
 
+      const job = { finish, reject };
+      this._aiWorkerJob = job;
+
       const timeout = setTimeout(() => {
+        if (done) return;
         console.warn('[AI] Worker timeout - using sync fallback');
-        done = true;
-        worker.terminate();
-        try { resolve(ZChess.AI.getBestMove(state, 'medium')); }
-        catch(e) { resolve(null); }
-      }, 10000);
+        try {
+          finish(ZChess.AI.getBestMove(compact, difficulty));
+        } catch (e) {
+          finish(null);
+        }
+      }, timeoutMs);
 
-      worker.onmessage = (e) => { clearTimeout(timeout); finish(e.data.move ?? null); };
-      worker.onerror   = (e) => { clearTimeout(timeout); reject(new Error(e.message)); };
+      const onResult = (move) => {
+        clearTimeout(timeout);
+        finish(move);
+      };
 
-      worker.postMessage({ state, difficulty });
+      job.onResult = onResult;
+
+      try {
+        worker.postMessage({ state: compact, difficulty });
+      } catch (e) {
+        clearTimeout(timeout);
+        reject(e);
+      }
     });
+  },
+
+  async _ensureAIWorker(blobUrl) {
+    if (this._aiWorker && this._aiWorkerReady) return this._aiWorker;
+
+    if (this._aiWorker) {
+      this._aiWorker.terminate();
+      this._aiWorker = null;
+      this._aiWorkerReady = false;
+    }
+
+    const worker = new Worker(blobUrl);
+    worker.onmessage = (e) => {
+      const job = this._aiWorkerJob;
+      if (job && job.onResult) job.onResult(e.data.move ?? null);
+    };
+    worker.onerror = (e) => {
+      const job = this._aiWorkerJob;
+      this._aiWorkerReady = false;
+      if (job) job.reject(new Error(e.message || 'AI worker error'));
+    };
+
+    this._aiWorker = worker;
+    this._aiWorkerReady = true;
+    return worker;
+  },
+
+  _disposeAIWorker() {
+    if (this._aiWorker) {
+      this._aiWorker.terminate();
+      this._aiWorker = null;
+      this._aiWorkerReady = false;
+      this._aiWorkerJob = null;
+    }
   },
 
   _workerBlobUrl: null,
@@ -1471,18 +1562,58 @@ self.onmessage = function(e) {
     const el = document.getElementById('move-history-list');
     if (!el) return;
     const history = this.gameState.history;
-    el.innerHTML = '';
-    for (let i = 0; i < history.length; i += 2) {
-      const num = Math.floor(i / 2) + 1;
-      const w = history[i];
-      const b = history[i + 1];
+    const rows = el.querySelectorAll('.move-history-row');
+    const expectedRows = Math.ceil(history.length / 2);
+
+    if (rows.length === expectedRows && history.length > 0) {
+      const lastIdx = history.length - 1;
+      const rowIdx = Math.floor(lastIdx / 2);
+      const row = rows[rowIdx];
+      if (row) {
+        const isWhite = lastIdx % 2 === 0;
+        const span = row.querySelector(isWhite ? '.move-white' : '.move-black');
+        const notation = history[lastIdx]?.notation || '';
+        if (span && span.textContent !== notation) span.textContent = notation;
+      }
+      const panel = document.getElementById('move-history-panel');
+      if (panel) panel.scrollTop = panel.scrollHeight;
+      return;
+    }
+
+    if (history.length === 0) {
+      el.innerHTML = '';
+      return;
+    }
+
+    if (rows.length === expectedRows - 1 && history.length % 2 === 1) {
+      const num = expectedRows;
+      const w = history[history.length - 1];
       const row = document.createElement('div');
       row.className = 'move-history-row';
       row.innerHTML = `<span class="move-number">${num}.</span>
         <span class="move-white">${w?.notation || ''}</span>
-        <span class="move-black">${b?.notation || ''}</span>`;
+        <span class="move-black"></span>`;
       el.appendChild(row);
+    } else if (rows.length > 0 && history.length % 2 === 0 && rows.length === expectedRows) {
+      const b = history[history.length - 1];
+      const row = rows[rows.length - 1];
+      const span = row.querySelector('.move-black');
+      if (span) span.textContent = b?.notation || '';
+    } else {
+      el.innerHTML = '';
+      for (let i = 0; i < history.length; i += 2) {
+        const num = Math.floor(i / 2) + 1;
+        const w = history[i];
+        const b = history[i + 1];
+        const row = document.createElement('div');
+        row.className = 'move-history-row';
+        row.innerHTML = `<span class="move-number">${num}.</span>
+          <span class="move-white">${w?.notation || ''}</span>
+          <span class="move-black">${b?.notation || ''}</span>`;
+        el.appendChild(row);
+      }
     }
+
     const panel = document.getElementById('move-history-panel');
     if (panel) panel.scrollTop = panel.scrollHeight;
   },

@@ -362,57 +362,94 @@ const ChessEngine = {
     return nb;
   },
 
-  // Apply move to full game state (returns new state)
-  applyMove(state, move) {
-    const ns = this.cloneState(state);
-    ns.board = this.applyMoveToBoard(state.board, move);
-    ns.turn = this.opp(state.turn);
+  /** Shared rules update after a move (board already applied). */
+  _buildStateAfterMove(state, move, board) {
+    const castling = { ...state.castling };
+    const c = move.piece.color;
 
-    // En passant target
-    ns.enPassant = move.doublePush
+    const enPassant = move.doublePush
       ? { row: move.from.row + this.pawnDir(move.piece.color), col: move.from.col }
       : null;
 
-    // Update castling rights
-    const c = move.piece.color;
     if (move.piece.type === 'K') {
-      ns.castling[c + 'K'] = false;
-      ns.castling[c + 'Q'] = false;
+      castling[c + 'K'] = false;
+      castling[c + 'Q'] = false;
     }
     if (move.piece.type === 'R') {
-      if (move.from.col === 0) ns.castling[c + 'Q'] = false;
-      if (move.from.col === 7) ns.castling[c + 'K'] = false;
+      if (move.from.col === 0) castling[c + 'Q'] = false;
+      if (move.from.col === 7) castling[c + 'K'] = false;
     }
-    // Rook captured
     if (move.capture?.type === 'R') {
       const oc = this.opp(c);
       const obr = this.backRankRow(oc);
       if (move.to.row === obr) {
-        if (move.to.col === 0) ns.castling[oc + 'Q'] = false;
-        if (move.to.col === 7) ns.castling[oc + 'K'] = false;
+        if (move.to.col === 0) castling[oc + 'Q'] = false;
+        if (move.to.col === 7) castling[oc + 'K'] = false;
       }
     }
 
-    // Half move clock
-    ns.halfMoveClock = (move.piece.type === 'P' || move.capture) ? 0 : state.halfMoveClock + 1;
+    const halfMoveClock = (move.piece.type === 'P' || move.capture) ? 0 : state.halfMoveClock + 1;
+    const fullMoveNumber = state.turn === 'b' ? state.fullMoveNumber + 1 : state.fullMoveNumber;
 
-    // Full move number
-    if (state.turn === 'b') ns.fullMoveNumber++;
+    return {
+      board,
+      turn: this.opp(state.turn),
+      castling,
+      enPassant,
+      halfMoveClock,
+      fullMoveNumber
+    };
+  },
 
-    // Track captures
+  // Apply move to full game state (returns new state)
+  applyMove(state, move) {
+    const board = this.applyMoveToBoard(state.board, move);
+    const core = this._buildStateAfterMove(state, move, board);
+    const ns = this.cloneState(state);
+    Object.assign(ns, core);
+
     if (move.capture) {
       ns.capturedPieces[this.opp(move.capture.color)].push(move.capture.type);
     }
 
-    // Notation and history
     const notation = this.getMoveNotation(move, state);
     ns.history.push({ ...move, notation });
 
-    // Position hash for repetition detection (simplified)
     const hash = this.getBoardHash(ns.board, ns.turn, ns.castling, ns.enPassant);
     ns.positionHistory = [...(state.positionHistory || []), hash];
 
     return ns;
+  },
+
+  /**
+   * Lightweight move for AI search - no history / repetition arrays (avoids O(n) copies per node).
+   */
+  applyMoveSearch(state, move) {
+    const board = this.applyMoveToBoard(state.board, move);
+    const core = this._buildStateAfterMove(state, move, board);
+    return {
+      ...core,
+      history: [],
+      capturedPieces: { w: [], b: [] },
+      positionHistory: [],
+      searchPly: (state.searchPly || 0) + 1
+    };
+  },
+
+  /** Strip UI-only fields before sending position to the AI worker. */
+  compactStateForAI(state) {
+    return {
+      board: state.board,
+      turn: state.turn,
+      castling: state.castling,
+      enPassant: state.enPassant,
+      halfMoveClock: state.halfMoveClock,
+      fullMoveNumber: state.fullMoveNumber,
+      history: [],
+      capturedPieces: { w: [], b: [] },
+      positionHistory: [],
+      searchPly: 0
+    };
   },
 
   // --- Legal Move Filtering ---
