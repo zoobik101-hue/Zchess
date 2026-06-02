@@ -281,13 +281,20 @@
 
 /* Footer bar */
 #page-game .arena-footer.epic-card {
-  padding: 6px 16px;
-  min-height: 40px;
+  padding: 0 20px;
+  min-height: 38px;
+  background: var(--arena-glass-bg);
+  backdrop-filter: blur(20px) saturate(1.3);
+  -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  border-top: 1px solid rgba(255, 213, 106, 0.14);
+  box-shadow:
+    0 -8px 32px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
-#page-game .arena-footer.epic-card::before {
-  animation: none;
-  opacity: 0.08;
+#page-game .arena-footer.epic-card::before,
+#page-game .arena-footer.epic-card::after {
+  display: none;
 }
 
 html.perf-touch #page-game .game-mode-card.epic-card:hover,
