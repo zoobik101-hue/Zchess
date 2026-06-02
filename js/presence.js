@@ -48,17 +48,19 @@ const Presence = {
       if (user) {
         this.stopGuestPresence();
         this.startRegistered();
-      } else {
+      } else if (ZChess.Auth?._authReady) {
         this.stopRegistered();
         this.maybeStartGuestPresence();
       }
     });
 
     this.subscribe();
-    if (ZChess.Auth?.isLoggedIn()) {
-      this.startRegistered();
-    } else {
-      this.maybeStartGuestPresence();
+    if (ZChess.Auth?._authReady) {
+      if (ZChess.Auth.isLoggedIn()) {
+        this.startRegistered();
+      } else {
+        this.maybeStartGuestPresence();
+      }
     }
   },
 
@@ -85,7 +87,10 @@ const Presence = {
   },
 
   _wantsGuestPresence() {
+    if (!ZChess.Auth?._authReady) return false;
     if (ZChess.Auth?._authBusy) return false;
+    const auth = ZChess.Auth?.auth;
+    if (auth?.currentUser && !auth.currentUser.isAnonymous) return false;
     try {
       if (sessionStorage.getItem(LOGOUT_FLAG)) return false;
     } catch (_) { /* ignore */ }
@@ -103,6 +108,8 @@ const Presence = {
     const auth = ZChess.Auth?.auth;
     const db = this.db();
     if (!auth || !db) return;
+
+    if (auth.currentUser && !auth.currentUser.isAnonymous) return;
 
     try {
       if (!auth.currentUser?.isAnonymous) {

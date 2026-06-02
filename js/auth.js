@@ -17,6 +17,7 @@ const Auth = {
   _LOGOUT_FLAG: 'zchess_explicit_logout',
   _authBusy: false,
   _registerInProgress: false,
+  _authReady: false,
 
   async init() {
     // Initialize Firebase if config is provided
@@ -24,6 +25,7 @@ const Auth = {
       if (typeof firebase === 'undefined') {
         console.warn('[Auth] Firebase SDK not loaded. Running in offline mode.');
         this.initOfflineMode();
+        this._authReady = true;
         return;
       }
 
@@ -35,13 +37,38 @@ const Auth = {
       this.auth = firebase.auth();
       this.db = firebase.firestore();
 
-      // Listen for auth state changes
-      this.auth.onAuthStateChanged(user => this.handleAuthChange(user));
+      try {
+        await this.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+      } catch (e) {
+        console.warn('[Auth] setPersistence:', e);
+      }
+
+      // Wait for Firebase to restore persisted session before Presence / guest auth runs
+      await new Promise((resolve) => {
+        let done = false;
+        const finish = () => {
+          if (done) return;
+          done = true;
+          this._authReady = true;
+          resolve();
+        };
+        const unsub = this.auth.onAuthStateChanged((user) => {
+          this.handleAuthChange(user);
+          if (!done) {
+            unsub();
+            finish();
+          }
+        });
+        setTimeout(finish, 10000);
+      });
+
+      this.auth.onAuthStateChanged((user) => this.handleAuthChange(user));
 
       console.log('[Auth] Firebase initialized');
     } catch (err) {
       console.error('[Auth] Firebase init failed:', err);
       this.initOfflineMode();
+      this._authReady = true;
     }
   },
 
@@ -117,8 +144,16 @@ const Auth = {
         };
       }
     } else {
+      if (!this._authReady) return;
+
+      let explicitLogout = false;
+      try { explicitLogout = sessionStorage.getItem(this._LOGOUT_FLAG) === '1'; } catch (_) { /* ignore */ }
+
       this.currentUser = null;
-      localStorage.removeItem(ZChess.STORAGE.USER_CACHE);
+      if (explicitLogout) {
+        localStorage.removeItem(ZChess.STORAGE.USER_CACHE);
+        try { sessionStorage.removeItem(this._LOGOUT_FLAG); } catch (_) { /* ignore */ }
+      }
       this.notifyListeners();
       this.updateNavUI();
       return;
