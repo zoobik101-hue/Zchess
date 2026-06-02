@@ -106,6 +106,15 @@ body.arena-page-lock {
   align-items: stretch;
 }
 
+.arena-window-tasks,
+.arena-window-stats {
+  align-self: end;
+  justify-self: stretch;
+  width: 100%;
+  height: auto;
+  max-height: none;
+}
+
 /* Skewed bottom corners - clip on shell only; glass sits inside for working backdrop-filter */
 .arena-panel-chamfer {
   border-radius: 0;
@@ -208,9 +217,81 @@ body.arena-page-lock {
 
 .arena-window-tasks,
 .arena-window-stats {
-  padding: 10px 12px calc(10px + var(--arena-chamfer));
-  align-self: stretch;
-  height: 100%;
+  padding: 8px 10px calc(8px + var(--arena-chamfer));
+}
+
+#page-game .arena-window-tasks.arena-window,
+#page-game .arena-window-stats.arena-window {
+  max-height: none;
+  overflow: visible;
+}
+
+#page-game .arena-window-tasks .arena-window-body,
+#page-game .arena-window-stats .arena-window-body {
+  flex: 0 0 auto;
+  min-height: 0;
+  overflow: visible;
+}
+
+#page-game .arena-window-tasks .arena-task-list {
+  flex: 0 0 auto;
+  gap: 7px;
+  overflow: visible;
+}
+
+#page-game .arena-window-stats .arena-stats-body {
+  flex: 0 0 auto;
+  overflow: visible;
+}
+
+#page-game .arena-window-tasks .arena-window-title,
+#page-game .arena-window-stats .arena-window-title {
+  margin-bottom: 7px;
+  font-size: 8px;
+}
+
+#page-game .arena-window-tasks .arena-task-row-top {
+  margin-bottom: 5px;
+}
+
+#page-game .arena-window-tasks .arena-task-name {
+  font-size: 10px;
+}
+
+#page-game .arena-window-stats .arena-rating-block {
+  margin-bottom: 7px;
+  padding-bottom: 7px;
+}
+
+#page-game .arena-window-stats .arena-rating-value {
+  font-size: clamp(22px, 2.6vw, 30px);
+  margin-bottom: 5px;
+}
+
+#page-game .arena-window-stats .arena-rating-chart {
+  height: 22px;
+}
+
+#page-game .arena-window-stats .arena-stat-trio {
+  margin-bottom: 6px;
+  gap: 5px;
+}
+
+#page-game .arena-window-stats .arena-stat-cell {
+  padding: 5px 3px;
+}
+
+#page-game .arena-window-stats .arena-stat-num {
+  font-size: 13px;
+}
+
+#page-game .arena-window-stats .arena-streak-block {
+  margin-top: 4px;
+}
+
+#page-game .arena-window-tasks .arena-window-link {
+  margin-top: 6px;
+  font-size: 8px;
 }
 
 .arena-window-main {
@@ -899,6 +980,7 @@ body.arena-page-lock {
 
   .arena-window-tasks,
   .arena-window-stats {
+    align-self: stretch;
     max-width: 100%;
     min-height: 0;
   }
