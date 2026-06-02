@@ -13,13 +13,11 @@ const GameSetupPage = {
     this.initAtmosphere();
     this.renderDailySidebar();
     this.renderStatsSidebar();
-    this.refreshFooter();
   },
 
   refresh() {
     this.renderDailySidebar();
     this.renderStatsSidebar();
-    this.refreshFooter();
   },
 
   initAtmosphere() {
@@ -150,14 +148,6 @@ const GameSetupPage = {
       ).join('');
     } else if (chart) {
       chart.innerHTML = '<span class="arena-chart-bar" style="height:30%"></span>'.repeat(7);
-    }
-  },
-
-  refreshFooter() {
-    const onlineEl = document.getElementById('arena-online-count');
-    if (onlineEl && ZChess.Presence) {
-      const n = ZChess.Presence._players?.length ?? 0;
-      onlineEl.textContent = String(n);
     }
   },
 

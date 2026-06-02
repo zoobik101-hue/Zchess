@@ -162,10 +162,6 @@
   filter: none;
 }
 
-#page-game .arena-footer {
-  opacity: 0.88;
-}
-
 /* --- Epic card system --- */
 #page-game .epic-card {
   position: relative;

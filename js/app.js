@@ -298,20 +298,6 @@ const App = {
 
     if (ZChess.GameSetupPage) ZChess.GameSetupPage.init();
     this.renderGameSetup();
-    this._bindArenaPremiumBtn();
-  },
-
-  _bindArenaPremiumBtn() {
-    const btn = document.getElementById('arena-premium-btn');
-    if (!btn || btn._bound) return;
-    btn._bound = true;
-    btn.addEventListener('click', () => {
-      if (ZChess.Auth?.isLoggedIn()) {
-        this.navigate('settings');
-      } else {
-        this.openModal('auth-modal-overlay');
-      }
-    });
   },
 
   renderGameSetup() {
