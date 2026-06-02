@@ -45,8 +45,8 @@
   <link rel="stylesheet" href="css/chess.css">
   <link rel="stylesheet" href="css/multiplayer.css">
   <link rel="stylesheet" href="css/training.css">
-  <link rel="stylesheet" href="css/game-setup.css?v=arena13">
-  <link rel="stylesheet" href="css/arena-premium.css?v=arena13">
+  <link rel="stylesheet" href="css/game-setup.css?v=arena14">
+  <link rel="stylesheet" href="css/arena-premium.css?v=arena14">
   <link rel="stylesheet" href="css/chess-decor.css">
   <link rel="stylesheet" href="css/theme-arena.css">
   <link rel="stylesheet" href="css/game-replay.css">
@@ -442,16 +442,16 @@
       <div class="game-setup-row game-setup-play-as">
         <h3 class="game-setup-label" data-i18n="game.play_as">Play As</h3>
         <div class="play-as-selector">
-          <div class="play-as-btn epic-chip selected" data-color="w">
-            <span class="play-as-piece">♔</span>
+          <div class="play-as-btn selected" data-color="w">
+            <img class="play-as-piece-img" src="assets/pieces/cburnett/wK.svg" width="28" height="28" alt="" aria-hidden="true">
             <span class="play-as-label" data-i18n="game.white">White</span>
           </div>
-          <div class="play-as-btn epic-chip" data-color="b">
-            <span class="play-as-piece">♚</span>
+          <div class="play-as-btn" data-color="b">
+            <img class="play-as-piece-img play-as-piece-img--dark" src="assets/pieces/cburnett/bK.svg" width="28" height="28" alt="" aria-hidden="true">
             <span class="play-as-label" data-i18n="game.black">Black</span>
           </div>
-          <div class="play-as-btn epic-chip" data-color="r">
-            <span class="play-as-piece">🎲</span>
+          <div class="play-as-btn" data-color="r">
+            <span class="play-as-dice" aria-hidden="true">🎲</span>
             <span class="play-as-label" data-i18n="game.random">Random</span>
           </div>
         </div>
@@ -460,9 +460,11 @@
 
       <!-- Start Button -->
       <div class="game-setup-footer">
-        <button type="button" class="game-setup-start epic-button" id="btn-start-game" data-i18n="game.start_game">
-          Start Game
-        </button>
+        <div class="game-setup-start-wrap">
+          <button type="button" class="game-setup-start epic-button" id="btn-start-game" data-i18n="game.start_game">
+            Start Game
+          </button>
+        </div>
       </div>
           </div>
         </div>

@@ -787,14 +787,160 @@ body.arena-page-lock {
   background: transparent;
 }
 
+#page-game .game-setup-play-as {
+  padding: 4px 22px 0;
+}
+
+#page-game .game-setup-play-as .game-setup-label {
+  margin-bottom: 10px;
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  color: rgba(255, 213, 106, 0.72);
+}
+
+#page-game .play-as-selector {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+#page-game .play-as-btn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(5, 5, 5, 0.28);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 213, 106, 0.14);
+  cursor: pointer;
+  transition:
+    border-color 0.3s ease,
+    background 0.3s ease,
+    box-shadow 0.35s ease,
+    transform 0.3s ease;
+  box-sizing: border-box;
+}
+
+#page-game .play-as-piece-img {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  object-fit: contain;
+  opacity: 0.45;
+  filter: saturate(0.6) brightness(0.85);
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+#page-game .play-as-piece-img--dark {
+  opacity: 0.5;
+  filter: brightness(0.55) saturate(0.5);
+}
+
+#page-game .play-as-dice {
+  font-size: 22px;
+  line-height: 1;
+  opacity: 0.45;
+  flex-shrink: 0;
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+#page-game .play-as-label {
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(245, 240, 230, 0.38);
+  text-align: left;
+  white-space: nowrap;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+#page-game .play-as-btn:hover {
+  border-color: rgba(255, 213, 106, 0.32);
+  transform: translateY(-1px);
+}
+
+#page-game .play-as-btn.selected {
+  border: 1px solid rgba(255, 213, 106, 0.72);
+  background:
+    linear-gradient(180deg, rgba(255, 213, 106, 0.1) 0%, rgba(11, 11, 15, 0.22) 48%, rgba(255, 213, 106, 0.07) 100%);
+  box-shadow:
+    0 0 32px rgba(255, 213, 106, 0.28),
+    0 0 56px rgba(255, 213, 106, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -12px 28px rgba(255, 213, 106, 0.06);
+  transform: translateY(-1px);
+}
+
+#page-game .play-as-btn.selected .play-as-piece-img {
+  opacity: 1;
+  filter: drop-shadow(0 0 10px rgba(255, 213, 106, 0.55)) brightness(1.05);
+}
+
+#page-game .play-as-btn.selected .play-as-piece-img--dark {
+  opacity: 0.95;
+  filter: brightness(0.75) drop-shadow(0 0 10px rgba(255, 213, 106, 0.45));
+}
+
+#page-game .play-as-btn.selected .play-as-dice {
+  opacity: 1;
+  filter: drop-shadow(0 0 8px rgba(255, 213, 106, 0.4));
+}
+
+#page-game .play-as-btn.selected .play-as-label {
+  color: var(--arena-gold-bright);
+  text-shadow: 0 0 18px rgba(255, 213, 106, 0.35);
+}
+
 #page-game .game-setup-footer {
-  padding: 12px 20px 12px;
+  padding: 16px 24px 14px;
   border-top: none;
   text-align: center;
   width: 100%;
   box-sizing: border-box;
   flex-shrink: 0;
   margin-top: auto;
+}
+
+#page-game .game-setup-start-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 6px 0 2px;
+}
+
+#page-game .game-setup-start-wrap::before {
+  content: '';
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  top: -6px;
+  bottom: -10px;
+  background:
+    radial-gradient(ellipse 55% 45% at 50% 0%, rgba(255, 213, 106, 0.42) 0%, transparent 72%),
+    radial-gradient(ellipse 70% 50% at 50% 100%, rgba(255, 213, 106, 0.28) 0%, transparent 68%);
+  filter: blur(14px);
+  pointer-events: none;
+  z-index: 0;
+  animation: arena-start-aura 3.2s ease-in-out infinite alternate;
+}
+
+@keyframes arena-start-aura {
+  from { opacity: 0.75; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1.02); }
+}
+
+#page-game .game-setup-start {
+  font-family: 'Cinzel', Georgia, serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
 }
 
 #page-game .game-modes-grid {
@@ -860,25 +1006,49 @@ body.arena-page-lock {
   text-align: center;
 }
 
-#page-game .diff-btn,
-#page-game .play-as-btn {
+#page-game .diff-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   padding: 6px 4px;
   min-height: 48px;
   width: 100%;
   gap: 4px;
   border-radius: 8px;
+  background: rgba(11, 11, 15, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 213, 106, 0.16);
+  cursor: pointer;
+  transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  box-sizing: border-box;
 }
 
 #page-game .diff-emoji {
   font-size: 18px;
 }
 
-#page-game .play-as-piece {
-  font-size: 22px;
+#page-game .diff-name {
+  font-size: 9px;
+  font-weight: 600;
+  color: rgba(245, 240, 230, 0.45);
+  text-align: center;
 }
 
-#page-game .play-as-btn {
-  min-height: 44px;
+#page-game .diff-btn:hover {
+  border-color: rgba(255, 213, 106, 0.4);
+  background: rgba(255, 213, 106, 0.06);
+}
+
+#page-game .diff-btn.selected {
+  border-color: rgba(255, 213, 106, 0.55);
+  background: rgba(255, 213, 106, 0.1);
+  box-shadow: 0 0 22px rgba(255, 213, 106, 0.2);
+}
+
+#page-game .diff-btn.selected .diff-name {
+  color: var(--arena-gold);
 }
 
 #page-game .game-setup-label {
@@ -901,63 +1071,14 @@ body.arena-page-lock {
   padding: 10px 14px;
 }
 
-#page-game .difficulty-selector,
-#page-game .play-as-selector {
+#page-game .difficulty-selector {
   display: grid;
   gap: 6px;
   width: 100%;
   max-width: 100%;
   margin: 0;
   box-sizing: border-box;
-}
-
-#page-game .difficulty-selector {
   grid-template-columns: repeat(7, minmax(0, 1fr));
-}
-
-#page-game .play-as-selector {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-#page-game .diff-btn,
-#page-game .play-as-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: rgba(11, 11, 15, 0.5);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 213, 106, 0.16);
-  cursor: pointer;
-  transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
-  box-sizing: border-box;
-}
-
-#page-game .play-as-label,
-#page-game .diff-name {
-  font-size: 9px;
-  font-weight: 600;
-  color: rgba(245, 240, 230, 0.45);
-  text-align: center;
-}
-
-#page-game .diff-btn:hover,
-#page-game .play-as-btn:hover {
-  border-color: rgba(255, 213, 106, 0.4);
-  background: rgba(255, 213, 106, 0.06);
-}
-
-#page-game .diff-btn.selected,
-#page-game .play-as-btn.selected {
-  border-color: rgba(255, 213, 106, 0.55);
-  background: rgba(255, 213, 106, 0.1);
-  box-shadow: 0 0 22px rgba(255, 213, 106, 0.2);
-}
-
-#page-game .diff-btn.selected .diff-name,
-#page-game .play-as-btn.selected .play-as-label {
-  color: var(--arena-gold);
 }
 
 #page-game .game-setup-start {

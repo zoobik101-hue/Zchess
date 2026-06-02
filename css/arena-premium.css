@@ -174,9 +174,8 @@
   display: none;
 }
 
-/* Chips */
-#page-game .diff-btn.epic-chip,
-#page-game .play-as-btn.epic-chip {
+/* Chips - difficulty only; play-as has dedicated styles in game-setup.css */
+#page-game .diff-btn.epic-chip {
   position: relative;
   overflow: hidden;
   background: linear-gradient(145deg, rgba(255, 213, 106, 0.05), rgba(11, 11, 15, 0.45));
@@ -186,32 +185,35 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
-#page-game .diff-btn.epic-chip.selected,
-#page-game .play-as-btn.epic-chip.selected {
+#page-game .diff-btn.epic-chip.selected {
   border-color: rgba(255, 213, 106, 0.48);
   box-shadow:
     0 0 26px rgba(255, 213, 106, 0.24),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-/* Start button - hero CTA */
+/* Start button - hero CTA (reference: wide gold pill + smoky aura) */
 #page-game .game-setup-start.epic-button {
   position: relative;
-  z-index: 2;
-  max-width: 480px;
+  z-index: 1;
+  display: block;
   width: 100%;
-  padding: 16px 36px;
-  font-size: clamp(13px, 1.4vw, 15px);
-  letter-spacing: 0.2em;
+  max-width: none;
+  padding: 17px 28px;
+  font-size: clamp(13px, 1.45vw, 15px);
+  font-weight: 800;
+  letter-spacing: 0.16em;
   border-radius: 12px;
-  border: none;
-  color: #120c04;
-  background: linear-gradient(180deg, #ffe8a3 0%, #ffd56a 32%, #d4a843 68%, #b98a2c 100%);
+  border: 1px solid rgba(255, 232, 163, 0.55);
+  color: #1a0e02;
+  background: linear-gradient(180deg, #fff0c4 0%, #ffd56a 28%, #e8b84a 62%, #c49a38 100%);
   box-shadow:
-    0 0 40px rgba(255, 213, 106, 0.5),
-    0 0 90px rgba(255, 213, 106, 0.22),
-    0 5px 0 #5a4210,
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    0 0 0 1px rgba(255, 213, 106, 0.35),
+    0 0 36px rgba(255, 213, 106, 0.55),
+    0 0 72px rgba(255, 213, 106, 0.22),
+    0 10px 28px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.58),
+    inset 0 -3px 12px rgba(140, 100, 20, 0.25);
   transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
   overflow: hidden;
   animation: arena-btn-glow 3s ease-in-out infinite;
@@ -220,17 +222,21 @@
 @keyframes arena-btn-glow {
   0%, 100% {
     box-shadow:
-      0 0 36px rgba(255, 213, 106, 0.45),
-      0 0 80px rgba(255, 213, 106, 0.18),
-      0 5px 0 #5a4210,
-      inset 0 1px 0 rgba(255, 255, 255, 0.48);
+      0 0 0 1px rgba(255, 213, 106, 0.32),
+      0 0 32px rgba(255, 213, 106, 0.48),
+      0 0 64px rgba(255, 213, 106, 0.18),
+      0 10px 28px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.52),
+      inset 0 -3px 12px rgba(140, 100, 20, 0.22);
   }
   50% {
     box-shadow:
-      0 0 52px rgba(255, 213, 106, 0.65),
-      0 0 110px rgba(255, 213, 106, 0.28),
-      0 5px 0 #5a4210,
-      inset 0 1px 0 rgba(255, 255, 255, 0.55);
+      0 0 0 1px rgba(255, 213, 106, 0.45),
+      0 0 48px rgba(255, 213, 106, 0.68),
+      0 0 96px rgba(255, 213, 106, 0.28),
+      0 12px 32px rgba(0, 0, 0, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6),
+      inset 0 -3px 14px rgba(140, 100, 20, 0.28);
   }
 }
 
@@ -239,7 +245,9 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.38) 0%, transparent 45%);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, transparent 38%),
+    radial-gradient(ellipse 90% 40% at 50% 100%, rgba(255, 200, 80, 0.25) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -248,10 +256,10 @@
   position: absolute;
   top: 0;
   left: -120%;
-  width: 60%;
+  width: 55%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
-  transform: skewX(-22deg);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.38), transparent);
+  transform: skewX(-20deg);
   animation: arena-light-sweep 4.5s ease-in-out infinite;
   pointer-events: none;
 }
@@ -263,19 +271,21 @@
 }
 
 #page-game .game-setup-start.epic-button:hover {
-  transform: translateY(-3px) scale(1.02);
-  filter: brightness(1.06);
+  transform: translateY(-2px) scale(1.015);
+  filter: brightness(1.05);
   animation: none;
   box-shadow:
-    0 0 60px rgba(255, 213, 106, 0.75),
-    0 0 120px rgba(255, 213, 106, 0.32),
-    0 7px 0 #5a4210,
-    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+    0 0 0 1px rgba(255, 213, 106, 0.5),
+    0 0 56px rgba(255, 213, 106, 0.75),
+    0 0 110px rgba(255, 213, 106, 0.32),
+    0 14px 36px rgba(0, 0, 0, 0.48),
+    inset 0 1px 0 rgba(255, 255, 255, 0.62),
+    inset 0 -3px 14px rgba(140, 100, 20, 0.3);
 }
 
 #page-game .game-setup-footer {
-  padding-top: 10px;
-  padding-bottom: calc(10px + var(--arena-chamfer));
+  padding-top: 14px;
+  padding-bottom: 10px;
 }
 
 /* Footer bar */
