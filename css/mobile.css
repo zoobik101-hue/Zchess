@@ -24,7 +24,7 @@ body.pwa-banner-visible {
 /* Mobile header - fit on screen */
 @media (max-width: 768px) {
   :root {
-    --nav-height: 56px;
+    --nav-height: 64px;
   }
 
   .navbar-inner {
@@ -37,11 +37,11 @@ body.pwa-banner-visible {
     gap: 6px;
     font-size: 17px;
     min-width: 0;
-    flex-shrink: 1;
+    flex-shrink: 0;
   }
 
   .logo-brand {
-    height: 48px;
+    height: 56px;
   }
 
   .logo-icon {

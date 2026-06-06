@@ -4,7 +4,7 @@
    Auto-reload when new version detected
    ============================================= */
 
-const CACHE_VERSION = 'zchess-217533141328157';
+const CACHE_VERSION = 'zchess-22971101046821';
 const STATIC_CACHE = `zchess-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `zchess-dynamic-${CACHE_VERSION}`;
 
@@ -55,6 +55,7 @@ const STATIC_ASSETS = [
   '/Zchess/assets/Image/Book.png',
   '/Zchess/assets/Image/Start_game.png',
   '/Zchess/assets/Image/Start_game_btn.png',
+  '/Zchess/assets/Image/Horse_nav.png',
   '/Zchess/assets/Image/Horse_in_a shield.png',
   '/Zchess/data/i18n/en.json',
   '/Zchess/data/i18n/ru.json',

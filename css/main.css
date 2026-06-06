@@ -47,7 +47,7 @@
   --color-info: #3b82f6;
 
   /* Spacing */
-  --nav-height: 64px;
+  --nav-height: 80px;
   --sidebar-width: 260px;
 
   /* Radii */
@@ -241,9 +241,10 @@ p { color: var(--text-secondary); }
 
 .logo-brand {
   display: block;
-  height: clamp(51px, 5.4vw, 63px);
+  height: clamp(68px, 7.2vw, 76px);
   width: auto;
   object-fit: contain;
+  flex-shrink: 0;
   pointer-events: none;
   user-select: none;
 }
