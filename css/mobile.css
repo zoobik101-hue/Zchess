@@ -369,6 +369,27 @@ body.pwa-banner-visible {
   .pwa-hero-cta .btn {
     width: 100%;
   }
+
+  /* Play page - PWA / mobile app */
+  #page-play.page-play-arena {
+    min-height: calc(100dvh - var(--nav-height) - var(--safe-top));
+  }
+
+  #page-play .chess-game-wrapper {
+    padding-left: max(var(--play-pad-left, 12px), var(--safe-left));
+    padding-right: max(var(--play-pad-right, 12px), var(--safe-right));
+  }
+}
+
+@media (display-mode: standalone) and (max-width: 960px) {
+  #page-play.page-play-arena {
+    min-height: calc(100dvh - var(--nav-height));
+    padding-bottom: calc(20px + var(--safe-bottom));
+  }
+
+  #page-play .chess-game-wrapper {
+    padding-bottom: calc(24px + var(--safe-bottom));
+  }
 }
 
 @media (max-width: 480px) {
@@ -376,8 +397,16 @@ body.pwa-banner-visible {
     --board-size: min(calc(100vw - 12px), calc(100dvh - 280px));
   }
 
+  #page-play.page-play-arena {
+    --board-size: min(calc(100vw - 24px), calc(100dvh - var(--nav-height) - 380px));
+  }
+
   .chess-game-wrapper {
     padding: 8px 4px;
+  }
+
+  #page-play .chess-game-wrapper {
+    padding: 8px 6px 20px;
   }
 
   .player-bar {

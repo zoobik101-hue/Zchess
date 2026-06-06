@@ -1771,6 +1771,14 @@ body:has(#page-play.active) {
   overflow: hidden;
 }
 
+@media (max-width: 960px) {
+  body:has(#page-play.active) {
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 /* =========================================
    RESPONSIVE
    ========================================= */
@@ -1784,13 +1792,17 @@ body:has(#page-play.active) {
     --play-sidebar-w: 100%;
     --play-pad-left: 12px;
     --play-pad-right: 12px;
+    --play-pad-y: 10px;
+    --play-inner-h: auto;
     --board-size: min(
-      calc(100vw - var(--play-pad-left) - var(--play-pad-right) - 20px),
-      calc(55dvh - var(--play-pad-y))
+      calc(100vw - var(--play-pad-left) - var(--play-pad-right) - 24px),
+      calc(100dvh - var(--nav-height) - 340px)
     );
     height: auto;
+    min-height: calc(100dvh - var(--nav-height));
     max-height: none;
     overflow: visible;
+    padding-bottom: calc(var(--play-pad-y) + env(safe-area-inset-bottom, 0px));
   }
 
   #page-play.active {
@@ -1798,28 +1810,84 @@ body:has(#page-play.active) {
   }
 
   #page-play .chess-game-wrapper {
+    flex: none;
     flex-direction: column;
-    align-items: stretch;
+    align-items: center;
     justify-content: flex-start;
-    gap: 12px;
+    gap: 14px;
+    overflow: visible;
+    min-height: 0;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   }
 
   #page-play .chess-main-panel {
     align-self: center;
+    flex: none;
+    max-height: none;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  #page-play .chess-board-wrap {
+    max-height: none;
   }
 
   #page-play .chess-side-panel {
-    width: 100%;
+    width: min(100%, calc(var(--board-size) + 28px));
     flex: none;
-    max-width: var(--board-size);
+    max-width: 100%;
     max-height: none;
+    height: auto;
+    overflow: visible;
     margin: 0 auto;
+    clip-path: none;
+    border-radius: 12px;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-self: stretch;
+  }
+
+  #page-play .play-sidebar-glass {
     clip-path: none;
     border-radius: 12px;
   }
 
+  #page-play .play-players-stack,
+  #page-play .turn-indicator-wrap,
+  #page-play .match-info-panel,
+  #page-play .mp-status-bar,
+  #page-play .game-controls-panel,
+  #page-play .training-panel {
+    flex-shrink: 0;
+    flex: none;
+  }
+
+  #page-play .game-controls-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+  }
+
+  #page-play .btn-game-control {
+    flex-direction: row;
+    justify-content: flex-start;
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 11px;
+  }
+
   #page-play .move-history-panel {
-    max-height: 120px;
+    flex: none;
+    min-height: 110px;
+    max-height: none;
+    height: auto;
+    width: 100%;
+  }
+
+  #page-play .training-panel {
+    max-height: none;
+    width: 100%;
   }
 
   .chess-game-wrapper {
@@ -1860,8 +1928,18 @@ body:has(#page-play.active) {
 @media (max-width: 600px) {
   :root { --board-size: calc(100vw - 16px); }
 
+  #page-play.page-play-arena {
+    --board-size: min(calc(100vw - 28px), calc(100dvh - var(--nav-height) - 360px));
+    --play-pad-left: 8px;
+    --play-pad-right: 8px;
+  }
+
   .chess-game-wrapper { padding: 10px 8px; gap: 8px; }
+  #page-play .chess-game-wrapper { padding: 10px 8px 20px; }
+
   .player-bar { max-width: var(--board-size); }
+  #page-play .player-bar { max-width: none; }
+
   .piece-img { width: 100%; height: 100%; }
 
   .chess-board-container::before,
