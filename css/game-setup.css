@@ -814,7 +814,7 @@ body.arena-page-lock {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 44px;
+  gap: 18px;
 }
 
 #page-game .game-setup-play-as {
@@ -946,23 +946,41 @@ body.arena-page-lock {
   display: block;
   width: 100%;
   max-width: 420px;
-  height: clamp(54px, 5.8vw, 64px);
   margin: 0 auto;
   padding: 0;
   border: none;
-  background: transparent url('../assets/Image/Start_game.png') center center / contain no-repeat;
-  mix-blend-mode: screen;
+  background: transparent;
   cursor: pointer;
+  line-height: 0;
+  transition: filter 0.25s ease, transform 0.25s ease;
+}
+
+#page-game .game-setup-start-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 8px 20px rgba(255, 140, 40, 0.22));
   transition: filter 0.25s ease, transform 0.25s ease;
 }
 
 #page-game .game-setup-start--image:hover {
-  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+#page-game .game-setup-start--image:hover .game-setup-start-img {
+  filter: drop-shadow(0 10px 26px rgba(255, 213, 106, 0.38)) brightness(1.05);
 }
 
 #page-game .game-setup-start--image:active {
-  filter: brightness(0.95);
-  transform: scale(0.985);
+  transform: translateY(0);
+}
+
+#page-game .game-setup-start--image:active .game-setup-start-img {
+  filter: drop-shadow(0 6px 14px rgba(255, 140, 40, 0.18)) brightness(0.97);
+  transform: scale(0.99);
 }
 
 #page-game .game-setup-start {
