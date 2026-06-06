@@ -334,8 +334,12 @@ const Multiplayer = {
     try {
       const app = ZChess.App;
       if (app?.navigate) {
+        app._skipPlayResume = true;
         app.navigate('play');
-        setTimeout(launch, 300);
+        setTimeout(() => {
+          launch();
+          app._skipPlayResume = false;
+        }, 300);
       } else {
         window.location.hash = '#play';
         setTimeout(launch, 500);

@@ -643,17 +643,61 @@ const ChessBoard = {
     try {
       const saved = localStorage.getItem(ZChess.STORAGE.GAME_STATE);
       if (!saved) return false;
+
+      if (localStorage.getItem('zchess_room')) return false;
+
       const data = JSON.parse(saved);
-      Object.assign(this, data);
+      if (data.gameOver || !data.gameState) {
+        localStorage.removeItem(ZChess.STORAGE.GAME_STATE);
+        return false;
+      }
+      if (data.multiplayerMode) return false;
+      if (!data.isAIGame && !data.trainingMode) return false;
+
+      this.gameState = data.gameState;
+      this.isAIGame = !!data.isAIGame;
+      this.aiDifficulty = data.aiDifficulty || 'medium';
+      this.playerColor = data.playerColor || 'w';
+      this.flipped = !!data.flipped;
+      this.gameOver = false;
+      this.multiplayerMode = false;
+      this.trainingMode = !!data.trainingMode;
+      this.trainingPuzzle = !!data.trainingPuzzle;
+      this.isThinking = false;
+      this.selectedSquare = null;
+      this.legalMovesForSelected = [];
+      this.undoHistory = [];
+
+      this._squares = null;
       this._prevPieces = Array.from({ length: 8 }, () => new Array(8).fill(null));
+      this._resetRenderCaches();
+
       this.initBoard();
+      this._applyBoardOrientation();
+      this.updateCoordinates();
       this.render();
       this.updateTurnIndicator();
       this.updatePlayerBars();
+      this.updateMatchInfoPanel();
+
+      if (this.isAIGame && this.gameState.turn !== this.playerColor && !this.gameOver) {
+        this.triggerAIMove();
+      }
+
       return true;
     } catch (e) {
+      console.warn('[ChessBoard] resumeGame failed:', e);
+      localStorage.removeItem(ZChess.STORAGE.GAME_STATE);
       return false;
     }
+  },
+
+  _flushGameStateSync() {
+    if (this._saveStateTimer) {
+      clearTimeout(this._saveStateTimer);
+      this._saveStateTimer = null;
+    }
+    this._flushGameState();
   },
 
   saveGameState() {
@@ -663,6 +707,7 @@ const ChessBoard = {
 
   _flushGameState() {
     this._saveStateTimer = null;
+    if (this.multiplayerMode || this.gameOver || !this.gameState) return;
     try {
       const gs = this.gameState;
       localStorage.setItem(ZChess.STORAGE.GAME_STATE, JSON.stringify({
@@ -681,7 +726,9 @@ const ChessBoard = {
         aiDifficulty: this.aiDifficulty,
         playerColor: this.playerColor,
         flipped: this.flipped,
-        gameOver: this.gameOver
+        gameOver: this.gameOver,
+        trainingMode: this.trainingMode,
+        trainingPuzzle: this.trainingPuzzle
       }));
     } catch (e) {}
   },
@@ -1680,6 +1727,11 @@ self.onmessage = function(e) {
   // =========================================
 
   init() {
+    window.addEventListener('beforeunload', () => {
+      if (this.gameState && !this.gameOver && (this.isAIGame || this.trainingMode)) {
+        this._flushGameStateSync();
+      }
+    });
     console.log('[ZChess] ChessBoard module loaded');
   }
 };

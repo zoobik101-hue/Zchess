@@ -320,11 +320,13 @@ const Training = {
     this._moveIndex = 0;
     this._hintsUsed = 0;
 
+    ZChess.App._skipPlayResume = true;
     ZChess.App.navigate('play');
     setTimeout(() => {
       ZChess.ChessBoard.startTrainingLesson(lesson);
       this._showPanel(true);
       this._updateLessonUI();
+      ZChess.App._skipPlayResume = false;
     }, 120);
   },
 
@@ -340,6 +342,7 @@ const Training = {
     this._moveIndex = 0;
     this._hintsUsed = 0;
 
+    ZChess.App._skipPlayResume = true;
     ZChess.App.navigate('play');
     setTimeout(() => {
       ZChess.ChessBoard.startGame({
@@ -350,6 +353,7 @@ const Training = {
       });
       this._showPanel(true);
       this._setCoachUI();
+      ZChess.App._skipPlayResume = false;
     }, 120);
   },
 

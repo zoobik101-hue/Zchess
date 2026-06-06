@@ -249,6 +249,8 @@
     "undo_move": "Undo",
     "flip_board": "Flip Board",
     "move_history": "Move History",
+    "game_resumed": "Game restored",
+    "no_saved_game": "No saved game found",
     "captured_pieces": "Captured",
     "promote_title": "Promote Pawn",
     "promote_queen": "Queen",

@@ -222,9 +222,7 @@ const App = {
         this.initGameSetupPage();
         break;
       case 'play':
-        if (this._pendingRoomCode) {
-          this._joinRoomFromInviteLink(this._pendingRoomCode);
-        }
+        this._initPlayPage();
         break;
       case 'profile':
         this.initProfilePage();
@@ -375,7 +373,7 @@ const App = {
       playerColor = Math.random() < 0.5 ? 'w' : 'b';
     }
 
-    // Navigate to play page
+    this._skipPlayResume = true;
     this.navigate('play');
 
     // Small delay to let page render
@@ -385,7 +383,36 @@ const App = {
         difficulty: opts.difficulty,
         playerColor
       });
+      this._skipPlayResume = false;
     }, 100);
+  },
+
+  async _initPlayPage() {
+    if (this._pendingRoomCode) {
+      await this._joinRoomFromInviteLink(this._pendingRoomCode);
+      return;
+    }
+    if (this._skipPlayResume) return;
+
+    const MP = ZChess.Multiplayer;
+    if (ZChess.Auth?.currentUser && MP?.status === 'idle') {
+      const reconnected = await MP.tryReconnect();
+      if (reconnected) return;
+    }
+    if (MP?.status === 'playing') return;
+
+    const CB = ZChess.ChessBoard;
+    if (CB?.resumeGame()) {
+      const msg = typeof t === 'function' ? t('board.game_resumed') : 'Игра восстановлена';
+      ZChess.Notifications?.info(msg);
+      return;
+    }
+
+    const msg = typeof t === 'function' ? t('board.no_saved_game') : 'Партия не найдена - выберите режим заново';
+    ZChess.Notifications?.info(msg);
+    this._skipPlayResume = true;
+    this.navigate('game');
+    this._skipPlayResume = false;
   },
 
   initProfilePage() {
@@ -875,9 +902,12 @@ const App = {
     }
   },
 
-  _isActiveMultiplayerGame() {
+  _isActiveGameSession() {
+    const CB = ZChess.ChessBoard;
     const MP = ZChess.Multiplayer;
-    return !!(MP && MP.status === 'playing' && !ZChess.ChessBoard?.gameOver);
+    if (MP?.status === 'playing' && !CB?.gameOver) return true;
+    if (!CB || CB.gameOver || !CB.gameState) return false;
+    return !!(CB.isAIGame || CB.multiplayerMode || CB.trainingMode);
   },
 
   checkPendingUpdate() {
@@ -885,7 +915,7 @@ const App = {
   },
 
   async applySiteUpdate(reason) {
-    if (this._isActiveMultiplayerGame()) {
+    if (this._isActiveGameSession()) {
       this._pendingSiteUpdate = true;
       const msg = typeof t === 'function' ? t('update.after_game') : 'Update will apply after the game';
       ZChess.Notifications?.info(msg);

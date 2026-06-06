@@ -249,6 +249,8 @@
     "undo_move": "Скасувати хід",
     "flip_board": "Повернути дошку",
     "move_history": "Історія ходів",
+    "game_resumed": "Партію відновлено",
+    "no_saved_game": "Збережену партію не знайдено",
     "captured_pieces": "Взяті",
     "promote_title": "Перетворення пішака",
     "promote_queen": "Ферзь",

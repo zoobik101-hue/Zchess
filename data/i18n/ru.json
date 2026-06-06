@@ -249,6 +249,8 @@
     "undo_move": "Отменить ход",
     "flip_board": "Повернуть доску",
     "move_history": "История ходов",
+    "game_resumed": "Партия восстановлена",
+    "no_saved_game": "Сохранённая партия не найдена",
     "captured_pieces": "Взятые",
     "promote_title": "Превращение пешки",
     "promote_queen": "Ферзь",
