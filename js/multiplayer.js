@@ -299,8 +299,8 @@ const Multiplayer = {
       if (el) el.textContent = n;
 
       if (n <= 0) {
-        // Close lobby, navigate to board, start game
-        if (overlay) overlay.classList.remove('open');
+        // Navigate to board and start game
+        this._showLobbyState('lobby-choose');
 
         const launch = () => {
           ZChess.ChessBoard.startMultiplayerGame({ playerColor, opponentName, opponentRating, opponentAvatar, opponentUid });
