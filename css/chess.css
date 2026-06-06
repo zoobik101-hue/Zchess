@@ -1477,6 +1477,201 @@ html.perf-lite .result-emblem {
 }
 
 /* =========================================
+   PLAY PAGE - viewport-fit layout
+   Board left, compact sidebar right, no scroll
+   ========================================= */
+
+#page-play {
+  --play-sidebar-w: 268px;
+  --play-gap: 14px;
+  --play-pad-x: 12px;
+  --play-pad-y: 10px;
+  --board-size: min(
+    calc(100dvh - var(--nav-height) - var(--play-pad-y) * 2),
+    calc(100vw - var(--play-sidebar-w) - var(--play-gap) - var(--play-pad-x) * 2 - 20px)
+  );
+  height: 100dvh;
+  min-height: 0;
+  max-height: 100dvh;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+#page-play.active {
+  display: flex;
+  flex-direction: column;
+}
+
+#page-play .chess-game-wrapper {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: auto var(--play-sidebar-w);
+  grid-template-rows: 1fr;
+  gap: var(--play-gap);
+  align-items: center;
+  justify-content: start;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: var(--play-pad-y) var(--play-pad-x);
+  box-sizing: border-box;
+}
+
+#page-play .chess-main-panel {
+  align-self: center;
+  justify-self: start;
+}
+
+#page-play .chess-side-panel {
+  width: var(--play-sidebar-w);
+  height: 100%;
+  max-height: calc(100dvh - var(--nav-height) - var(--play-pad-y) * 2);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+#page-play .play-players-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+#page-play .player-bar {
+  max-width: none;
+  padding: 7px 10px;
+  gap: 8px;
+  border-radius: 8px;
+}
+
+#page-play .player-avatar-sm {
+  width: 32px;
+  height: 32px;
+  font-size: 13px;
+}
+
+#page-play .player-name-sm {
+  font-size: 12px;
+}
+
+#page-play .player-rating-sm {
+  font-size: 10px;
+}
+
+#page-play .captured-piece-img {
+  width: 16px;
+  height: 16px;
+}
+
+#page-play .turn-indicator-wrap {
+  max-width: none;
+  min-height: 36px;
+  margin-top: 0;
+  flex-shrink: 0;
+}
+
+#page-play.is-multiplayer .turn-indicator-wrap {
+  display: none;
+}
+
+#page-play .turn-indicator {
+  min-height: 34px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+#page-play .match-info-panel {
+  padding: 10px 12px;
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+
+#page-play .match-info-panel h4 {
+  margin-bottom: 6px;
+  font-size: 10px;
+}
+
+#page-play .match-chip-row {
+  margin-bottom: 5px;
+}
+
+#page-play .match-chip {
+  padding: 4px 10px;
+  font-size: 11px;
+}
+
+#page-play .match-turn-banner {
+  margin-top: 6px;
+  padding: 7px 10px;
+  font-size: 12px;
+}
+
+#page-play .game-controls-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+#page-play .btn-game-control {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 6px;
+  font-size: 10px;
+  text-align: center;
+}
+
+#page-play .btn-game-control .icon {
+  font-size: 16px;
+}
+
+#page-play .btn-game-control:hover {
+  transform: none;
+}
+
+#page-play .training-panel {
+  flex-shrink: 0;
+  max-height: 38%;
+  overflow-y: auto;
+}
+
+#page-play .move-history-panel {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+  padding: 10px;
+}
+
+#page-play .move-history-panel h4 {
+  margin-bottom: 6px;
+  font-size: 10px;
+}
+
+#page-play .move-history-row {
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+#page-play .move-history-row {
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+#page-play .chess-board {
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.55);
+}
+
+body:has(#page-play.active) {
+  overflow: hidden;
+}
+
+/* =========================================
    RESPONSIVE
    ========================================= */
 
@@ -1485,6 +1680,43 @@ html.perf-lite .result-emblem {
 }
 
 @media (max-width: 960px) {
+  #page-play {
+    --play-sidebar-w: 100%;
+    --board-size: min(
+      calc(100vw - var(--play-pad-x) * 2 - 20px),
+      calc(55dvh - var(--play-pad-y))
+    );
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  #page-play.active {
+    display: block;
+  }
+
+  #page-play .chess-game-wrapper {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    justify-content: center;
+    align-items: stretch;
+  }
+
+  #page-play .chess-main-panel {
+    justify-self: center;
+  }
+
+  #page-play .chess-side-panel {
+    width: 100%;
+    max-width: var(--board-size);
+    max-height: none;
+    margin: 0 auto;
+  }
+
+  #page-play .move-history-panel {
+    max-height: 120px;
+  }
+
   .chess-game-wrapper {
     flex-direction: column;
     align-items: center;

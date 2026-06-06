@@ -359,6 +359,7 @@ const ChessBoard = {
 
     const show = this.multiplayerMode && !this.gameOver;
     panel.style.display = show ? '' : 'none';
+    document.getElementById('page-play')?.classList.toggle('is-multiplayer', show);
     if (!show) return;
 
     const youChip = document.getElementById('match-you-chip');

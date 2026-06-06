@@ -319,7 +319,7 @@ body.pwa-banner-visible {
     height: 140px;
   }
 
-  .mp-status-bar {
+  .mp-status-bar:not(#page-play .mp-status-bar) {
     bottom: calc(12px + var(--safe-bottom));
     left: 12px;
     right: 12px;
@@ -328,7 +328,7 @@ body.pwa-banner-visible {
     min-width: 0;
   }
 
-  body.pwa-banner-visible .mp-status-bar {
+  body.pwa-banner-visible .mp-status-bar:not(#page-play .mp-status-bar) {
     bottom: calc(96px + var(--safe-bottom));
   }
 

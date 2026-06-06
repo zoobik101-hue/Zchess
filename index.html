@@ -42,7 +42,7 @@
   <!-- Styles -->
   <link rel="stylesheet" href="css/animations.css">
   <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="css/chess.css">
+  <link rel="stylesheet" href="css/chess.css?v=play2">
   <link rel="stylesheet" href="css/multiplayer.css">
   <link rel="stylesheet" href="css/training.css">
   <link rel="stylesheet" href="css/game-setup.css?v=arena34">
@@ -663,20 +663,8 @@
   <div id="page-play" class="page">
     <div class="chess-game-wrapper">
 
-      <!-- Main Chess Panel -->
+      <!-- Board column (left) -->
       <div class="chess-main-panel">
-
-        <!-- Black player bar (top) -->
-        <div class="player-bar" id="player-bar-black">
-          <div class="player-avatar-sm" id="player-avatar-black"></div>
-          <div class="player-info-text">
-            <div class="player-name-sm">Black</div>
-            <div class="player-rating-sm"></div>
-          </div>
-          <div class="player-captured" id="captured-by-black"></div>
-        </div>
-
-        <!-- Chess Board -->
         <div class="chess-board-wrap">
           <div class="board-coordinates" id="board-row-labels">
             <span class="coord-label">8</span>
@@ -688,7 +676,7 @@
             <span class="coord-label">2</span>
             <span class="coord-label">1</span>
           </div>
-          <div>
+          <div class="chess-board-inner">
             <div class="chess-board" id="chess-board" role="grid" aria-label="Chess Board"></div>
             <div class="board-coordinates-bottom" id="board-col-labels">
               <span class="coord-label">a</span>
@@ -702,27 +690,35 @@
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- White player bar (bottom) -->
-        <div class="player-bar" id="player-bar-white" style="order:1">
-          <div class="player-avatar-sm" id="player-avatar-white"></div>
-          <div class="player-info-text">
-            <div class="player-name-sm">White</div>
-            <div class="player-rating-sm"></div>
+      <!-- Controls column (right) -->
+      <div class="chess-side-panel">
+
+        <div class="play-players-stack">
+          <div class="player-bar" id="player-bar-black">
+            <div class="player-avatar-sm" id="player-avatar-black"></div>
+            <div class="player-info-text">
+              <div class="player-name-sm">Black</div>
+              <div class="player-rating-sm"></div>
+            </div>
+            <div class="player-captured" id="captured-by-black"></div>
           </div>
-          <div class="player-captured" id="captured-by-white"></div>
+          <div class="player-bar" id="player-bar-white">
+            <div class="player-avatar-sm" id="player-avatar-white"></div>
+            <div class="player-info-text">
+              <div class="player-name-sm">White</div>
+              <div class="player-rating-sm"></div>
+            </div>
+            <div class="player-captured" id="captured-by-white"></div>
+          </div>
         </div>
 
-        <!-- Turn Indicator (fixed height - no layout shift when AI thinks) -->
         <div class="turn-indicator-wrap">
           <div id="turn-indicator" class="turn-indicator your-turn">
             <div class="turn-dot"></div> Your turn
           </div>
         </div>
-      </div>
-
-      <!-- Side Panel -->
-      <div class="chess-side-panel">
 
         <!-- Match info (multiplayer) -->
         <div class="match-info-panel" id="match-info-panel" style="display:none">
@@ -734,6 +730,21 @@
             <span class="match-chip match-chip-opp" id="match-opp-chip">♚ Opponent</span>
           </div>
           <div class="match-turn-banner" id="match-turn-banner"></div>
+        </div>
+
+        <!-- Multiplayer HUD (inline in sidebar) -->
+        <div class="mp-status-bar" id="mp-status-bar" style="display:none">
+          <div class="mp-hud-row">
+            <span id="mp-opp-status" class="mp-status-ok">● Онлайн</span>
+            <span id="mp-turn-label" class="mp-turn-label">⚡ Ваш ход</span>
+            <div class="mp-move-timer" id="mp-move-timer">
+              <span>⏱</span>
+              <span id="mp-move-timer-val">2:00</span>
+            </div>
+          </div>
+          <div class="mp-timer-bar-wrap">
+            <div class="mp-timer-bar-fill" id="mp-timer-bar-fill"></div>
+          </div>
         </div>
 
         <!-- Game Controls -->
@@ -1401,21 +1412,6 @@
         <button type="button" class="btn btn-secondary pwa-btn-later" id="pwa-btn-later"></button>
       </div>
     </div>
-  </div>
-</div>
-
-<!-- In-game multiplayer HUD (shown during multiplayer) -->
-<div class="mp-status-bar" id="mp-status-bar" style="display:none">
-  <div class="mp-hud-row">
-    <span id="mp-opp-status" class="mp-status-ok">● Онлайн</span>
-    <span id="mp-turn-label" class="mp-turn-label">⚡ Ваш ход</span>
-    <div class="mp-move-timer" id="mp-move-timer">
-      <span>⏱</span>
-      <span id="mp-move-timer-val">2:00</span>
-    </div>
-  </div>
-  <div class="mp-timer-bar-wrap">
-    <div class="mp-timer-bar-fill" id="mp-timer-bar-fill"></div>
   </div>
 </div>
 
