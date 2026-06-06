@@ -122,23 +122,17 @@ def trim_rows(rows, w, h, lum_min=18, pad_ratio_x=0.02, pad_ratio_y=0.04):
     return cropped, right - left + 1, bottom - top + 1
 
 
-def crop_center_width(rows, cw, ch, width_ratio=0.62):
-    """Remove wide lens flares; keep shield-centered band."""
-    keep_w = max(1, int(cw * width_ratio))
-    x0 = max(0, (cw - keep_w) // 2)
-    x1 = x0 + keep_w
-    out = []
-    for row in rows:
-        out.append(bytearray(row[x0 * 4 : x1 * 4]))
-    return out, keep_w, ch
+def trim_shield_nav(rows, cw, ch, shield_ratio=SHIELD_RATIO):
+    """Keep shield + ring; drop ZChess text below."""
+    shield_h = max(1, int(ch * shield_ratio))
+    shield_rows = rows[:shield_h]
+    return trim_rows(shield_rows, cw, shield_h, lum_min=16, pad_ratio_x=0.06, pad_ratio_y=0.05)
 
 
 def main():
     w, h, rows = read_png(SRC)
     cropped, cw, ch = trim_rows(rows, w, h)
-    shield_h = max(1, int(ch * SHIELD_RATIO))
-    shield_rows = cropped[:shield_h]
-    nav_rows, nw, nh = crop_center_width(shield_rows, cw, shield_h, width_ratio=0.58)
+    nav_rows, nw, nh = trim_shield_nav(cropped, cw, ch)
     write_png(OUT_NAV, nw, nh, nav_rows)
     print(f"source {w}x{h} -> trimmed {cw}x{ch} -> nav {nw}x{nh} -> {OUT_NAV}")
 

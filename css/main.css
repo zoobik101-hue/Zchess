@@ -201,6 +201,7 @@ p { color: var(--text-secondary); }
   height: var(--nav-height);
   display: flex;
   align-items: center;
+  overflow: visible;
   background: rgba(8, 8, 16, 0.96);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
@@ -235,6 +236,7 @@ p { color: var(--text-secondary); }
   cursor: pointer;
   transition: opacity var(--transition-fast);
   flex-shrink: 0;
+  overflow: visible;
 }
 
 .navbar-logo:hover { opacity: 0.85; }
