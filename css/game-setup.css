@@ -681,11 +681,13 @@ body.arena-page-lock {
 }
 
 .arena-premium-icon {
-  width: 16px;
-  height: 16px;
+  display: block;
+  width: auto;
+  height: 32px;
   flex-shrink: 0;
-  fill: var(--arena-gold);
-  filter: drop-shadow(0 0 6px rgba(255, 213, 106, 0.45));
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
 }
 
 .arena-premium-text {
