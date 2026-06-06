@@ -390,6 +390,14 @@ body.pwa-banner-visible {
   #page-play .chess-game-wrapper {
     padding-bottom: calc(24px + var(--safe-bottom));
   }
+
+  #page-game.page-game-arena {
+    min-height: calc(100dvh - var(--nav-height));
+  }
+
+  #page-game .game-setup-shell {
+    padding-bottom: calc(32px + var(--safe-bottom));
+  }
 }
 
 @media (max-width: 480px) {
