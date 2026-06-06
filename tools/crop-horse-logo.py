@@ -126,13 +126,28 @@ def trim_shield_nav(rows, cw, ch, shield_ratio=SHIELD_RATIO):
     """Keep shield + ring; drop ZChess text below."""
     shield_h = max(1, int(ch * shield_ratio))
     shield_rows = rows[:shield_h]
-    return trim_rows(shield_rows, cw, shield_h, lum_min=16, pad_ratio_x=0.06, pad_ratio_y=0.05)
+    return trim_rows(shield_rows, cw, shield_h, lum_min=16, pad_ratio_x=0.1, pad_ratio_y=0.06)
+
+
+def pad_symmetric(rows, nw, nh, pad_x_pct=0.1, pad_y_pct=0.05):
+    pad_x = max(12, int(nw * pad_x_pct))
+    pad_y = max(8, int(nh * pad_y_pct))
+    out_w = nw + pad_x * 2
+    blank = b"\x00\x00\x00\x00" * out_w
+    out = [bytearray(blank) for _ in range(pad_y)]
+    for row in rows:
+        padded = bytearray(blank)
+        padded[pad_x * 4 : (pad_x + nw) * 4] = row
+        out.append(padded)
+    out.extend(bytearray(blank) for _ in range(pad_y))
+    return out, out_w, nh + pad_y * 2
 
 
 def main():
     w, h, rows = read_png(SRC)
     cropped, cw, ch = trim_rows(rows, w, h)
     nav_rows, nw, nh = trim_shield_nav(cropped, cw, ch)
+    nav_rows, nw, nh = pad_symmetric(nav_rows, nw, nh, pad_x_pct=0.1, pad_y_pct=0.04)
     write_png(OUT_NAV, nw, nh, nav_rows)
     print(f"source {w}x{h} -> trimmed {cw}x{ch} -> nav {nw}x{nh} -> {OUT_NAV}")
 
