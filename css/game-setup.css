@@ -298,8 +298,9 @@ body.arena-page-lock {
 }
 
 #page-game .arena-window-stats .arena-streak-icon {
-  width: 22px;
-  height: 22px;
+  width: 14px;
+  height: 16px;
+  transform: translateY(2px);
 }
 
 #page-game .arena-window-tasks .arena-window-link {
@@ -573,11 +574,17 @@ body.arena-page-lock {
 .arena-streak-val {
   margin: 0;
   display: inline-flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: flex-end;
-  gap: 5px;
+  gap: 4px;
   min-width: 0;
   line-height: 1;
+}
+
+.arena-streak-metric {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
 }
 
 .arena-streak-val strong {
@@ -586,6 +593,7 @@ body.arena-page-lock {
   font-weight: 700;
   font-family: 'Segoe UI', system-ui, sans-serif;
   line-height: 1;
+  display: inline-block;
 }
 
 .arena-streak-suffix {
@@ -599,11 +607,10 @@ body.arena-page-lock {
 
 .arena-streak-icon {
   display: block;
-  width: 22px;
-  height: 22px;
+  width: 14px;
+  height: 16px;
   flex-shrink: 0;
-  align-self: center;
-  overflow: visible;
+  transform: translateY(2px);
 }
 
 .arena-window-body {
@@ -1383,6 +1390,16 @@ html[data-no-animations="true"] #page-game .glass-panel {
   backdrop-filter: blur(16px) saturate(1.15);
   -webkit-backdrop-filter: blur(16px) saturate(1.15);
   background: var(--arena-glass-bg);
+}
+
+html.perf-lite #page-game .arena-window-stats.glass-panel,
+html.perf-touch #page-game .arena-window-stats.glass-panel,
+html[data-no-animations="true"] #page-game .arena-window-stats.glass-panel {
+  background: rgba(5, 5, 8, 0.22);
+  backdrop-filter: blur(14px) saturate(1.08);
+  -webkit-backdrop-filter: blur(14px) saturate(1.08);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+  border-color: rgba(255, 213, 106, 0.1);
 }
 
 html.perf-lite #page-game .game-mode-card,
