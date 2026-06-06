@@ -926,24 +926,51 @@ body.arena-page-lock {
 }
 
 #page-game .game-setup-start-wrap::before {
-  content: '';
-  position: absolute;
-  left: 2%;
-  right: 2%;
-  top: -4px;
-  bottom: -8px;
-  background:
-    radial-gradient(ellipse 50% 40% at 50% 0%, rgba(255, 213, 106, 0.55) 0%, transparent 70%),
-    radial-gradient(ellipse 55% 45% at 50% 100%, rgba(255, 160, 50, 0.45) 0%, transparent 68%);
-  filter: blur(10px);
-  pointer-events: none;
-  z-index: 0;
-  animation: arena-start-aura 3.2s ease-in-out infinite alternate;
+  display: none;
 }
 
-@keyframes arena-start-aura {
-  from { opacity: 0.75; transform: scale(0.98); }
-  to { opacity: 1; transform: scale(1.02); }
+#page-game .game-setup-start--image {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+  line-height: 0;
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+#page-game .game-setup-start-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 0 18px rgba(255, 213, 106, 0.28));
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+#page-game .game-setup-start--image:hover {
+  transform: translateY(-2px);
+}
+
+#page-game .game-setup-start--image:hover .game-setup-start-img {
+  filter: drop-shadow(0 0 28px rgba(255, 213, 106, 0.48)) brightness(1.06);
+}
+
+#page-game .game-setup-start--image:active {
+  transform: translateY(0);
+}
+
+#page-game .game-setup-start--image:active .game-setup-start-img {
+  filter: drop-shadow(0 0 14px rgba(255, 213, 106, 0.35)) brightness(0.96);
+  transform: scale(0.985);
 }
 
 #page-game .game-setup-start {

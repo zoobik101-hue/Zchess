@@ -192,8 +192,8 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-/* Start button - transparent glass + gold/fire (reference) */
-#page-game .game-setup-start.epic-button {
+/* Start button - Start_game.png asset */
+#page-game .game-setup-start.epic-button:not(.game-setup-start--image) {
   position: relative;
   z-index: 1;
   display: block;
@@ -241,7 +241,7 @@
   }
 }
 
-#page-game .game-setup-start.epic-button::before {
+#page-game .game-setup-start.epic-button:not(.game-setup-start--image)::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -264,7 +264,7 @@
   to { opacity: 0.95; transform: scale(1.03); }
 }
 
-#page-game .game-setup-start.epic-button::after {
+#page-game .game-setup-start.epic-button:not(.game-setup-start--image)::after {
   content: '';
   position: absolute;
   z-index: 0;
@@ -285,7 +285,7 @@
   100% { left: 180%; opacity: 0; }
 }
 
-#page-game .game-setup-start.epic-button:hover {
+#page-game .game-setup-start.epic-button:not(.game-setup-start--image):hover {
   transform: translateY(-2px);
   animation: none;
   color: #fff0c4;
