@@ -104,46 +104,36 @@
   transform: translateY(-2px);
 }
 
-/* Mode cards */
+/* Mode cards - no epic-card square overlays */
 #page-game .game-mode-card.epic-card {
   border-radius: 14px;
+  overflow: hidden;
+  box-shadow: none;
+  background: rgba(11, 11, 15, 0.28);
+  backdrop-filter: blur(18px) saturate(1.25);
+  -webkit-backdrop-filter: blur(18px) saturate(1.25);
+  border: 1px solid rgba(255, 213, 106, 0.18);
 }
 
-#page-game .game-mode-card.epic-card::before {
-  animation: none;
-  opacity: 0.1;
+#page-game .game-mode-card.epic-card::before,
+#page-game .game-mode-card.epic-card::after {
+  display: none;
+  content: none;
 }
 
 #page-game .game-mode-card.epic-card.selected {
-  transform: translateY(-5px) scale(1.02);
+  transform: translateY(-2px);
   border-color: rgba(255, 213, 106, 0.62);
-  background: linear-gradient(
-    145deg,
-    rgba(255, 213, 106, 0.14) 0%,
-    rgba(40, 28, 8, 0.32) 50%,
-    rgba(5, 5, 5, 0.34) 100%
-  );
-  box-shadow:
-    0 0 48px rgba(255, 213, 106, 0.32),
-    0 0 90px rgba(255, 213, 106, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  animation: arena-mode-pulse 2.8s ease-in-out infinite;
+  background: rgba(11, 11, 15, 0.38);
+  box-shadow: 0 0 22px rgba(255, 213, 106, 0.28);
+  animation: none;
 }
 
-@keyframes arena-mode-pulse {
-  0%, 100% { box-shadow: 0 0 48px rgba(255, 213, 106, 0.28), 0 0 80px rgba(255, 213, 106, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1); }
-  50% { box-shadow: 0 0 64px rgba(255, 213, 106, 0.42), 0 0 110px rgba(255, 213, 106, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.14); }
-}
-
-#page-game .game-mode-card.epic-card.selected::before {
-  opacity: 0.32;
-}
-
-#page-game .game-mode-card.epic-card:not(.selected):hover {
-  transform: translateY(-4px) scale(1.015);
-  box-shadow:
-    0 0 40px rgba(255, 213, 106, 0.22),
-    0 0 70px rgba(255, 213, 106, 0.08);
+#page-game .game-mode-card.epic-card:not(.selected):hover,
+#page-game .game-mode-card.epic-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 213, 106, 0.38);
+  box-shadow: 0 0 16px rgba(255, 213, 106, 0.16);
 }
 
 #page-game .game-mode-card.epic-card.selected .game-mode-icon {
