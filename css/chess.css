@@ -1486,6 +1486,9 @@ html.perf-lite .result-emblem {
   --play-pad-left: 20px;
   --play-pad-right: 24px;
   --play-pad-y: 12px;
+  --play-coords-h: 22px;
+  --play-shadow-pad: 8px;
+  --play-available-h: calc(100dvh - var(--nav-height) - var(--play-pad-y) * 2);
   --arena-gold: #ffd56a;
   --arena-gold-dark: #b98a2c;
   --arena-ivory: #f5f0e6;
@@ -1496,9 +1499,10 @@ html.perf-lite .result-emblem {
     rgba(5, 5, 5, 0.82) 100%
   );
   --board-size: min(
-    calc(100dvh - var(--nav-height) - var(--play-pad-y) * 2),
+    calc(var(--play-available-h) - var(--play-coords-h) - var(--play-shadow-pad)),
     calc(100vw - var(--play-sidebar-w) - var(--play-pad-left) - var(--play-pad-right) - 80px)
   );
+  padding-top: var(--nav-height);
   height: 100dvh;
   min-height: 0;
   max-height: 100dvh;
@@ -1513,8 +1517,9 @@ html.perf-lite .result-emblem {
 }
 
 #page-play .chess-game-wrapper {
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
+  max-height: var(--play-available-h);
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -1525,18 +1530,38 @@ html.perf-lite .result-emblem {
   padding: var(--play-pad-y) var(--play-pad-right) var(--play-pad-y) var(--play-pad-left);
   box-sizing: border-box;
   gap: 0;
+  overflow: hidden;
 }
 
 #page-play .chess-main-panel {
-  flex: 0 0 auto;
+  flex: 0 1 auto;
   align-self: center;
+  min-height: 0;
+  max-height: 100%;
+  overflow: visible;
+}
+
+#page-play .chess-board-wrap {
+  max-height: calc(var(--board-size) + var(--play-coords-h));
+}
+
+#page-play .chess-board-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+#page-play .board-coordinates-bottom {
+  flex-shrink: 0;
+  height: var(--play-coords-h);
+  align-items: center;
 }
 
 #page-play .chess-side-panel {
   width: var(--play-sidebar-w);
   flex: 0 0 var(--play-sidebar-w);
-  height: 100%;
-  max-height: calc(100dvh - var(--nav-height) - var(--play-pad-y) * 2);
+  height: auto;
+  max-height: 100%;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -1740,7 +1765,7 @@ html.perf-lite .result-emblem {
 }
 
 #page-play .chess-board {
-  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
 }
 
 body:has(#page-play.active) {
