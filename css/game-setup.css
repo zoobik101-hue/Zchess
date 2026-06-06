@@ -810,11 +810,11 @@ body.arena-page-lock {
 #page-game .game-setup-cta {
   flex-shrink: 0;
   width: 100%;
-  padding: 0 22px 4px;
+  padding: 0 22px 8px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 44px;
 }
 
 #page-game .game-setup-play-as {
@@ -937,77 +937,31 @@ body.arena-page-lock {
   width: 100%;
   box-sizing: border-box;
   flex-shrink: 0;
-  margin: 28px 0 0;
+  margin: 0;
   position: relative;
-  z-index: auto;
-}
-
-#page-game .game-setup-start-wrap {
-  position: relative;
-  width: 100%;
-  max-width: 420px;
-  height: clamp(52px, 5.5vw, 62px);
-  margin: 0 auto;
-  padding: 0;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 10px 22px rgba(255, 140, 40, 0.18);
-  transition: box-shadow 0.25s ease;
-}
-
-#page-game .game-setup-play-as .game-setup-label {
-  margin-bottom: 8px;
-  font-size: 9px;
-  letter-spacing: 0.28em;
-  color: rgba(255, 213, 106, 0.72);
-}
-
-#page-game .game-setup-start-wrap::before {
-  display: none;
+  background: transparent;
 }
 
 #page-game .game-setup-start--image {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  margin: 0;
-  border: none;
-  background: transparent;
-  box-shadow: none;
-  cursor: pointer;
-  line-height: 0;
-  transition: filter 0.25s ease;
-}
-
-#page-game .game-setup-start-img {
   display: block;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center center;
-  pointer-events: none;
-  user-select: none;
+  max-width: 420px;
+  height: clamp(54px, 5.8vw, 64px);
+  margin: 0 auto;
+  padding: 0;
+  border: none;
+  background: transparent url('../assets/Image/Start_game.png') center center / contain no-repeat;
   mix-blend-mode: screen;
-  filter: none;
+  cursor: pointer;
   transition: filter 0.25s ease, transform 0.25s ease;
 }
 
-#page-game .game-setup-start-wrap:hover {
-  box-shadow: 0 12px 28px rgba(255, 213, 106, 0.32);
+#page-game .game-setup-start--image:hover {
+  filter: brightness(1.1);
 }
 
-#page-game .game-setup-start--image:hover .game-setup-start-img {
-  filter: brightness(1.06);
-}
-
-#page-game .game-setup-start--image:active .game-setup-start-img {
-  filter: brightness(0.96);
+#page-game .game-setup-start--image:active {
+  filter: brightness(0.95);
   transform: scale(0.985);
 }
 
