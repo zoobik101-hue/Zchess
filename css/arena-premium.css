@@ -12,26 +12,19 @@
 }
 
 #page-game .arena-zone-secondary {
-  opacity: 0.72;
-  filter: saturate(0.85) brightness(0.92);
-  transition: opacity 0.35s ease, filter 0.35s ease;
-}
-
-#page-game .arena-zone-secondary:hover,
-#page-game .arena-zone-secondary:focus-within {
   opacity: 1;
   filter: none;
 }
 
 #page-game .arena-window-tasks.epic-card--dim,
 #page-game .arena-window-stats.epic-card--dim {
-  opacity: 0.78;
-  filter: saturate(0.88) brightness(0.93);
+  opacity: 1;
+  filter: none;
 }
 
 #page-game .arena-window-tasks.epic-card--dim:hover,
 #page-game .arena-window-stats.epic-card--dim:hover {
-  opacity: 0.92;
+  opacity: 1;
   filter: none;
 }
 
