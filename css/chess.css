@@ -1481,20 +1481,30 @@ html.perf-lite .result-emblem {
    Board left, compact sidebar right, no scroll
    ========================================= */
 
-#page-play {
-  --play-sidebar-w: 268px;
-  --play-gap: 14px;
-  --play-pad-x: 12px;
-  --play-pad-y: 10px;
+#page-play.page-play-arena {
+  --play-sidebar-w: 280px;
+  --play-pad-left: 20px;
+  --play-pad-right: 24px;
+  --play-pad-y: 12px;
+  --arena-gold: #ffd56a;
+  --arena-gold-dark: #b98a2c;
+  --arena-ivory: #f5f0e6;
+  --arena-chamfer: 18px;
+  --arena-glass-bg: linear-gradient(
+    145deg,
+    rgba(11, 11, 15, 0.72) 0%,
+    rgba(5, 5, 5, 0.82) 100%
+  );
   --board-size: min(
     calc(100dvh - var(--nav-height) - var(--play-pad-y) * 2),
-    calc(100vw - var(--play-sidebar-w) - var(--play-gap) - var(--play-pad-x) * 2 - 20px)
+    calc(100vw - var(--play-sidebar-w) - var(--play-pad-left) - var(--play-pad-right) - 80px)
   );
   height: 100dvh;
   min-height: 0;
   max-height: 100dvh;
   overflow: hidden;
   box-sizing: border-box;
+  background: #050505;
 }
 
 #page-play.active {
@@ -1505,61 +1515,95 @@ html.perf-lite .result-emblem {
 #page-play .chess-game-wrapper {
   flex: 1;
   min-height: 0;
-  display: grid;
-  grid-template-columns: auto var(--play-sidebar-w);
-  grid-template-rows: 1fr;
-  gap: var(--play-gap);
+  display: flex;
+  flex-direction: row;
   align-items: center;
-  justify-content: start;
+  justify-content: space-between;
   width: 100%;
   max-width: none;
   margin: 0;
-  padding: var(--play-pad-y) var(--play-pad-x);
+  padding: var(--play-pad-y) var(--play-pad-right) var(--play-pad-y) var(--play-pad-left);
   box-sizing: border-box;
+  gap: 0;
 }
 
 #page-play .chess-main-panel {
+  flex: 0 0 auto;
   align-self: center;
-  justify-self: start;
 }
 
 #page-play .chess-side-panel {
   width: var(--play-sidebar-w);
+  flex: 0 0 var(--play-sidebar-w);
   height: 100%;
   max-height: calc(100dvh - var(--nav-height) - var(--play-pad-y) * 2);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  flex-shrink: 0;
+  gap: 10px;
+  margin-left: auto;
+  align-self: center;
+}
+
+#page-play .play-sidebar-glass {
+  background: var(--arena-glass-bg);
+  backdrop-filter: blur(22px) saturate(1.35);
+  -webkit-backdrop-filter: blur(22px) saturate(1.35);
+  border: 1px solid rgba(255, 213, 106, 0.24);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 0 40px rgba(255, 213, 106, 0.07),
+    0 20px 50px rgba(0, 0, 0, 0.5);
+  padding: 14px 14px 16px;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 100%,
+    var(--arena-chamfer) 100%,
+    0 calc(100% - var(--arena-chamfer))
+  );
 }
 
 #page-play .play-players-stack {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   flex-shrink: 0;
 }
 
 #page-play .player-bar {
   max-width: none;
-  padding: 7px 10px;
+  padding: 8px 10px;
   gap: 8px;
   border-radius: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  border-color: rgba(255, 213, 106, 0.14);
+}
+
+#page-play .player-bar.active {
+  border-color: rgba(255, 213, 106, 0.45);
+  box-shadow: 0 0 0 1px rgba(255, 213, 106, 0.12), 0 0 18px rgba(255, 213, 106, 0.08);
+}
+
+#page-play .player-bar.active::after {
+  background: linear-gradient(180deg, var(--arena-gold), var(--arena-gold-dark));
 }
 
 #page-play .player-avatar-sm {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   font-size: 13px;
+  box-shadow: 0 0 10px rgba(255, 213, 106, 0.25);
 }
 
 #page-play .player-name-sm {
   font-size: 12px;
+  color: var(--arena-ivory);
 }
 
 #page-play .player-rating-sm {
   font-size: 10px;
+  color: rgba(255, 213, 106, 0.65);
 }
 
 #page-play .captured-piece-img {
@@ -1584,15 +1628,25 @@ html.perf-lite .result-emblem {
   font-size: 12px;
 }
 
+#page-play .turn-indicator.your-turn {
+  background: rgba(255, 213, 106, 0.1);
+  border-color: rgba(255, 213, 106, 0.35);
+  color: var(--arena-gold);
+}
+
 #page-play .match-info-panel {
   padding: 10px 12px;
   margin-bottom: 0;
   flex-shrink: 0;
+  background: rgba(0, 0, 0, 0.28);
+  border-color: rgba(255, 213, 106, 0.2);
 }
 
 #page-play .match-info-panel h4 {
   margin-bottom: 6px;
   font-size: 10px;
+  color: var(--arena-gold-dark);
+  letter-spacing: 0.08em;
 }
 
 #page-play .match-chip-row {
@@ -1604,6 +1658,12 @@ html.perf-lite .result-emblem {
   font-size: 11px;
 }
 
+#page-play .match-chip-you {
+  background: rgba(255, 213, 106, 0.12);
+  border-color: rgba(255, 213, 106, 0.35);
+  color: var(--arena-gold);
+}
+
 #page-play .match-turn-banner {
   margin-top: 6px;
   padding: 7px 10px;
@@ -1613,7 +1673,7 @@ html.perf-lite .result-emblem {
 #page-play .game-controls-panel {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px;
+  gap: 8px;
   flex-shrink: 0;
 }
 
@@ -1621,18 +1681,30 @@ html.perf-lite .result-emblem {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  padding: 8px 6px;
+  gap: 4px;
+  padding: 9px 6px;
   font-size: 10px;
   text-align: center;
-}
-
-#page-play .btn-game-control .icon {
-  font-size: 16px;
+  background: rgba(0, 0, 0, 0.32);
+  border-color: rgba(255, 213, 106, 0.12);
+  color: rgba(245, 240, 230, 0.82);
+  border-radius: 8px;
 }
 
 #page-play .btn-game-control:hover {
   transform: none;
+  border-color: rgba(255, 213, 106, 0.38);
+  background: rgba(255, 213, 106, 0.08);
+  color: var(--arena-ivory);
+}
+
+#page-play .btn-game-control.danger:hover {
+  border-color: rgba(239, 68, 68, 0.45);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+#page-play .btn-game-control .icon {
+  font-size: 16px;
 }
 
 #page-play .training-panel {
@@ -1645,12 +1717,16 @@ html.perf-lite .result-emblem {
   flex: 1;
   min-height: 0;
   height: auto;
-  padding: 10px;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.28);
+  border-color: rgba(255, 213, 106, 0.16);
 }
 
 #page-play .move-history-panel h4 {
   margin-bottom: 6px;
   font-size: 10px;
+  color: var(--arena-gold-dark);
+  letter-spacing: 0.1em;
 }
 
 #page-play .move-history-row {
@@ -1658,9 +1734,9 @@ html.perf-lite .result-emblem {
   line-height: 1.5;
 }
 
-#page-play .move-history-row {
-  font-size: 11px;
-  line-height: 1.5;
+#page-play .mp-status-bar {
+  border-color: rgba(255, 213, 106, 0.2);
+  background: rgba(0, 0, 0, 0.35);
 }
 
 #page-play .chess-board {
@@ -1680,10 +1756,12 @@ body:has(#page-play.active) {
 }
 
 @media (max-width: 960px) {
-  #page-play {
+  #page-play.page-play-arena {
     --play-sidebar-w: 100%;
+    --play-pad-left: 12px;
+    --play-pad-right: 12px;
     --board-size: min(
-      calc(100vw - var(--play-pad-x) * 2 - 20px),
+      calc(100vw - var(--play-pad-left) - var(--play-pad-right) - 20px),
       calc(55dvh - var(--play-pad-y))
     );
     height: auto;
@@ -1696,21 +1774,24 @@ body:has(#page-play.active) {
   }
 
   #page-play .chess-game-wrapper {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto;
-    justify-content: center;
+    flex-direction: column;
     align-items: stretch;
+    justify-content: flex-start;
+    gap: 12px;
   }
 
   #page-play .chess-main-panel {
-    justify-self: center;
+    align-self: center;
   }
 
   #page-play .chess-side-panel {
     width: 100%;
+    flex: none;
     max-width: var(--board-size);
     max-height: none;
     margin: 0 auto;
+    clip-path: none;
+    border-radius: 12px;
   }
 
   #page-play .move-history-panel {
