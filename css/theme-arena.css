@@ -75,6 +75,10 @@ body::before {
   background: rgba(5, 5, 6, 0.97);
 }
 
+.logo-brand {
+  filter: none;
+}
+
 .logo-icon {
   background: linear-gradient(145deg, #f0d78c, #a67c2e);
   box-shadow: 0 0 16px rgba(212, 175, 85, 0.35);
