@@ -997,6 +997,15 @@ body.arena-page-lock {
   filter: drop-shadow(0 0 18px rgba(255, 213, 106, 0.35));
 }
 
+#page-game .game-mode-icon-img {
+  display: block;
+  width: clamp(52px, 5.8vw, 72px);
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
 #page-game .game-mode-title {
   font-family: 'Cinzel', Georgia, serif;
   font-size: 10px;
