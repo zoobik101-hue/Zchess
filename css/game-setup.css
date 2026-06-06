@@ -776,15 +776,27 @@ body.arena-page-lock {
   display: flex;
   flex-direction: column;
   width: 100%;
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: visible;
   background: transparent;
 }
 
 #page-game #difficulty-section {
   flex-shrink: 0;
+  padding: 4px 18px 0;
+}
+
+/* Lower cluster: difficulty + play-as + start move together */
+#page-game .game-setup-lower {
+  margin-top: auto;
+  flex-shrink: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 8px;
+  box-sizing: border-box;
 }
 
 #page-game .game-setup-row,
@@ -792,21 +804,23 @@ body.arena-page-lock {
   background: transparent;
 }
 
-/* CTA block: play-as + start game stay together at bottom */
+/* CTA block: play-as + start game */
 #page-game .game-setup-cta {
-  margin-top: auto;
   flex-shrink: 0;
   width: 100%;
-  padding: 0 22px 6px;
+  padding: 0 22px;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 #page-game .game-setup-play-as {
   padding: 0;
-  margin: 0 0 6px;
+  margin: 0;
+  position: relative;
+  z-index: 1;
 }
-
-#page-game .game-setup-play-as .game-setup-label {
   margin-bottom: 8px;
   font-size: 9px;
   letter-spacing: 0.28em;
@@ -919,20 +933,31 @@ body.arena-page-lock {
   width: 100%;
   box-sizing: border-box;
   flex-shrink: 0;
-  margin-top: 0;
+  margin: 0;
+  position: relative;
+  z-index: 2;
 }
 
 #page-game .game-setup-start-wrap {
   position: relative;
+  z-index: 2;
   width: 100%;
-  max-width: 400px;
-  height: clamp(40px, 4.2vw, 50px);
+  max-width: 420px;
+  height: clamp(46px, 4.8vw, 54px);
   margin: 0 auto;
   padding: 0;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  isolation: isolate;
+}
+
+#page-game .game-setup-play-as .game-setup-label {
+  margin-bottom: 8px;
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  color: rgba(255, 213, 106, 0.72);
 }
 
 #page-game .game-setup-start-wrap::before {
@@ -972,7 +997,7 @@ body.arena-page-lock {
 }
 
 #page-game .game-setup-start--image:hover {
-  transform: translateY(-2px);
+  transform: none;
 }
 
 #page-game .game-setup-start--image:hover .game-setup-start-img {
