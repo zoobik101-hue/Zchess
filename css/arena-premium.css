@@ -16,6 +16,20 @@
   filter: none;
 }
 
+#page-game .arena-window-stats.epic-card {
+  background: rgba(6, 6, 10, 0.42);
+  backdrop-filter: blur(20px) saturate(1.05);
+  -webkit-backdrop-filter: blur(20px) saturate(1.05);
+  border: 1px solid rgba(255, 213, 106, 0.1);
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.34);
+}
+
+#page-game .arena-window-stats.epic-card::before,
+#page-game .arena-window-stats.epic-card::after {
+  display: none;
+  content: none;
+}
+
 #page-game .arena-window-tasks.epic-card--dim,
 #page-game .arena-window-stats.epic-card--dim {
   opacity: 1;

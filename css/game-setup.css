@@ -260,38 +260,46 @@ body.arena-page-lock {
 
 #page-game .arena-window-stats .arena-window-title {
   margin-bottom: 10px;
-  font-size: 9px;
+  font-size: 8px;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  color: rgba(201, 168, 92, 0.82);
   text-align: left;
 }
 
 #page-game .arena-window-stats .arena-stats-rating-row {
-  gap: 8px;
+  gap: 10px;
+  align-items: flex-end;
 }
 
 #page-game .arena-window-stats .arena-rating-value {
-  font-size: clamp(24px, 2.4vw, 32px);
+  font-size: clamp(22px, 2.2vw, 28px);
+  font-weight: 700;
+  color: rgba(210, 178, 108, 0.92);
+  text-shadow: none;
 }
 
 #page-game .arena-window-stats .arena-rating-chart {
-  width: 108px;
-  height: 46px;
-}
-
-#page-game .arena-window-stats .arena-stat-trio {
-  margin: 0;
-  gap: 0;
-}
-
-#page-game .arena-window-stats .arena-stat-cell {
-  padding: 8px 4px;
+  width: 96px;
+  height: 40px;
+  opacity: 0.92;
 }
 
 #page-game .arena-window-stats .arena-stat-num {
-  font-size: 15px;
+  font-size: 14px;
+  font-weight: 700;
 }
 
-#page-game .arena-window-stats .arena-streak-block {
-  margin: 0;
+#page-game .arena-window-stats .arena-streak-val strong {
+  font-size: 16px;
+  font-weight: 700;
+  color: rgba(232, 224, 208, 0.78);
+}
+
+#page-game .arena-window-stats .arena-streak-icon {
+  width: 22px;
+  height: 22px;
 }
 
 #page-game .arena-window-tasks .arena-window-link {
@@ -427,7 +435,7 @@ body.arena-page-lock {
 }
 
 .arena-stats-section {
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .arena-stats-section-rating {
@@ -436,19 +444,19 @@ body.arena-page-lock {
 }
 
 .arena-stats-section-grid {
-  padding: 10px 0;
+  padding: 9px 0;
 }
 
 .arena-stats-section-streak {
-  padding: 10px 0 2px;
+  padding: 9px 0 0;
 }
 
 .arena-stats-rating-row {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: 12px;
-  padding: 2px 0 10px;
+  gap: 10px;
+  padding: 0 0 9px;
 }
 
 .arena-stats-rating-left {
@@ -458,31 +466,32 @@ body.arena-page-lock {
 
 .arena-rating-label {
   display: block;
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 0.22em;
+  font-size: 7px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(245, 240, 230, 0.38);
-  margin-bottom: 4px;
+  color: rgba(245, 240, 230, 0.32);
+  margin-bottom: 3px;
 }
 
 .arena-rating-value {
-  font-size: clamp(28px, 3vw, 34px);
-  font-weight: 800;
+  font-size: clamp(24px, 2.6vw, 30px);
+  font-weight: 700;
   font-family: 'Segoe UI', system-ui, sans-serif;
-  color: var(--arena-gold);
+  color: rgba(210, 178, 108, 0.92);
   line-height: 1;
-  letter-spacing: -0.02em;
-  text-shadow: 0 0 24px rgba(255, 213, 106, 0.28);
+  letter-spacing: -0.01em;
+  text-shadow: none;
 }
 
 .arena-rating-chart {
   flex-shrink: 0;
-  width: 118px;
-  height: 50px;
+  width: 100px;
+  height: 42px;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: flex-end;
+  padding-bottom: 2px;
 }
 
 .arena-rating-sparkline {
@@ -493,12 +502,12 @@ body.arena-page-lock {
 }
 
 .arena-sparkline-axis {
-  stroke: rgba(255, 213, 106, 0.18);
+  stroke: rgba(255, 255, 255, 0.08);
   stroke-width: 1;
 }
 
 .arena-sparkline-dot-end {
-  filter: url(#arenaSparkGlow);
+  opacity: 0.95;
 }
 
 .arena-stat-trio {
@@ -517,20 +526,20 @@ body.arena-page-lock {
 }
 
 .arena-stat-cell + .arena-stat-cell {
-  border-left: 1px solid rgba(255, 255, 255, 0.07);
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .arena-stat-num {
   display: block;
-  font-size: 16px;
-  font-weight: 800;
+  font-size: 15px;
+  font-weight: 700;
   font-family: 'Segoe UI', system-ui, sans-serif;
   line-height: 1.1;
 }
 
-.arena-stat-win .arena-stat-num { color: #6ee07a; }
-.arena-stat-loss .arena-stat-num { color: #e86868; }
-.arena-stat-draw .arena-stat-num { color: rgba(245, 240, 230, 0.82); }
+.arena-stat-win .arena-stat-num { color: rgba(95, 173, 106, 0.88); }
+.arena-stat-loss .arena-stat-num { color: rgba(184, 101, 101, 0.88); }
+.arena-stat-draw .arena-stat-num { color: rgba(245, 240, 230, 0.52); }
 
 .arena-stat-lbl {
   display: block;
@@ -552,45 +561,49 @@ body.arena-page-lock {
 }
 
 .arena-streak-lbl {
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
+  font-size: 7px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--arena-gold);
+  color: rgba(201, 168, 92, 0.78);
   margin: 0;
   flex-shrink: 0;
 }
 
 .arena-streak-val {
   margin: 0;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 6px;
+  gap: 5px;
   min-width: 0;
+  line-height: 1;
 }
 
 .arena-streak-val strong {
-  color: rgba(245, 240, 230, 0.92);
-  font-size: 18px;
-  font-weight: 800;
+  color: rgba(232, 224, 208, 0.78);
+  font-size: 16px;
+  font-weight: 700;
   font-family: 'Segoe UI', system-ui, sans-serif;
   line-height: 1;
 }
 
 .arena-streak-suffix {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: rgba(245, 240, 230, 0.38);
+  color: rgba(245, 240, 230, 0.32);
+  line-height: 1;
 }
 
 .arena-streak-icon {
   display: block;
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   flex-shrink: 0;
+  align-self: center;
+  overflow: visible;
 }
 
 .arena-window-body {

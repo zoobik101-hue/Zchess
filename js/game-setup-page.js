@@ -101,13 +101,16 @@ const GameSetupPage = {
     const games = user?.gamesPlayed || 0;
     const wr = games > 0 ? (user?.wins || 0) / games : 0.5;
     const points = loggedIn
-      ? [0.35, 0.42, 0.38, 0.48, 0.44, 0.52, 0.58, Math.min(0.92, 0.42 + wr * 0.48)]
-      : [0.32, 0.36, 0.34, 0.38, 0.36, 0.4, 0.38, 0.36];
+      ? [0.28, 0.34, 0.32, 0.4, 0.38, 0.46, 0.5, Math.min(0.82, 0.36 + wr * 0.42)]
+      : [0.3, 0.32, 0.31, 0.34, 0.33, 0.35, 0.34, 0.33];
 
-    const w = 132;
-    const h = 52;
-    const padX = 6;
-    const padY = 8;
+    const w = 120;
+    const h = 44;
+    const padX = 4;
+    const padY = 6;
+    const lineColor = 'rgba(95, 173, 106, 0.72)';
+    const dotColor = 'rgba(95, 173, 106, 0.85)';
+    const endDotColor = 'rgba(120, 196, 130, 0.95)';
     const coords = points.map((v, i) => {
       const x = padX + (i / (points.length - 1)) * (w - padX * 2);
       const y = h - padY - v * (h - padY * 2);
@@ -117,27 +120,20 @@ const GameSetupPage = {
     const fillPoly = `${poly} ${coords[coords.length - 1].x},${h - padY} ${coords[0].x},${h - padY}`;
     const dots = coords.map((p, i) => {
       const last = i === coords.length - 1;
-      return `<circle cx="${p.x}" cy="${p.y}" r="${last ? 4.5 : 2.5}" fill="#ffd56a"${last ? ' class="arena-sparkline-dot-end"' : ''}/>`;
+      return `<circle cx="${p.x}" cy="${p.y}" r="${last ? 2.8 : 1.8}" fill="${last ? endDotColor : dotColor}"${last ? ' class="arena-sparkline-dot-end"' : ''}/>`;
     }).join('');
 
     chartEl.innerHTML = `
       <svg class="arena-rating-sparkline" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
         <defs>
           <linearGradient id="arenaSparkFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="rgba(255, 213, 106, 0.28)"/>
-            <stop offset="100%" stop-color="rgba(255, 213, 106, 0)"/>
+            <stop offset="0%" stop-color="rgba(95, 173, 106, 0.14)"/>
+            <stop offset="100%" stop-color="rgba(95, 173, 106, 0)"/>
           </linearGradient>
-          <filter id="arenaSparkGlow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="2.5" result="blur"/>
-            <feMerge>
-              <feMergeNode in="blur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
         </defs>
-        <line class="arena-sparkline-axis" x1="${w - padX}" y1="${padY - 2}" x2="${w - padX}" y2="${h - padY}" />
+        <line class="arena-sparkline-axis" x1="${w - padX}" y1="${padY - 1}" x2="${w - padX}" y2="${h - padY}" />
         <polygon points="${fillPoly}" fill="url(#arenaSparkFill)"/>
-        <polyline points="${poly}" fill="none" stroke="#ffd56a" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+        <polyline points="${poly}" fill="none" stroke="${lineColor}" stroke-width="1.15" stroke-linejoin="round" stroke-linecap="round"/>
         ${dots}
       </svg>`;
   },
