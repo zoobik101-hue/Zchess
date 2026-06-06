@@ -241,7 +241,7 @@ p { color: var(--text-secondary); }
 
 .logo-brand {
   display: block;
-  height: clamp(34px, 3.6vw, 42px);
+  height: clamp(51px, 5.4vw, 63px);
   width: auto;
   object-fit: contain;
   pointer-events: none;
