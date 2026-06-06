@@ -776,10 +776,15 @@ body.arena-page-lock {
   display: flex;
   flex-direction: column;
   width: 100%;
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   background: transparent;
+}
+
+#page-game #difficulty-section {
+  flex-shrink: 0;
 }
 
 #page-game .game-setup-row,
@@ -792,7 +797,7 @@ body.arena-page-lock {
   margin-top: auto;
   flex-shrink: 0;
   width: 100%;
-  padding: 0 22px 10px;
+  padding: 0 22px 6px;
   box-sizing: border-box;
 }
 
@@ -920,9 +925,14 @@ body.arena-page-lock {
 #page-game .game-setup-start-wrap {
   position: relative;
   width: 100%;
-  max-width: 520px;
+  max-width: 400px;
+  height: clamp(40px, 4.2vw, 50px);
   margin: 0 auto;
   padding: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #page-game .game-setup-start-wrap::before {
@@ -932,8 +942,11 @@ body.arena-page-lock {
 #page-game .game-setup-start--image {
   position: relative;
   z-index: 1;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
+  height: 100%;
   padding: 0;
   margin: 0;
   border: none;
@@ -947,12 +960,14 @@ body.arena-page-lock {
 #page-game .game-setup-start-img {
   display: block;
   width: 100%;
+  min-height: 100%;
   height: auto;
-  object-fit: contain;
+  object-fit: cover;
+  object-position: center center;
   pointer-events: none;
   user-select: none;
   mix-blend-mode: screen;
-  filter: drop-shadow(0 0 18px rgba(255, 213, 106, 0.28));
+  filter: drop-shadow(0 0 14px rgba(255, 213, 106, 0.24));
   transition: transform 0.25s ease, filter 0.25s ease;
 }
 
