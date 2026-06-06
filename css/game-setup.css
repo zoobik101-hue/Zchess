@@ -1030,7 +1030,7 @@ body.arena-page-lock {
   font-size: clamp(28px, 3.2vw, 36px);
   line-height: 1;
   flex-shrink: 0;
-  filter: drop-shadow(0 0 18px rgba(255, 213, 106, 0.35));
+  filter: none;
 }
 
 #page-game .game-mode-icon-img {
@@ -1040,6 +1040,7 @@ body.arena-page-lock {
   object-fit: contain;
   pointer-events: none;
   user-select: none;
+  filter: none;
 }
 
 #page-game .game-mode-title {
