@@ -1035,7 +1035,7 @@ body.arena-page-lock {
 
 #page-game .game-mode-icon-img {
   display: block;
-  width: clamp(52px, 5.8vw, 72px);
+  width: clamp(64px, 7vw, 88px);
   height: auto;
   object-fit: contain;
   pointer-events: none;
