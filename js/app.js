@@ -305,6 +305,8 @@ const App = {
     const mode = this.gameSetupOptions.mode;
     const isAi = mode === 'ai';
     const isTraining = mode === 'training';
+    const isQuick = mode === 'quick';
+    const isCatalogMode = isTraining || isQuick;
 
     document.querySelectorAll('.game-mode-card').forEach(card => {
       card.classList.toggle('selected', card.dataset.mode === mode);
@@ -316,8 +318,11 @@ const App = {
     const trainEl = document.getElementById('training-section');
     if (trainEl) trainEl.style.display = isTraining ? 'flex' : 'none';
 
+    const onlineEl = document.getElementById('online-section');
+    if (onlineEl) onlineEl.style.display = isQuick ? 'flex' : 'none';
+
     const lowerEl = document.querySelector('#page-game .game-setup-lower');
-    if (lowerEl) lowerEl.style.display = isTraining ? 'none' : '';
+    if (lowerEl) lowerEl.style.display = isCatalogMode ? 'none' : '';
 
     const playAsWrap = document.querySelector('#page-game .game-setup-play-as');
     if (playAsWrap) playAsWrap.style.display = isAi ? '' : 'none';
@@ -326,13 +331,20 @@ const App = {
     if (optionsEl) optionsEl.style.display = isAi ? '' : 'none';
 
     const startBtn = document.getElementById('btn-start-game');
-    if (startBtn) startBtn.style.display = isTraining ? 'none' : '';
+    if (startBtn) startBtn.style.display = isCatalogMode ? 'none' : '';
 
     const panel = document.getElementById('game-setup-panel');
-    if (panel) panel.classList.toggle('is-training-mode', isTraining);
+    if (panel) {
+      panel.classList.toggle('is-training-mode', isTraining);
+      panel.classList.toggle('is-online-mode', isQuick);
+    }
 
     if (isTraining && ZChess.Training) {
       ZChess.Training.renderCatalog('basics');
+    }
+
+    if (isQuick && ZChess.Multiplayer && ZChess.Multiplayer.status === 'idle') {
+      ZChess.Multiplayer._showLobbyState('lobby-choose');
     }
 
     // Highlight selected difficulty
@@ -578,12 +590,17 @@ const App = {
 
     // Game setup
     document.querySelectorAll('.game-mode-card').forEach(card => {
-      card.addEventListener('click', () => {
+      card.addEventListener('click', async () => {
         const mode = card.dataset.mode;
-        // Quick match → open lobby with 3 options (quick, create, join)
+        if (this.gameSetupOptions.mode === 'quick' && mode !== 'quick' && ZChess.Multiplayer?.status !== 'idle') {
+          await ZChess.Multiplayer.leave();
+        }
         if (mode === 'quick') {
-          if (!ZChess.Auth.isLoggedIn()) { this.showAuthModal('login'); return; }
-          ZChess.Multiplayer?.showLobby('lobby-choose');
+          if (!ZChess.Auth.isLoggedIn()) {
+            this.showAuthModal('login');
+          }
+          this.gameSetupOptions.mode = mode;
+          this.renderGameSetup();
           return;
         }
         if (mode === 'training') {
@@ -1024,7 +1041,7 @@ const App = {
       console.error('[QuickMatch]', e);
       MP.leave();
       ZChess.Notifications.error('Не удалось начать поиск. Попробуй ещё раз.');
-      document.getElementById('room-lobby-overlay')?.classList.remove('open');
+      MP._showLobbyState('lobby-choose');
     });
   },
 
@@ -1057,7 +1074,9 @@ const App = {
       return;
     }
 
-    document.getElementById('room-lobby-overlay')?.classList.add('open');
+    this.navigate('game');
+    this.gameSetupOptions.mode = 'quick';
+    this.renderGameSetup();
     MP._showLobbyState('lobby-join-code');
     const inp = document.getElementById('room-code-input');
     if (inp) inp.value = normalized;
@@ -1094,13 +1113,13 @@ const App = {
       return true;
     };
 
-    // Close lobby
+    // Close lobby (legacy - overlay unused)
     document.getElementById('btn-lobby-close')?.addEventListener('click', async () => {
       if (MP.status === 'waiting') await MP.leave();
-      this.closeModal('room-lobby-overlay');
+      showState('lobby-choose');
     });
 
-    // ---- Quick match (from lobby) ----
+    // ---- Quick match (inline) ----
     document.getElementById('btn-lob-quick')?.addEventListener('click', () => {
       if (!requireLogin()) return;
       this._startQuickMatch();
@@ -1108,7 +1127,7 @@ const App = {
 
     document.getElementById('btn-cancel-search')?.addEventListener('click', async () => {
       await MP.leave();
-      this.closeModal('room-lobby-overlay');
+      showState('lobby-choose');
     });
 
     // ---- Create room ----
@@ -1122,7 +1141,6 @@ const App = {
         const codeEl = document.getElementById('lobby-invite-code');
         if (codeEl) codeEl.textContent = res.code;
         this._updateInviteLink(res.code);
-        document.getElementById('room-lobby-overlay')?.classList.add('open');
         showState('lobby-waiting');
       } catch (e) {
         if (btn) btn.style.opacity = '';

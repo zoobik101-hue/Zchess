@@ -277,9 +277,12 @@ const Multiplayer = {
 
     console.log('[MP] _beginGame called, localColor=', this.localColor, 'opp=', opp);
 
-    // Make sure lobby overlay is open to show countdown
-    const overlay = document.getElementById('room-lobby-overlay');
-    if (overlay) overlay.classList.add('open');
+    const app = window.ZChess?.App;
+    if (app) {
+      app.navigate('game');
+      app.gameSetupOptions.mode = 'quick';
+      app.renderGameSetup();
+    }
 
     this._showLobbyState('lobby-ready');
     this._updateReadyInfo(opp);
@@ -787,13 +790,20 @@ const Multiplayer = {
 
   /* ---- UI helpers ---- */
   _showLobbyState(id) {
-    document.querySelectorAll('.lobby-state').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('#online-section .lobby-state').forEach(el => {
+      el.style.display = 'none';
+    });
     const el = document.getElementById(id);
     if (el) el.style.display = '';
   },
 
   showLobby(tab) {
-    document.getElementById('room-lobby-overlay')?.classList.add('open');
+    const app = window.ZChess?.App;
+    if (app) {
+      app.navigate('game');
+      app.gameSetupOptions.mode = 'quick';
+      app.renderGameSetup();
+    }
     this._showLobbyState(tab || 'lobby-choose');
   }
 };

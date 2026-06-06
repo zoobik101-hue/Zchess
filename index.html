@@ -45,7 +45,7 @@
   <link rel="stylesheet" href="css/chess.css">
   <link rel="stylesheet" href="css/multiplayer.css">
   <link rel="stylesheet" href="css/training.css">
-  <link rel="stylesheet" href="css/game-setup.css?v=arena33">
+  <link rel="stylesheet" href="css/game-setup.css?v=arena34">
   <link rel="stylesheet" href="css/arena-premium.css?v=arena33">
   <link rel="stylesheet" href="css/chess-decor.css">
   <link rel="stylesheet" href="css/theme-arena.css">
@@ -404,6 +404,98 @@
         <h3 class="training-section-title" data-i18n="training.catalog_title">Training Academy</h3>
         <p class="training-section-sub" data-i18n="training.catalog_sub">Puzzles, techniques, and live coaching with move quality feedback</p>
         <div id="training-catalog"></div>
+      </div>
+
+      <!-- Online multiplayer (inline, no modal) -->
+      <div id="online-section" class="online-section" style="display:none">
+        <div class="lobby-state" id="lobby-choose">
+          <h3 class="online-section-title" data-i18n="game.online_title">Online play</h3>
+          <p class="online-section-sub" data-i18n="game.online_sub">Play against live opponents</p>
+          <div class="lobby-mode-grid online-mode-grid">
+            <button type="button" class="lobby-mode-card online-mode-card" id="btn-lob-quick">
+              <span class="lmc-icon" aria-hidden="true">⚡</span>
+              <span class="lmc-title" data-i18n="game.online_quick">Quick match</span>
+              <span class="lmc-desc" data-i18n="game.online_quick_desc">Random opponent</span>
+            </button>
+            <button type="button" class="lobby-mode-card online-mode-card" id="btn-lob-create">
+              <span class="lmc-icon" aria-hidden="true">🏠</span>
+              <span class="lmc-title" data-i18n="game.online_create">Create room</span>
+              <span class="lmc-desc" data-i18n="game.online_create_desc">Invite a friend</span>
+            </button>
+            <button type="button" class="lobby-mode-card online-mode-card" id="btn-lob-join">
+              <span class="lmc-icon" aria-hidden="true">🔗</span>
+              <span class="lmc-title" data-i18n="game.online_join">Join room</span>
+              <span class="lmc-desc" data-i18n="game.online_join_desc">By invite code</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="lobby-state" id="lobby-searching" style="display:none">
+          <div class="online-state-head">
+            <div class="lobby-spinner-big"></div>
+            <h3 class="online-section-title" data-i18n="game.online_searching">Finding opponent...</h3>
+            <p class="online-section-sub" data-i18n="game.online_searching_sub">Waiting for another player to join quick match</p>
+          </div>
+          <div class="lobby-search-timer" id="lobby-search-timer">0:00</div>
+          <div class="lobby-dots"><span></span><span></span><span></span></div>
+          <button type="button" class="online-btn-cancel" id="btn-cancel-search" data-i18n="common.cancel">Cancel</button>
+        </div>
+
+        <div class="lobby-state" id="lobby-waiting" style="display:none">
+          <div class="online-state-head">
+            <h3 class="online-section-title" data-i18n="game.online_waiting">Waiting for opponent</h3>
+            <p class="online-section-sub" data-i18n="game.online_waiting_sub">Share the code with a friend</p>
+          </div>
+          <div class="lobby-code-block online-code-block">
+            <div class="lobby-code" id="lobby-invite-code">------</div>
+            <p class="lobby-invite-label" data-i18n="multiplayer.invite_link">Invite link</p>
+            <input type="text" class="lobby-invite-link-input online-invite-input" id="lobby-invite-link" readonly aria-label="Invite link">
+            <button type="button" class="online-btn-secondary" id="btn-copy-invite" data-i18n="multiplayer.copy_invite">Copy link</button>
+          </div>
+          <div class="lobby-waiting-anim">
+            <div class="lobby-dots"><span></span><span></span><span></span></div>
+          </div>
+          <button type="button" class="online-btn-cancel" id="btn-cancel-room" data-i18n="common.cancel">Cancel</button>
+        </div>
+
+        <div class="lobby-state" id="lobby-join-code" style="display:none">
+          <div class="online-state-head">
+            <h3 class="online-section-title" data-i18n="game.online_join">Join room</h3>
+            <p class="online-section-sub" data-i18n="game.online_join_input_sub">Enter the 6-character invite code</p>
+          </div>
+          <div class="lobby-code-input-wrap">
+            <input class="lobby-code-input online-code-input" id="room-code-input" type="text"
+                   placeholder="ABC123" maxlength="6" autocomplete="off" style="text-transform:uppercase">
+            <p class="lobby-error online-join-error" id="join-error" style="display:none" data-i18n="multiplayer.room_not_found">Room not found</p>
+          </div>
+          <div class="online-join-actions">
+            <button type="button" class="online-btn-primary" id="btn-submit-join" data-i18n="game.online_join_btn">Join</button>
+            <button type="button" class="online-btn-cancel" id="btn-back-from-join" data-i18n="common.back">Back</button>
+          </div>
+        </div>
+
+        <div class="lobby-state" id="lobby-ready" style="display:none">
+          <div class="online-state-head">
+            <h3 class="online-section-title" data-i18n="game.online_ready">Opponent found!</h3>
+          </div>
+          <div class="lobby-vs online-lobby-vs">
+            <div class="lobby-player-card">
+              <div class="lpc-avatar" id="ready-my-avatar">Me</div>
+              <div class="lpc-name" id="ready-my-name">You</div>
+              <div class="lpc-rating" id="ready-my-rating">1200</div>
+            </div>
+            <div class="lobby-vs-badge">VS</div>
+            <div class="lobby-player-card opp" id="ready-opp-card">
+              <div class="lpc-avatar" id="ready-opp-avatar">?</div>
+              <div class="lpc-name" id="ready-opp-name">Opponent</div>
+              <div class="lpc-rating" id="ready-opp-rating">1200</div>
+            </div>
+          </div>
+          <div class="lobby-countdown-wrap">
+            <div class="lobby-countdown" id="lobby-countdown">3</div>
+            <p class="online-section-sub" data-i18n="game.online_countdown">Game starts in...</p>
+          </div>
+        </div>
       </div>
 
       <div class="game-setup-lower">
@@ -1279,117 +1371,8 @@
 <!-- Toast Notifications Container -->
 <div id="toast-container" role="status" aria-live="polite"></div>
 
-<!-- ======= ROOM LOBBY MODAL ======= -->
-<div class="modal-overlay" id="room-lobby-overlay" role="dialog" aria-label="Online Game">
-  <div class="lobby-modal">
-    <button class="modal-close lobby-close" id="btn-lobby-close">×</button>
-
-    <!-- STATE: выбор режима -->
-    <div class="lobby-state" id="lobby-choose">
-      <div class="lobby-header">
-        <div class="lobby-icon">🌐</div>
-        <h2 class="lobby-title">Онлайн игра</h2>
-        <p class="lobby-sub">Играй против живых соперников</p>
-      </div>
-      <div class="lobby-mode-grid">
-        <button class="lobby-mode-card" id="btn-lob-quick">
-          <span class="lmc-icon">⚡</span>
-          <span class="lmc-title">Быстрый матч</span>
-          <span class="lmc-desc">Случайный соперник</span>
-        </button>
-        <button class="lobby-mode-card" id="btn-lob-create">
-          <span class="lmc-icon">🏠</span>
-          <span class="lmc-title">Создать комнату</span>
-          <span class="lmc-desc">Пригласить друга</span>
-        </button>
-        <button class="lobby-mode-card" id="btn-lob-join">
-          <span class="lmc-icon">🔗</span>
-          <span class="lmc-title">Войти в комнату</span>
-          <span class="lmc-desc">По коду приглашения</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- STATE: поиск быстрого матча -->
-    <div class="lobby-state" id="lobby-searching" style="display:none">
-      <div class="lobby-header">
-        <div class="lobby-spinner-big"></div>
-        <h2 class="lobby-title">Поиск соперника...</h2>
-        <p class="lobby-sub">Ждём пока другой игрок нажмёт «Быстрый матч»</p>
-      </div>
-      <div class="lobby-search-timer" id="lobby-search-timer">0:00</div>
-      <div class="lobby-dots">
-        <span></span><span></span><span></span>
-      </div>
-      <button class="lobby-btn-cancel" id="btn-cancel-search">Отменить поиск</button>
-    </div>
-
-    <!-- STATE: ожидание в комнате (хост) -->
-    <div class="lobby-state" id="lobby-waiting" style="display:none">
-      <div class="lobby-header">
-        <h2 class="lobby-title">Ожидание соперника</h2>
-        <p class="lobby-sub">Поделись кодом с другом</p>
-      </div>
-      <div class="lobby-code-block">
-        <div class="lobby-code" id="lobby-invite-code">------</div>
-        <p class="lobby-invite-label" data-i18n="multiplayer.invite_link">Ссылка для друга</p>
-        <input type="text" class="lobby-invite-link-input" id="lobby-invite-link" readonly aria-label="Invite link">
-        <button class="lobby-copy-btn" id="btn-copy-invite" data-i18n="multiplayer.copy_invite">
-          Скопировать ссылку
-        </button>
-      </div>
-      <div class="lobby-waiting-anim">
-        <div class="lobby-dots"><span></span><span></span><span></span></div>
-        <p class="lobby-sub">Ждём когда кто-то войдёт...</p>
-      </div>
-      <button class="lobby-btn-cancel" id="btn-cancel-room">Отменить</button>
-    </div>
-
-    <!-- STATE: ввод кода для входа -->
-    <div class="lobby-state" id="lobby-join-code" style="display:none">
-      <div class="lobby-header">
-        <div class="lobby-icon">🔗</div>
-        <h2 class="lobby-title">Войти в комнату</h2>
-        <p class="lobby-sub">Введи 6-значный код приглашения</p>
-      </div>
-      <div class="lobby-code-input-wrap">
-        <input class="lobby-code-input" id="room-code-input" type="text"
-               placeholder="ABC123" maxlength="6" autocomplete="off"
-               style="text-transform:uppercase">
-        <p class="lobby-error" id="join-error" style="display:none">Комната не найдена</p>
-      </div>
-      <div class="lobby-actions">
-        <button class="lobby-btn-primary" id="btn-submit-join">Войти →</button>
-        <button class="lobby-btn-cancel" id="btn-back-from-join">Назад</button>
-      </div>
-    </div>
-
-    <!-- STATE: соперник найден, обратный отсчёт -->
-    <div class="lobby-state" id="lobby-ready" style="display:none">
-      <div class="lobby-header">
-        <h2 class="lobby-title">Соперник найден!</h2>
-      </div>
-      <div class="lobby-vs">
-        <div class="lobby-player-card">
-          <div class="lpc-avatar" id="ready-my-avatar">Я</div>
-          <div class="lpc-name" id="ready-my-name">Вы</div>
-          <div class="lpc-rating" id="ready-my-rating">1200</div>
-        </div>
-        <div class="lobby-vs-badge">VS</div>
-        <div class="lobby-player-card opp" id="ready-opp-card">
-          <div class="lpc-avatar" id="ready-opp-avatar">?</div>
-          <div class="lpc-name" id="ready-opp-name">Соперник</div>
-          <div class="lpc-rating" id="ready-opp-rating">1200</div>
-        </div>
-      </div>
-      <div class="lobby-countdown-wrap">
-        <div class="lobby-countdown" id="lobby-countdown">3</div>
-        <p class="lobby-sub">Игра начнётся через...</p>
-      </div>
-    </div>
-
-  </div>
-</div>
+<!-- Room lobby: inline in #online-section on game setup page -->
+<div class="modal-overlay" id="room-lobby-overlay" role="dialog" aria-label="Online Game" hidden aria-hidden="true"></div>
 
 <!-- PWA install banner (mobile) -->
 <div class="pwa-install-banner" id="pwa-install-banner" aria-live="polite">
