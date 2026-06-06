@@ -940,6 +940,7 @@ body.arena-page-lock {
   margin: 0;
   position: relative;
   background: transparent;
+  isolation: isolate;
 }
 
 #page-game .game-setup-start--image {
@@ -952,7 +953,7 @@ body.arena-page-lock {
   background: transparent;
   cursor: pointer;
   line-height: 0;
-  transition: filter 0.25s ease, transform 0.25s ease;
+  transition: transform 0.25s ease;
 }
 
 #page-game .game-setup-start-img {
@@ -961,9 +962,7 @@ body.arena-page-lock {
   height: auto;
   pointer-events: none;
   user-select: none;
-  mix-blend-mode: screen;
-  filter: drop-shadow(0 8px 20px rgba(255, 140, 40, 0.22));
-  transition: filter 0.25s ease, transform 0.25s ease;
+  transition: transform 0.25s ease, opacity 0.25s ease;
 }
 
 #page-game .game-setup-start--image:hover {
@@ -971,7 +970,7 @@ body.arena-page-lock {
 }
 
 #page-game .game-setup-start--image:hover .game-setup-start-img {
-  filter: drop-shadow(0 10px 26px rgba(255, 213, 106, 0.38)) brightness(1.05);
+  opacity: 0.95;
 }
 
 #page-game .game-setup-start--image:active {
@@ -979,7 +978,7 @@ body.arena-page-lock {
 }
 
 #page-game .game-setup-start--image:active .game-setup-start-img {
-  filter: drop-shadow(0 6px 14px rgba(255, 140, 40, 0.18)) brightness(0.97);
+  opacity: 0.88;
   transform: scale(0.99);
 }
 

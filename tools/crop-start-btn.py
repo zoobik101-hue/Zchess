@@ -119,8 +119,12 @@ def main():
     right = min(w - 1, right + pad_x)
     cropped = []
     for y in range(top, bottom + 1):
-        row = rows[y]
-        cropped.append(row[left * 4 : (right + 1) * 4])
+        row = bytearray(rows[y][left * 4 : (right + 1) * 4])
+        for x in range(0, len(row), 4):
+            r, g, b, a = row[x], row[x + 1], row[x + 2], row[x + 3]
+            if a <= 8 or luminance(r, g, b) < 22:
+                row[x + 3] = 0
+        cropped.append(row)
     out_w = right - left + 1
     out_h = bottom - top + 1
     write_png(OUT, out_w, out_h, cropped)
