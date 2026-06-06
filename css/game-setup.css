@@ -1207,8 +1207,150 @@ body.arena-page-lock {
 #page-game .training-section {
   flex: 1;
   min-height: 0;
+  overflow-x: hidden;
   overflow-y: auto;
-  padding: 10px 14px;
+  padding: 10px 14px 12px;
+  -webkit-overflow-scrolling: touch;
+  display: none;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#page-game .is-training-mode .training-section {
+  display: flex;
+}
+
+#page-game .is-training-mode .game-modes-grid {
+  padding: 8px 12px 4px;
+  gap: 6px;
+}
+
+#page-game .is-training-mode .game-mode-card {
+  padding: 8px 4px 6px;
+  gap: 6px;
+}
+
+#page-game .is-training-mode .game-mode-icon-img {
+  width: clamp(44px, 4.8vw, 58px);
+}
+
+#page-game .is-training-mode .game-mode-desc {
+  display: none;
+}
+
+#page-game .is-training-mode .game-setup-lower {
+  display: none;
+}
+
+#page-game .training-section-title {
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(210, 178, 108, 0.92);
+  margin: 0 0 4px;
+}
+
+#page-game .training-section-sub {
+  font-size: 9px;
+  line-height: 1.35;
+  color: rgba(245, 240, 230, 0.42);
+  margin: 0 0 10px;
+}
+
+#page-game .training-cat-tabs {
+  gap: 6px;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+
+#page-game .training-cat-tab {
+  padding: 6px 10px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  border-radius: 6px;
+  background: rgba(5, 5, 5, 0.28);
+  border: 1px solid rgba(255, 213, 106, 0.12);
+  color: rgba(245, 240, 230, 0.48);
+}
+
+#page-game .training-cat-tab:hover,
+#page-game .training-cat-tab.active {
+  border-color: rgba(255, 213, 106, 0.32);
+  color: rgba(255, 213, 106, 0.88);
+  background: rgba(255, 213, 106, 0.06);
+}
+
+#page-game .training-lessons-grid {
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+#page-game .training-lesson-card {
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(5, 5, 5, 0.28);
+  border: 1px solid rgba(255, 213, 106, 0.12);
+}
+
+#page-game .training-lesson-card:hover {
+  border-color: rgba(255, 213, 106, 0.28);
+  transform: none;
+}
+
+#page-game .training-lesson-card h4 {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(245, 240, 230, 0.88);
+  margin: 6px 0 4px;
+}
+
+#page-game .training-lesson-card p {
+  font-size: 8px;
+  color: rgba(245, 240, 230, 0.42);
+  min-height: 0;
+  margin-bottom: 8px;
+  line-height: 1.35;
+}
+
+#page-game .training-coach-block {
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+#page-game .training-coach-card {
+  padding: 12px;
+  gap: 10px;
+  border-radius: 8px;
+  background: rgba(5, 5, 5, 0.32);
+  border: 1px solid rgba(255, 213, 106, 0.16);
+}
+
+#page-game .training-coach-card h4 {
+  font-size: 10px;
+  color: rgba(210, 178, 108, 0.92);
+  margin-bottom: 2px;
+}
+
+#page-game .training-coach-card p {
+  font-size: 8px;
+  color: rgba(245, 240, 230, 0.42);
+  max-width: none;
+}
+
+#page-game .training-coach-icon {
+  font-size: 24px;
+}
+
+#page-game #training-catalog {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 #page-game .difficulty-selector {
@@ -1276,10 +1418,7 @@ body.arena-page-lock {
 
 @media (min-width: 769px) {
   #page-game .training-section {
-    padding: 12px 18px 8px;
-    overflow-y: auto;
-    width: 100%;
-    box-sizing: border-box;
+    padding: 10px 16px 12px;
   }
 }
 

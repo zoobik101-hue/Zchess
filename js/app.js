@@ -314,16 +314,22 @@ const App = {
     if (diffEl) diffEl.style.display = isAi ? '' : 'none';
 
     const trainEl = document.getElementById('training-section');
-    if (trainEl) trainEl.style.display = isTraining ? 'block' : 'none';
+    if (trainEl) trainEl.style.display = isTraining ? 'flex' : 'none';
+
+    const lowerEl = document.querySelector('#page-game .game-setup-lower');
+    if (lowerEl) lowerEl.style.display = isTraining ? 'none' : '';
 
     const playAsWrap = document.querySelector('#page-game .game-setup-play-as');
-    if (playAsWrap) playAsWrap.style.display = (isAi || isTraining) ? '' : 'none';
+    if (playAsWrap) playAsWrap.style.display = isAi ? '' : 'none';
 
     const optionsEl = document.getElementById('game-setup-options');
-    if (optionsEl) optionsEl.style.display = (isAi || isTraining) ? '' : 'none';
+    if (optionsEl) optionsEl.style.display = isAi ? '' : 'none';
 
     const startBtn = document.getElementById('btn-start-game');
     if (startBtn) startBtn.style.display = isTraining ? 'none' : '';
+
+    const panel = document.getElementById('game-setup-panel');
+    if (panel) panel.classList.toggle('is-training-mode', isTraining);
 
     if (isTraining && ZChess.Training) {
       ZChess.Training.renderCatalog('basics');
