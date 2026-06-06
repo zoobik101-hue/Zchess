@@ -289,13 +289,20 @@ const App = {
   },
 
   initGameSetupPage() {
-    // Reset setup
-    this.gameSetupOptions = {
-      mode: 'ai',
-      difficulty: 'medium',
-      playerColor: 'w',
-      timeControl: 'unlimited'
-    };
+    const mp = ZChess.Multiplayer;
+    const mpBusy = mp && mp.status !== 'idle';
+
+    // Do not wipe arena mode while a multiplayer lobby or game is active
+    if (!mpBusy) {
+      this.gameSetupOptions = {
+        mode: 'ai',
+        difficulty: 'medium',
+        playerColor: 'w',
+        timeControl: 'unlimited'
+      };
+    } else if (this.gameSetupOptions.mode !== 'quick') {
+      this.gameSetupOptions.mode = 'quick';
+    }
 
     if (ZChess.GameSetupPage) ZChess.GameSetupPage.init();
     this.renderGameSetup();
@@ -488,10 +495,17 @@ const App = {
   },
 
   rerenderCurrentPage() {
-    if (this.currentPage) {
-      ZChess.I18n.updateDOM();
-      this.onPageEnter(this.currentPage, []);
+    if (!this.currentPage) return;
+    ZChess.I18n.updateDOM();
+    // Re-running initGameSetupPage during an active MP session breaks lobby countdown
+    const mp = ZChess.Multiplayer;
+    const mpBusy = mp && mp.status !== 'idle';
+    if (this.currentPage === 'game' && mpBusy) {
+      if (ZChess.GameSetupPage) ZChess.GameSetupPage.refresh();
+      this.renderGameSetup();
+      return;
     }
+    this.onPageEnter(this.currentPage, []);
   },
 
   updateAuthDependentUI() {

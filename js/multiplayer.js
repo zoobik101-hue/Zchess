@@ -227,6 +227,8 @@ const Multiplayer = {
 
     // ② Opponent joined → start game
     if (room.status === 'playing' && this.status === 'waiting') {
+      const opp = this.localColor === 'w' ? room.black : room.white;
+      if (!opp) return;
       this.status = 'playing';
       if (ZChess.Presence?.pulse) ZChess.Presence.pulse();
       this._beginGame(room);
@@ -275,11 +277,17 @@ const Multiplayer = {
       return;
     }
 
+    this._lobbyCountdownGen = (this._lobbyCountdownGen || 0) + 1;
+    const gen = this._lobbyCountdownGen;
+
     console.log('[MP] _beginGame called, localColor=', this.localColor, 'opp=', opp);
 
     const app = window.ZChess?.App;
     if (app) {
-      app.navigate('game');
+      // Avoid navigate('game') when already on arena - it resets setup via initGameSetupPage
+      if (app.currentPage !== 'game') {
+        app.navigate('game');
+      }
       app.gameSetupOptions.mode = 'quick';
       app.renderGameSetup();
     }
@@ -294,25 +302,16 @@ const Multiplayer = {
     const opponentUid    = opp.uid      || null;
     let   n = 3;
     const el = document.getElementById('lobby-countdown');
+    if (el) el.textContent = '3';
+
+    const launchOpts = { playerColor, opponentName, opponentRating, opponentAvatar, opponentUid };
 
     const tick = () => {
-      if (el) el.textContent = n;
+      if (gen !== this._lobbyCountdownGen) return;
+      if (el) el.textContent = String(n);
 
       if (n <= 0) {
-        // Navigate to board and start game
-        this._showLobbyState('lobby-choose');
-
-        const launch = () => {
-          ZChess.ChessBoard.startMultiplayerGame({ playerColor, opponentName, opponentRating, opponentAvatar, opponentUid });
-        };
-
-        if (ZChess.App && ZChess.App.navigate) {
-          ZChess.App.navigate('play');
-          setTimeout(launch, 300);
-        } else {
-          window.location.hash = 'play';
-          setTimeout(launch, 500);
-        }
+        this._goToMultiplayerBoard(launchOpts);
         return;
       }
 
@@ -321,6 +320,31 @@ const Multiplayer = {
     };
 
     tick();
+  },
+
+  _goToMultiplayerBoard(opts) {
+    const launch = () => {
+      try {
+        ZChess.ChessBoard.startMultiplayerGame(opts);
+      } catch (e) {
+        console.error('[MP] startMultiplayerGame failed:', e);
+      }
+    };
+
+    try {
+      const app = ZChess.App;
+      if (app?.navigate) {
+        app.navigate('play');
+        setTimeout(launch, 300);
+      } else {
+        window.location.hash = '#play';
+        setTimeout(launch, 500);
+      }
+    } catch (e) {
+      console.error('[MP] navigate to play failed:', e);
+      window.location.hash = '#play';
+      setTimeout(launch, 500);
+    }
   },
 
   _updateReadyInfo(opp) {
@@ -772,6 +796,7 @@ const Multiplayer = {
     this.localColor    = null;
     this.localUid      = null;
     this.status        = 'idle';
+    this._lobbyCountdownGen = (this._lobbyCountdownGen || 0) + 1;
     if (ZChess.Presence?.pulse) ZChess.Presence.pulse();
     this._lastMoveCount    = 0;
     this._gameEnded        = false;
