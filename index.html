@@ -45,7 +45,7 @@
   <link rel="stylesheet" href="css/chess.css">
   <link rel="stylesheet" href="css/multiplayer.css">
   <link rel="stylesheet" href="css/training.css">
-  <link rel="stylesheet" href="css/game-setup.css?v=arena29">
+  <link rel="stylesheet" href="css/game-setup.css?v=arena30">
   <link rel="stylesheet" href="css/arena-premium.css?v=arena29">
   <link rel="stylesheet" href="css/chess-decor.css">
   <link rel="stylesheet" href="css/theme-arena.css">
@@ -476,35 +476,52 @@
         </div>
 
         <aside class="arena-window arena-window-stats glass-panel epic-card epic-card--sidebar epic-card--dim arena-panel-chamfer arena-panel-chamfer-stats" aria-label="Your stats">
-          <h2 class="arena-window-title" data-i18n="game.sidebar_stats">Your statistics</h2>
+          <h2 class="arena-window-title arena-stats-title" data-i18n="game.sidebar_stats">Your statistics</h2>
           <div class="arena-window-body arena-stats-body">
             <p class="arena-stats-guest" id="arena-stats-guest" data-i18n="game.stats_login_hint">Sign in to track stats</p>
-            <div class="arena-rating-block">
-              <span class="arena-rating-label" data-i18n="game.rating_label">Rating</span>
-              <div class="arena-rating-value" id="arena-stat-rating">1200</div>
-              <div class="arena-rating-chart" id="arena-rating-chart" aria-hidden="true"></div>
-            </div>
-            <div class="arena-stat-trio">
-              <div class="arena-stat-cell arena-stat-win">
-                <span class="arena-stat-lbl" data-i18n="profile.wins">Wins</span>
-                <span class="arena-stat-num" id="arena-stat-wins">0</span>
-              </div>
-              <div class="arena-stat-cell arena-stat-loss">
-                <span class="arena-stat-lbl" data-i18n="profile.losses">Losses</span>
-                <span class="arena-stat-num" id="arena-stat-losses">0</span>
-              </div>
-              <div class="arena-stat-cell arena-stat-draw">
-                <span class="arena-stat-lbl" data-i18n="profile.draws">Draws</span>
-                <span class="arena-stat-num" id="arena-stat-draws">0</span>
+            <div class="arena-stats-section arena-stats-section-rating">
+              <div class="arena-stats-rating-row">
+                <div class="arena-stats-rating-left">
+                  <span class="arena-rating-label" data-i18n="game.rating_label">Rating</span>
+                  <div class="arena-rating-value" id="arena-stat-rating">1200</div>
+                </div>
+                <div class="arena-rating-chart" id="arena-rating-chart" aria-hidden="true"></div>
               </div>
             </div>
-            <div class="arena-streak-block">
-              <span class="arena-streak-lbl" data-i18n="game.best_streak_label">Best streak</span>
-              <p class="arena-streak-val">
-                <span class="arena-streak-icon" aria-hidden="true">🔥</span>
-                <strong id="arena-stat-streak">0</strong>
-                <span data-i18n="game.best_streak_suffix">wins</span>
-              </p>
+            <div class="arena-stats-section arena-stats-section-grid">
+              <div class="arena-stat-trio">
+                <div class="arena-stat-cell arena-stat-win">
+                  <span class="arena-stat-lbl" data-i18n="profile.wins">Wins</span>
+                  <span class="arena-stat-num" id="arena-stat-wins">0</span>
+                </div>
+                <div class="arena-stat-cell arena-stat-loss">
+                  <span class="arena-stat-lbl" data-i18n="profile.losses">Losses</span>
+                  <span class="arena-stat-num" id="arena-stat-losses">0</span>
+                </div>
+                <div class="arena-stat-cell arena-stat-draw">
+                  <span class="arena-stat-lbl" data-i18n="profile.draws">Draws</span>
+                  <span class="arena-stat-num" id="arena-stat-draws">0</span>
+                </div>
+              </div>
+            </div>
+            <div class="arena-stats-section arena-stats-section-streak">
+              <div class="arena-streak-block">
+                <span class="arena-streak-lbl" data-i18n="game.best_streak_label">Best streak</span>
+                <div class="arena-streak-val">
+                  <svg class="arena-streak-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <defs>
+                      <linearGradient id="arenaStreakFlame" x1="12" y1="2" x2="12" y2="22" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stop-color="#ffd56a"/>
+                        <stop offset="55%" stop-color="#ff9a3c"/>
+                        <stop offset="100%" stop-color="#e84a1f"/>
+                      </linearGradient>
+                    </defs>
+                    <path fill="url(#arenaStreakFlame)" d="M12 2c-1.4 2.8-3.8 4.2-3.8 7.6a3.8 3.8 0 1 0 7.6 0c0-1.8-.9-3.2-2.2-5.2.4 1.8 1.2 2.8 1.6 4.2.5-1.4.8-2.8.4-4.2C14.4 5.8 13.2 3.6 12 2z"/>
+                  </svg>
+                  <strong id="arena-stat-streak">0</strong>
+                  <span class="arena-streak-suffix" data-i18n="game.best_streak_suffix">wins</span>
+                </div>
+              </div>
             </div>
           </div>
         </aside>
