@@ -9,6 +9,10 @@ window.ZChess = window.ZChess || {};
 
 const GameSetupPage = {
 
+  _coinIconHtml() {
+    return '<img class="arena-coin-icon" src="assets/Image/money.svg" width="16" height="16" alt="" aria-hidden="true">';
+  },
+
   init() {
     this.renderDailySidebar();
     this.renderStatsSidebar();
@@ -45,7 +49,7 @@ const GameSetupPage = {
       const done = state.completed || state.claimed;
       const reward = done
         ? '<span class="arena-task-reward arena-task-done" aria-label="Done">✓</span>'
-        : `<span class="arena-task-reward"><span class="arena-coin-icon" aria-hidden="true">🪙</span>+${coin}</span>`;
+        : `<span class="arena-task-reward">${this._coinIconHtml()}+${coin}</span>`;
 
       return `
         <div class="arena-task ${done ? 'is-done' : ''}">
